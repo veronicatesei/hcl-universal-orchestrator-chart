@@ -17,33 +17,6 @@ HCL Universal Orchestrator is a complete, modern solution for batch and real-tim
 
 For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v1.1/index.html).
 
-Table of contents
-[Details](#details)
-[Supported Platforms](#supported-platforms)
-[Accessing the container images](#accessing-the-container-images)
-[Prerequisites](#prerequisites)
-[Resources Required](#resources-required)
-[Deploying](#deploying)
-&ensp;&ensp;&ensp;[Creating the Namespace](#creating-the-namespace)
-&ensp;&ensp;&ensp;[Creating a Kubernetes Secret](#creating-the-secret) 
-&ensp;&ensp;&ensp;[Deploying the product components](https://stackedit.io/app#deploying-the-product-components)
-&ensp;&ensp;&ensp;[Verifying the deployment](https://stackedit.io/app#verifying-the-deployment)
-[Uninstalling the chart](#uninstalling-the-chart)
-[Configuring](#configuring)
-&ensp;&ensp;&ensp;[Network enablement](#network-enablement)
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;[Network policy](#network-policy)
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;[Node affinity Required](#node-affinity-required)
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;[Load balancer service](#load-balancer-service)
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;[Ingress service](#ingress-service)
-&ensp;&ensp;&ensp;[Scaling the product](#scaling-the-product)
-&ensp;&ensp;&ensp;[Managing your custom certificates](#managing-your-custom-certificates)
-[Metrics monitoring](#metrics-monitoring)
-&ensp;&ensp;&ensp;[Viewing the preconfigured dashboard in Grafana](#viewing-the-preconfigured-dashboard-in-grafana)
-[Limitations](#limitations)
-[Documentation](#documentation)
-[Troubleshooting](#troubleshooting)
-[Change history](#change-history)
-
 ## Details
 
 By default, all microservices and the Dynamic Workload Console (console) are installed. 
