@@ -140,7 +140,7 @@ To deploy the HCL Universal Orchestrator, perform the following steps:
 1. Download the chart from the HCL Entitled Registry: `hclcr.io` and unpack it to a local directory.
 2. Add the repository:
    
-        helm repo add <repo_name> https://hclcr.io/chartrepo/wa --username <username> --password <api_key>
+        helm repo add <repo_name> https://hclcr.io/chartrepo/uno --username <username> --password <api_key>
    where 
    <repo_name> represents the name of the chosen local repository.
    <api_key> represents the key to access the registry.
@@ -150,7 +150,7 @@ To deploy the HCL Universal Orchestrator, perform the following steps:
    
 4. Pull the Helm chart:
 
-        helm pull <repo_name>/hcl-uno-prod
+        helm pull <repo_name>/hcl-uno-chart
 	
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
@@ -158,7 +158,7 @@ To deploy the HCL Universal Orchestrator, perform the following steps:
 
 6. Deploy the instance by running the following command: 
 
-        helm install -f values.yaml <uno_release_name> <repo_name>/hcl-uno-prod -n <uno_namespace>
+        helm install -f values.yaml <uno_release_name> <repo_name>/hcl-uno-chart -n <uno_namespace>
 
 
  where 
@@ -173,7 +173,7 @@ The following are some useful Helm commands:
 	
 * To update the Helm release:
 
-        helm upgrade <uno_release_name> <repo_name>/hcl-uno-prod -f values.yaml -n <uno_namespace>
+        helm upgrade <uno_release_name> <repo_name>/hcl-uno-chart -f values.yaml -n <uno_namespace>
 	
 * To delete the Helm release: 
 
