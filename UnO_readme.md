@@ -2,9 +2,9 @@
 # HCL Universal Orchestrator
 
 ## Introduction
-To ensure a fast and responsive experience when using HCL Universal Orchestrator, you can deploy HCL Universal Orchestrator on a cloud infrastructure. A cloud deployment ensures access anytime anywhere and is a fast and efficient way to get up and running quickly. It also simplifies maintenance, lowers costs, provides rapid upscale and downscale, minimizes IT requirements and physical on-premises data storage.
+HCL Universal Orchestrator is a cloud-native process orchestrator and requires to be deployed on a Kubernetes platform, either on a public or a private cloud infrastructure. A cloud deployment ensures access anytime anywhere and is a fast and efficient way to get up and running quickly. It also simplifies maintenance, lowers costs, provides rapid upscale and downscale, minimizes IT requirements and physical on-premises data storage.
 
-As more and more organizations move their critical workloads to the cloud, there is an increasing demand for solutions and services that help them easily migrate and manage their cloud environment.
+As more and more organizations move their critical applications to the cloud, there is an increasing demand for solutions and services that help them easily migrate and manage their cloud environment.
 
 To respond to the growing request to make automation opportunities more accessible, HCL Universal Orchestrator containers can be deployed into the following supported third-party cloud provider infrastructures:
 
@@ -13,7 +13,7 @@ To respond to the growing request to make automation opportunities more accessib
 - ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE)
 - ![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OCP)
 
-HCL Universal Orchestrator is a complete, modern solution for batch and real-time workload management. It enables organizations to gain complete visibility and control over attended or unattended workloads. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
+HCL Universal Orchestrator is a complete, modern solution to orchestrate calendar-based and event-driven tasks, business and IT processes. It enables organizations to gain complete visibility and control over attended or unattended workflows. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
 For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v1.1/index.html).
 
