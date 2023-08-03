@@ -45,7 +45,6 @@ Ensure you modify the value of the `waconsole.console.exposeServiceType` paramet
 
 You can access the HCL Universal Orchestrator chart and container images from the Entitled Registry. See [Create the secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
 
- - hcl-uno-external-pod
  - hcl-uno-agentmanager
  - hcl-uno-gateway
  - hcl-uno-iaa
