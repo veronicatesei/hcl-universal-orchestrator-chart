@@ -1,0 +1,204 @@
+
+{{ $fullName := include "fullname" . }}
+{{ $baseImageName := include "baseImageName" . }}
+{{ $pluginConfig := printf "%s-%s" $fullName  "plugins-config" }}
+{{ $dwcInternalHost := include "uno.console.internal.host" . }}
+{{ $saName := include "uno.serviceAccount" . }}
+{{ $dwcsecretname := include "uno.dwcsecretname" . }}
+{{ $dwcissuer:= printf "%s%s%s" "https://" .Release.Name "-waconsole-h:9443" }}
+##### global.consoleCertSecretName  {{ (.Values.global.dwcconsole).certSecretName | default "NOT DEFINED"}}  $dwcsecretname {{ $dwcsecretname }}
+
+{{- $root := . -}}
+{{- $myList := include "uno.microservices.list" . | fromJsonArray -}}
+{{- range $myList}}
+{{- $k := . -}}
+{{- $v := (index $root.Values.deployment . ) -}}
+
+
+{{ $data := dict "root" $root "item" $v }}
+####################################################################
+# 
+####################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-{{ $k }}
+  labels:
+    app: {{ $fullName }}-{{ $k }}
+{{ include "uno.common.label" $root | indent 4 }}
+  annotations:
+{{ include "uno.prometheus.annotation" . | indent 4 }}
+{{ toYaml $root.Values.global.customPodAnnotations | indent 4}}
+
+spec:
+  replicas: {{  coalesce (index $root.Values.deployment $k ).minTargetReplicas $root.Values.deployment.global.minTargetReplicas|default 1 }}
+  minReadySeconds: 60
+  selector:
+    matchLabels:
+      app: {{ $fullName }}-{{ $k }}
+  template:
+    metadata:
+      name: {{ $fullName }}-{{ $k }}
+      labels:
+        prometheus: "true"
+        prometheus.job.label: "kubernetes-pods"
+        app: {{ $fullName }}-{{ $k }}
+        service: {{ $fullName }}-{{ $k }}
+        release: {{ $root.Release.Name }}
+{{ include "uno.common.label" $root | indent 8 }}
+      annotations:
+{{ include "uno.prometheus.annotation"  $root | indent 8 }}
+{{ toYaml $root.Values.global.customPodAnnotations | indent 8}}
+    spec:
+      affinity:
+{{- if $root.Values.global.nodeAffinityRequired }}
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+{{ toYaml $root.Values.global.nodeAffinityRequired | indent 12}}
+{{- end }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ $fullName }}-{{ $k }}
+              topologyKey: "kubernetes.io/hostname"
+      serviceAccountName: {{ $root.Values.global.serviceAccountName | default $saName }}
+      serviceAccount:   {{ $root.Values.global.serviceAccountName | default $saName }}
+{{ include "uno.securityContext"  $root | indent 6 }}
+{{- if eq $k "agentmanager" }}
+{{- if $root.Values.global.pluginImageName }}
+      initContainers:
+      - name: init-copy-plugins
+        image:  {{ include "uno.pluginImageRepository" $root }}/{{ $root.Values.global.pluginImageName }}
+        imagePullPolicy: {{ $root.Values.config.registry.pullPolicy }}
+        volumeMounts:
+        - name: plugindir
+          mountPath: /storage
+        command: [/opt/wautils/copy_plugins.sh]
+        args: ["/opt/wa_cloud_plugins/", "/storage"]
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false     
+          capabilities:
+            drop:
+            - ALL
+{{- end }} 
+{{- end }} 
+      containers:
+        - name: {{ $k }}
+{{ include "uno.resources" $data | indent 10 }}
+          image: {{ include "uno.repouno" $root }}/{{ $baseImageName }}{{ $k }}:{{  $root.Values.config.registry.tag }}
+          imagePullPolicy: {{  $root.Values.config.registry.pullPolicy }}
+{{ include "uno.readiness" $root | indent 10 }}
+          ports:
+            - name: https
+              containerPort: 8443
+          env:
+            - name: QUARKUS_HTTP_HTTP2
+              value: "true"
+            - name: UNO_MICROSERVICE_JWT_EXPIRATION_DURATION
+              value: "{{  $root.Values.config.jwt.internalExpirationDuration }}"
+            - name: UNO_MONGODB_DATABASE
+              value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.database.databaseName }}"
+{{ include "common.env.variable"  $root | indent 12 }}
+{{ include "common.custom.env.variable"  $root | indent 12 }}
+{{- if eq $k "iaa"  }}
+{{ include "uno.console.env.variable" $root | indent 12 }}
+{{ include "uno.oidc.enabled.variable" $root | indent 12 }}
+{{ include "uno.authentication.api.env.variable" $root | indent 12 }}
+{{ include "uno.apikey.cleanup.variable" $root | indent 12 }}
+{{ include "uno.apikey.warning.variable" $root | indent 12 }}
+            - name: UNO_MICROSERVICE_APIKEY_PERSONAL_EXPIRATION_DURATION
+              value: "{{ $root.Values.config.apiKey.apikeyPersonalExpirationDuration }}"
+            - name: UNO_MICROSERVICE_APIKEY_SERVICE_EXPIRATION_DURATION
+              value: "{{ $root.Values.config.apiKey.apikeyServiceExpirationDuration }}"
+            - name: UNO_GROUPS_CACHE_EXPIRATION_DURATION
+              value: "{{ $root.Values.config.apiKey.groupsCacheExpirationDuration }}"
+{{- end}}
+{{- if eq $k "gateway"  }}
+{{- if (($root.Values).global).enableConsole }}
+##### global.consoleCertSecretName  $dwcsecretname {{ $dwcsecretname }}
+
+{{- if $dwcsecretname }}
+            - name: EXTERNAL_MP_JWT__WA_CONSOLE__VERIFY_PUBLICKEY_LOCATION
+              value: "/security/dwc-certs/tls.crt"
+            #external.mp.jwt."https://cj5t0efv19fl3h6qmgbg-waconsole-h:9443","
+            # dwcissuer {{ $dwcissuer }}
+            - name: EXTERNAL_MP_JWT__{{ regexReplaceAll "\\W" $dwcissuer "_" | upper  }}__VERIFY_PUBLICKEY_LOCATION
+              value: "/security/dwc-certs/tls.crt"
+{{- else }}
+            #external.mp.jwt."https://wajwt/dwc".verify.publickey.location dwcsecretname {{ $dwcsecretname }}
+            #- name: EXTERNAL_MP_JWT__HTTPS___WAJWT_DWC__VERIFY_PUBLICKEY_LOCATION
+            #  value: "https://{{ $dwcInternalHost }}:9443/jwt/ibm/api/jwtBuilder/jwk"
+            # dwcissuer {{ $dwcissuer }}
+            - name: EXTERNAL_MP_JWT__WA_CONSOLE__VERIFY_PUBLICKEY_LOCATION
+              value: "https://{{ $dwcInternalHost }}:9443/jwt/ibm/api/jwtBuilder/jwk"
+            - name: EXTERNAL_MP_JWT__{{ regexReplaceAll "\\W" $dwcissuer "_" | upper }}__VERIFY_PUBLICKEY_LOCATION
+              value: "https://{{ $dwcInternalHost }}:9443/jwt/ibm/api/jwtBuilder/jwk"
+{{- end }}
+{{- end }}
+{{ include "uno.apikey.warning.variable" $root | indent 12 }}
+{{ include "uno.oidc.env.variable" $root | indent 12 }}
+{{- end}}
+
+
+{{ include "uno.secret.volumes.mounts" $root | indent 10 }}
+{{- if eq $k "agentmanager" }}
+            - name: plugindir
+              mountPath: /storage
+            - name: config-plugin
+              mountPath: /config/plugins.properties
+              subPath: plugins.properties
+{{- end }}   
+{{- if eq $k "audit"  }}
+            - name: emptydir
+              mountPath: /opt/app/audit
+        - name: audit-log-sidecar
+          resources:
+            limits:
+              cpu: '0.2'
+              memory: 64Mi
+            requests:
+              cpu: '0.1'
+              memory: 32Mi
+          image:  {{ include "uno.repouno" $root }}/{{ $baseImageName }}{{ $k }}:{{ $root.Values.config.registry.tag }}
+          imagePullPolicy: {{ $root.Values.config.registry.pullPolicy }}
+          args: [/bin/sh, -c, 'touch /opt/app/audit/audit.json ;tail -n+1 -F /opt/app/audit/audit.json']
+          volumeMounts:
+          - name: emptydir
+            mountPath: /opt/app/audit
+        - name: error-log-sidecar
+          resources:
+            limits:
+              cpu: '0.2'
+              memory: 64Mi
+            requests:
+              cpu: '0.1'
+              memory: 32Mi
+          image:  {{ include "uno.repouno" $root }}/{{ $baseImageName }}{{ $k }}:{{ $root.Values.config.registry.tag }}
+          imagePullPolicy: {{ $root.Values.config.registry.pullPolicy }}
+          args: [/bin/sh, -c, 'touch /opt/app/audit/errors.json ;tail -n+1 -F /opt/app/audit/errors.json']
+          volumeMounts:
+          - name: emptydir
+            mountPath: /opt/app/audit
+{{- end}}
+{{ include "uno.secret.volumes" $root | indent 6 }}
+{{- if eq $k "agentmanager" }}
+        - name: config-plugin
+          configMap:
+            name: {{ $root.Values.global.configPlugins | default $pluginConfig }} 
+            optional: true
+            items:
+            - key: plugins.properties
+              path: plugins.properties
+{{- end}}
+
+---
+{{- end}}

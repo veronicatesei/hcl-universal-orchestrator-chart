@@ -1,0 +1,70 @@
+{{ $fullName := include "fullname" . }}
+{{ $certIssuer := include "uno.cert.issuer" . }}
+
+{{- if not .Values.config.certificates.useCustomizedCert }} 
+
+{{ $list := include "uno.microservices.list" . | fromJsonArray }}
+
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1"}}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1"}}
+apiVersion: certmanager.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
+apiVersion: cert-manager.io/v1alpha2
+{{- else if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1"}}
+apiVersion: certmanager.k8s.io/v1alpha1
+{{- end }}
+kind: Certificate
+metadata:
+  name: {{ $fullName }}-uno-certificates
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+  #annotations:
+    #"helm.sh/hook": pre-install
+    #"helm.sh/hook-delete-policy": hook-failed
+spec:
+  secretName: {{ .Values.config.certificates.certSecretName | quote }}
+  duration: {{ .Values.config.certificates.duration  }} # 90d
+  renewBefore: {{ .Values.config.certificates.renewBefore  }} # 15d
+{{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1" ) ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1" ) }}
+  subject:
+    organizations:
+      - {{ .Values.config.certificates.organization  }}
+{{- else if or ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" ) ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" ) }}
+  organization:
+  - {{ .Values.config.certificates.organization  }}
+{{- end }}
+  commonName: uno
+  isCA: false
+{{- if or ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" ) ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" )  }}
+{{- if not ( .Capabilities.APIVersions.Has "cert-manager.io/v1" )  }}
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+{{- end }}
+{{- end }}
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+{{- $myList := include "uno.microservices.list" . | fromJsonArray -}}
+{{- range $myList}}
+  - {{ . }}
+{{- end -}}
+{{- range $myList}}
+  - {{ $fullName }}-{{ . }}
+{{- end -}}
+{{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
+  privateKey:
+    rotationPolicy: Always
+{{- if ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
+    size: 2048
+    algorithm: RSA
+    encoding: PKCS1
+{{- end }}
+{{- end }}
+  issuerRef:
+    name: {{ $certIssuer }}
+    kind: Issuer
+
+{{- end }}

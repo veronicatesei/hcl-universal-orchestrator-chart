@@ -1,0 +1,31 @@
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1"}}
+{{ $fullName := include "fullname" . }}
+
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ $fullName }}-pod-monitor
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+spec:
+  namespaceSelector:
+    any: false
+    matchNames:
+    - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      prometheus: "true"
+  jobLabel: "prometheus.job.label"
+  podTargetLabels:
+  - app
+  - service
+  - release
+  podMetricsEndpoints:
+  - targetPort: 8443
+    enableHttp2: true
+    scheme: "https"
+    path: /q/metrics
+    interval: "30s"
+    tlsConfig:
+      insecureSkipVerify: true
+{{ end }}

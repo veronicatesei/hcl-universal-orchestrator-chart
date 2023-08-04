@@ -1,0 +1,11 @@
+
+{{- if .Values.global.enableConsole -}}
+{{ $fullName := include "fullname" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}-dwc-config
+data:
+  dwc.public.host:  {{include "uno.console.public.host" . |quote }}
+  dwc.public.port:  {{include "uno.console.public.port" . |quote }} 
+{{- end -}}

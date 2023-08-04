@@ -1,0 +1,53 @@
+{{ $fullName := include "fullname" . }}
+{{ $baseImageName := include "baseImageName" . }}
+{{ $saName := include "uno.serviceAccount" . }}
+{{ $enable := include "enable.testprereq" . }}
+
+{{- if eq $enable "true" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-testprereq
+  labels:
+    app: {{ $fullName }}-testprereq
+  annotations:
+{{ include "uno.prometheus.annotation" . | indent 4 }}
+spec:
+  replicas: 1
+  minReadySeconds: 30
+  selector:
+    matchLabels:
+      app: {{ $fullName }}-testprereq
+  template:
+    metadata:
+      name: {{ $fullName }}-testprereq
+      labels:
+        app: {{ $fullName }}-testprereq
+      annotations:
+{{ include "uno.prometheus.annotation" . | indent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName | default $saName }}
+      serviceAccount: {{ .Values.global.serviceAccountName | default $saName }}
+{{ include "uno.securityContext" . | indent 6 }}
+      containers:
+        - image: {{ .Values.config.registry.name }}/{{ $baseImageName }}test-prereq:{{ .Values.config.registry.tag }}
+          imagePullPolicy: Always
+          name: hcl-uno-testprereq
+          resources:
+            limits:
+              cpu: '0.5'
+              memory: 256Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+          ports:
+            - name: https
+              containerPort: 8443
+          env:
+            - name: UNO_MONGODB_DATABASE
+              value: "{{ .Values.database.databaseName }}"
+{{ include "common.env.variable" . | indent 12 }}
+{{ include "uno.secret.volumes.mounts" . | indent 10 }}
+{{ include "uno.secret.volumes" . | indent 6 }}
+
+{{ end }}

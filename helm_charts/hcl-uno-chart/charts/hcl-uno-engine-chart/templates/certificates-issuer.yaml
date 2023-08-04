@@ -1,0 +1,27 @@
+{{ $fullName := include "fullname" . }}
+{{ $certIssuer := include "uno.cert.issuer" . }}
+
+{{- if not .Values.config.certificates.useCustomizedCert }} 
+
+kind: Issuer
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1"}}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1"}}
+apiVersion: certmanager.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
+apiVersion: cert-manager.io/v1alpha2
+{{- else if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1"}}
+apiVersion: certmanager.k8s.io/v1alpha1
+{{- end }}
+metadata:
+  name: {{ $certIssuer }}
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+  annotations:
+#    "helm.sh/hook": "pre-install, pre-upgrade"
+#    "helm.sh/hook-weight": "0"
+spec:
+  ca:
+    secretName: {{ .Values.config.certificates.caPairSecretName| default "{{ $fullName }}-uno-selfsigned-issuer" }} 
+
+{{- end -}}

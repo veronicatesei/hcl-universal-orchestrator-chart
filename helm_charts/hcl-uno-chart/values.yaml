@@ -1,0 +1,462 @@
+
+# Global values are values that can be accessed from any chart or subchart by exactly the same name.
+# Globals require explicit declaration. You can’t use an existing non-global as if it were a global.
+
+# nameOverride changes the resources names. By default, the release name is used.
+nameOverride:
+# Url of flexera license server
+hclFlexnetURL:
+# Id of flexera license instance
+hclFlexnetID:
+global:
+  
+  # enableEngine enables and disables the engine deployment. Supported values are true and false.
+  enableEngine: true
+  # enableConsole enables and disables the Dynamic Workload Console deployment. Supported values are true and false.
+  enableConsole: true
+  # debug enables and disables the debugging mode. Supported values are true and false.
+  debug: false
+  # language specifies the language to be used.
+  language: en
+  # license indicates whether you accept the license. Supported values are accept and not accepted. Mandatory parameter. 
+  license: "not accepted"
+  # configPlugins is the ConfigMap containing list of plugin to be installed.
+  configPlugins:
+  # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
+  pluginImageRepository: hclcr.io/wa
+  # pluginImageName is the name of the image with tags for Automation Hub integrations. 
+  pluginImageName: hcl-workload-automation-plugins:10.2.0.00.20230728
+  # extraImageRepository is the name of the repository that contains the image with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
+  extraImageRepository: hclcr.io/wa
+  # extraImageName is the name of the image with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
+  extraImageName: hcl-workload-automation-packages:10.2.0.00.20230728
+  # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
+  customPluginImageName:
+  # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
+  serviceAccountName:
+  # enablePrometheus enables the Prometheus service. Supported values are true and false.
+  enablePrometheus: true
+  # use the customLabels, customPodAnnotations, and customEnv sections to add custom information about your environment.
+  customLabels:
+    - name: environment
+      value: prod
+  customPodAnnotations:
+    env.name: ""
+  customEnv:
+  #- name: "MY_ENVKEY"
+  #  value: "MY_EN_VALUE"
+  # 
+  # wapassword is the password of the user for which you have installed the engine.
+  wapassword:
+  # dbadminpassword is the password of the database administrator.
+  dbadminpassword:
+  # dbpassword is the password for the user that has been granted access to the HCL Universal Orchestrator or Dynamic Workload Console tables on the database server
+  dbpassword:
+  # Hcl additional imagePullSecret to add to service account
+  hclImagePullSecret:
+  # For internal use
+  waconsole:
+uno:
+  database:
+    # url is the URL of the database. Mandatory parameter.
+    url: mongodb://hcl-uno-db-mongodb.db.svc.cluster.local:27017
+    # type is the type of the database. Supported value is mongodb.
+    type: mongodb
+    # databaseName is the name of the database.
+    databaseName: uno
+    # username is the name of the database user. Mandatory parameter.
+    username: 
+    # password is the password of the database user. Mandatory parameter.
+    password:
+    # tls specifies whether TLS is enabled. Supported values are true and false.
+    tls: false
+    # tlsInsecure specifies whether certificate validation must be skipped. Supported values are true and false.
+    tlsInsecure: false
+  kafka:
+    # url is the URL of the event streaming platform. Mandatory parameter.
+    url: hcl-uno-kafka-0.kafka-headless.kafka.svc.cluster.local:9092
+    # username is the name of the kafka user. Mandatory parameter.
+    username: 
+    # password is the password of the kafka user. Mandatory parameter.
+    password:
+    # tls specifies whether TLS is enabled. Supported values are true and false.
+    tls: false
+    # tlsInsecure specifies whether certificate validation must be skipped. Supported values are true and false.
+    tlsInsecure: false
+  config:
+    license:
+      # Url of flexera license server
+      licenseServerUrl: 
+      # Id of flexera license instance
+      licenseServerId:
+    registry:
+      # name is the name of your registry.
+      name:  hclcr.io/uno
+      # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
+      pullPolicy: Always
+      # tag is the tag of the image. The default value is latest.
+      tag: 1.1.0.0
+    planning:
+      # max number of days to generate not active instance
+      notActiveWindowMax: P9DT0H
+      # min number of days to generate not active instance
+      notActiveWindowMin: P7DT0H
+      # Frequency to activate not active instances
+      activeWindowExtension: PT5M
+      # How long is the windows of active instance (how long the plan is)
+      activeWindow: PT24H
+    console:
+      # hostname is the hostname of the Dynamic Workload Console.
+      hostname:
+      # port is the port of the Dynamic Workload Console.
+      port:
+
+    certificates:
+      # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below.
+      useCustomizedCert: false
+      # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to true.
+      caPairSecretName: ca-key-pair
+      # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to true.
+      certSecretName: uno-certificate
+      # certExtAgtSecretName is the name of the secret of the external agent. This parameter applies if you set useCustomizedCert to true.
+      certExtAgtSecretName: uno-certificate-ext-agt
+      # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to true.
+      duration: 2160h
+      # renewBefore is the time before the certificate expires when the certificate manager service begins attempts to renew the certificate. This parameter applies if you set useCustomizedCert to true.
+      renewBefore: 360h
+      # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to true.
+      organization: hcl
+      # additionalCASecrets contains additional secrets, for example to trust MongoDb or Kafka certificates. This parameter applies if you set useCustomizedCert to true.
+      additionalCASecrets: 
+      #  - secretname1
+    apiKey:
+      # lifespanWarningDays specifies how many days before API Key expiration you are notified about it.
+      lifespanWarningDays: 5
+      # apikeyPersonalExpirationDuration is the amount of time on or after which the Personal API Keys expire. It is calculated starting from API Key creation.
+      apikeyPersonalExpirationDuration: P365D
+      # apikeyServiceExpirationDuration is the amount of time on or after which the Service API Keys expire. It is calculated starting from API Key creation.
+      apikeyServiceExpirationDuration: P365D
+      # groupsCacheExpirationDuration is the amount of time on or after which users must login again to the authentication provider to use Personal API Keys.
+      groupsCacheExpirationDuration: P30D
+      # cleanupFrequencyForPending indicates how often the IAA service checks in the database for API Keys whose token has not been created after the cleanupFrequencyForPending timeout has expired.
+      cleanupFrequencyForPending: PT1M
+      # cleanupTimeoutForPending indicates the amount of time after which API Keys must be deleted if the related token has not been created. The maximum supported value is 1 day.
+      cleanupTimeoutForPending: PT15M # Maximum allowed value is 1d
+
+    jwt:
+      # jwtSecretName is the name of your custom Kubernetes secret used to sign JWTs.
+      jwtSecretName:
+      # internalExpirationDuration is the amount of time on or after which the internal JWT expires.
+      internalExpirationDuration: PT10M
+
+    tracing:
+      # enabled specifies whether tracing is enabled. Supported value are true and false.
+      enabled: true
+      # otelEndpoint is the endpoint to which OpenTelemetry traces are sent.
+      otelEndpoint: http://simplest-collector.default:4317/api/traces
+      # traceAll specifies whether all events are traced. Supported value are true and false. If you set it to true, also internal calls are traced.
+      traceAll: false
+
+  authentication:
+    #apiHostname specifies the API gateway hostname and is used only when ingress.enabled is set to false.
+    apiHostname: gateway
+    oidc:
+      # connectionTimeout is the amount of time on or after which connection to OIDC provider goes in timeout.
+      connectionTimeout: PT1M
+      # enabled specifies whether authentication through OpenID Connect (OIDC) server is enabled.
+      # If enabled is set to false, the other properties in this section are ignored.
+      enabled: false
+      # useToManageApiKeys specifies whether the OpenID Connect (OIDC) server must be used in place of the Dynamic Workload Console to manage API keys (for example, when authentication information expires).
+      # Supported values are true and false.
+      useToManageApiKeys: false
+      # server is the base URL of the OpenID Connect (OIDC) server. This parameter applies when enabled is set to true.
+      server: https://unokeycloak.k8s.uat.uno/realms/uno
+      # clientId is the client-id of the application in the OpenID Connect (OIDC) server. This parameter applies when enabled is set to true.
+      clientId: uno-service
+      # credentialSecret is the client secret which is used for a client_secret_basic authentication with OpenID Connect (OIDC) server. This parameter applies when enabled is set to true.
+      credentialSecret: put_oidc_secret_here
+      # encryptTokensInCookie enables the encryption of the tokens before being stored in the cookies. This parameter applies when enabled is set to true.
+      encryptTokensInCookie: true
+      # splitTokensInCookie set false to keep all OIDC-related tokens (ID, access and refresh) in a single session cookie. Set true to minimize session cookie size. This parameter applies when enabled is set to true.
+      splitTokensInCookie: true
+      # tlsVerification  enables certificate validation and hostname verification. Supported values are “none”, “required”, “certificate-validation”. This parameter applies when enabled is set to true.
+      tlsVerification: none
+      # applicationType is the application type. Supported values are “web-app”, “service”, “hybrid”. This parameter applies when enabled is set to true.
+      applicationType: web-app
+
+  # bulkhead defines the policy to be used on the gateway endpoint for avoiding bulk requests and block DDOS attacks against these contexts.
+  bulkhead:
+    request:
+      # maxValue defines the maximum number of concurrent calls to an instance. The value must be greater than 0.
+      maxValue: 12
+      # waitingTaskQueue defines the maximum number of calls which can be kept waiting in each queue. The value must be greater than 0.
+      waitingTaskQueue: 12
+
+  ingress:
+    # enabled specifies whether an ingress is enabled to route traffic from external sources to the applications in the cluster. Supported values are true and false.
+    enabled: true
+    # ingressClassName is a unique identifier for the ingress controller.
+    ingressClassName: nginx
+    # baseDomainName is the name of the base domain for using the ingress controller. This parameter applies if you set enabled to true.
+    baseDomainName: .k8s.uat.uno
+    annotations:
+      # For more information, see the ingress controller documentation.
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths: []
+    tls: []
+    #    secretName is the name of the secret.
+    #  - secretName: chart-example-tls
+    #    hosts specifies the names of the hosts to which the secret applies.
+    #    hosts:
+    #      - chart-example.local
+
+
+  deployment:
+    global:
+      # minTargetReplicas is the minimum number of target replicas to be deployed for each microservice.
+      minTargetReplicas: 1
+      # maxTargetReplicas is the maximum number of target replicas to be deployed for each microservice.
+      maxTargetReplicas: 3
+      autoscaler:
+        # cpuAverageUtilization specifies the average usage of CPU which starts the autoscaler.
+        cpuAverageUtilization: 200
+      resources:
+        limits:
+          # cpu is the maximum amount of cpu services can use.
+          cpu: "2"
+          # memory is the maximum amount of memory services can use.
+          memory: 1024Mi
+        requests:
+          # cpu is the minimum amount of cpu services require to run.
+          cpu: "0.3"
+          # memory is the minimum amount of memory services require to run.
+          memory: 512Mi
+    # The properties listed below apply to single microservices. You can use them to override the global settings defined above for one or more microservices.
+    agentmanager:
+      # ingressPrefix is the prefix of the name of the endpoint of the agentmanager microservice.
+      ingressPrefix: agentmanager
+      #minTargetReplicas: 1
+    gateway:
+      # ingressPrefix is the prefix of the name of the endpoint of the gateway microservice.
+      ingressPrefix: "gateway"
+      #minTargetReplicas: 1
+    audit:
+      #minTargetReplicas: 1
+    toolbox:
+      #minTargetReplicas: 1
+    iaa:
+      #minTargetReplicas: 1
+    executor:
+      #minTargetReplicas: 1
+    orchestrator:
+      #minTargetReplicas: 1
+      resources:
+        limits:
+          cpu: "2"
+          memory: 1024Mi
+        requests:
+          cpu: "0.3"
+          memory: 1024Mi
+    scheduler:
+      #minTargetReplicas: 1
+    storage:
+      #minTargetReplicas: 1
+    timer:
+      #minTargetReplicas: 1
+
+waconsole:
+  # runAsUser specfies the user to be used for running the Dynamic Workload Console.
+  runAsUser: 999
+  # fsGroupId is the secondary group ID of the user.
+  fsGroupId: 999
+  # supplementalGroupId is the supplemental group ID of the user.
+  supplementalGroupId:
+  # enable page to download extra packages from DWC
+  enableNginxServer: true
+  console:
+    # certSecretName is the name of the secret to store customized SSL certificates.
+    certSecretName: waconsole-cert-secret
+    # containerDebug specifies that the container is executed in debug mode.
+    containerDebug: false
+    # enableSSO specifies whether Single Sign On (SSO) is enabled. It's enable by default always false
+    enableSSO: false
+    # adminGroup is the name of the administrative group.
+    adminGroup:
+    # engineHostName specifies the hostname of the engine to connect to. Mandatory parameter.
+    engineHostName:
+    # enginePort specifies the port of the engine to connect to.
+    enginePort: 8443
+    db:
+      # database type one DERBY for test, MONGODB for production
+      # type is the preferred remote database server type.
+      type: DERBY
+      # adminUser is the database administrator who accesses the Console tables on the database server.
+      adminUser: db2inst1
+      # hostname is the hostname or the IP address of the database server. Mandatory parameter.
+      hostname: dbhost
+      # alternateHostName is the hostname or the IP address of the alternate database server.
+      alternateHostName:
+      # name is the database name.
+      name: DWC
+      # port is the port of the database server.
+      port: 50000
+      #alternatePort is the alternative port of the database server.
+      alternatePort:
+      # server is the name of the database server. Mandatory parameter.
+      server:
+      # sslConnection specifies whether the connection to the database is in SSL mode.
+      sslConnection: false
+      # Only for mongodb disable TLS hostname verification 
+      invalidHostnameAllowed:
+      # Only for mongodb optially specify the admin database  
+      authDb:
+      # tsName is the name of the DATA table space.
+      tsName: null
+      # tsPath is the path of the DATA table space.
+      tsPath: null
+      # tsTempName is the name of the TEMP table space.
+      tsTempName: null
+      # tssbspace is the name of the SB table space.
+      tssbspace: null
+     
+      # usepartitioning specifies whether partitioning is used.
+      usepartitioning: true
+      # user is the database user who accesses the Console tables on the database server.
+      user: db2inst1
+      # skipCheck specifies whether a database integrity check should be performed.
+      skipCheck: false
+    routes:
+      # enabled specifies whether the ingress controller rules are enabled.
+      enabled: true
+    ingress:
+      # hostname is the virtual hostname defined in the DNS used to reach the Console.
+      hostname:
+      # className is the name of the class.
+      className:
+      # secretName is the name fot he secret to store the ingress data.
+      secretName: wa-console-ingress-secret
+    # exposeServiceType specifies the network enablement configuration implemented. Supported values are Load balancer or Ingress.
+    exposeServiceType: Ingress
+    # exposeServiceAnnotation specifies the annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider.
+    exposeServiceAnnotation:
+      #cert-manager.io/issuer: wa-ca-issuer
+      #service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
+      #service.beta.kubernetes.io/aws-load-balancer-type: "clb"
+      #service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      #networking.gke.io/load-balancer-type: "Internal"
+    # networkpolicyEgress controls network traffic and how a component pod is allowed to communicate with other pods. If empty, no egress policy is defined.
+    networkpolicyEgress:
+    # Allows all  Egress to mdm.
+    #  - name: to-mdm
+    #    egress:
+    #    - to:
+    #      - podSelector:
+    #          matchLabels:
+    #            app.kubernetes.io/name: waserver
+    #
+    #  - name: dns
+    #    egress:
+    #    - to:
+    #        - namespaceSelector:
+    #            matchLabels:
+    #              name: kube-system
+    #    - ports:
+    #        - port: 53
+    #          protocol: UDP
+    #        - port: 53
+    #          protocol: TCP
+    # nodeAffinityRequired is a set of rules that determines on which nodes a console can be deployed using custom labels on nodes and label selectors specified in pods.
+    nodeAffinityRequired:
+    livenessProbe:
+      # initialDelaySeconds is the number of seconds after which the liveness probe starts checking if the server is running.
+      initialDelaySeconds: 100
+    # pwdSecretName is the name of the secret to store the password.
+    pwdSecretName: wa-pwd-secret
+    # useCustomizedCert specifies whether customized SSL certificates are used to connect to the Dynamic Workload Console.
+    useCustomizedCert: false
+    # tz sets the timezone (TZ) operating system environment variable.
+    tz:
+    # libConfigName is the name of the ConfigMap to store all custom Liberty configurations.
+    libConfigName:
+    # Enable the following row to configure DWC with oidc provider
+    #libConfigName: hcl-uno-oidc-config
+    disableAccessControl:
+    oidc:
+      clientId: uno-service
+      clientSecret: put_oidc_secret_here
+      httpsRequired: true
+      userIdentifier: preferred_username
+      signatureAlgorithm: RS256
+      scope: openid
+      authFilterRef: restFilterOpenID
+      inboundPropagation: supported
+      groupIdentifier: groups
+      groupNameAttribute: groups
+      redirectToRPHostAndPort: https://dwc_ingress_hostname
+      discoveryEndpointUrl: https://<oidc ingress hostname>/realms/uno/.well-known/openid-configuration
+  image:
+    # pullPolicy specifies the image pull policy. Supported values are Always, Never, IfNotPresent.
+    pullPolicy: Always
+    # repository is the Dynamic Workload Console image repository. Mandatory parameter.
+    repository: hclcr.io/wa/hcl-workload-automation-console
+    # tag is the Dynamic Workload Console image tag. Mandatory parameter.
+    tag: 10.2.0.00.20230728
+  persistence:
+    dataPVC:
+      # name is the prefix for the Persistent Volumes Claim name.
+      name: data
+      selector:
+        # label is the volume label to bind (only limited to single label).
+        label: ""
+        # value is the volume label value to bind (only limited to single label).
+        value: ""
+      # size is the minimum size of the Persistent Volume.
+      size: 5Gi
+      # storageClassName is the name of the StorageClass to be used. Leave empty if you do not use a storage class.
+      storageClassName: ""
+    # enabled specifies whether persistent volumes for the pods are used.
+    enabled: true
+    # useDynamicProvisioning specifies whether StorageClasses are used to dynamically create persistent volumes for the pods.
+    useDynamicProvisioning: true
+    # extraVolumes provides a list of additional extra volumes.
+    extraVolumes: []
+      # - name: custom-volume-1
+      #   configMap:
+      #      name: custom-configMap
+      #      defaultMode: 0755
+      # - name: custom-volume-2
+      #   secret:
+      #     secretName: custom-secret
+      #     defaultMode: 0744
+      # - name: nfs-volume
+      #   nfs:
+      #     # URL for the NFS server
+      #     server: <nfs_server> # Change this!
+      #     path: /
+    # extraVolumeMounts provides a list of additional extra volumes.
+    extraVolumeMounts: []
+      # - name: custom-volume-1
+      #   mountPath: /custom/mount/path-1
+      #   readOnly: false
+      # - name: custom-volume-2
+      #   mountPath: /custom/mount/path-2
+      # - name: nfs-volume
+      #   mountPath: /path/nfs
+  # replicaCount specifies the number of replicas to deploy.
+  replicaCount: 1
+  resources:
+    limits:
+      # cpu is the maximum amount of cpu services can use.
+      cpu: 4
+      # memory is the maximum amount of memory services can use.
+      memory: 16Gi
+    requests:
+      # cpu is the minimum amount of cpu services require to run.
+      cpu: 1
+      # memory is the minimum amount of memory services require to run.
+      memory: 4Gi

@@ -1,0 +1,12 @@
+{{ $fullName := include "fullname" . }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hcl-uno-grafana-common-dashboard
+  labels:
+     grafana_dashboard: "1"
+spec:
+data:
+  k8s-{{ .Release.Name }}-dashboard.json: |-
+{{ .Files.Get "dashboards/WA_Performance_Metrics.json" | indent 5 }}

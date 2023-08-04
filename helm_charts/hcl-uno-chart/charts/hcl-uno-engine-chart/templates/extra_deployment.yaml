@@ -1,0 +1,62 @@
+{{- if .Values.global.extraImageName }}
+{{ $fullName := include "fullname" . }}
+{{ $baseImageName := include "baseImageName" . }}
+{{ $pluginConfig := printf "%s-%s" $fullName  "plugins-config" }}
+{{ $dwcInternalHost := include "uno.console.internal.host" . }}
+{{ $saName := include "uno.serviceAccount" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-extra
+  labels:
+    app: {{ $fullName }}-extra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $fullName }}-extra
+      app.kubernetes.io/instance: {{ $fullName }}-extra
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ $fullName }}-extra
+        app.kubernetes.io/instance: {{ $fullName }}-extra
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName | default $saName }}
+      containers:
+        - name: {{ $fullName }}-extra-container
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false     
+            capabilities:
+              drop:
+              - ALL 
+          image:  {{ include "uno.extraImageRepository" . }}/{{ .Values.global.extraImageName }}
+          imagePullPolicy: {{ .Values.config.registry.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: packages.json
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: packages.json
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          env:
+            - name: PACKAGES_URL
+              value: http://{{ $fullName }}-extra:8080/
+{{- end }}

@@ -1,0 +1,15 @@
+name: wa-console-prod
+version: 1.6.6
+appVersion: 10.2.0.00
+description: Helm chart for configuring HCL Workload Automation.
+keywords:
+- Commercial
+- amd64
+- Workload Scheduler
+- Workload Automation
+- Automation
+- DevOps
+maintainers:
+- name: HCL Workload Automation
+kubeVersion: ">=1.14.0 || >=1.14.0-0"
+apiVersion: v2

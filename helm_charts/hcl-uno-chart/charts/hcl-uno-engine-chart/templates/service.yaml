@@ -1,0 +1,26 @@
+{{ $fullName := include "fullname" . }}
+
+{{- $root := . -}}
+
+{{- $myList := include "uno.microservices.list" . | fromJsonArray -}}
+{{- range $myList}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-{{ . }}
+  labels:
+    prometheus: "true"
+    prometheus.job.label: "kubernetes-services"
+{{ include "uno.common.label" $root | indent 4 }}
+  annotations:
+spec:
+  ports:
+    - name: https
+      port: 8443
+      targetPort: https
+  selector:
+    app: {{ $fullName }}-{{ . }}
+
+---
+{{- end}}

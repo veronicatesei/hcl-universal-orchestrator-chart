@@ -1,0 +1,31 @@
+{{- if .Values.global.enableConsole -}}
+{{ $fullName := include "fullname" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hcl-uno-oidc-config
+data:
+  openid_connect.xml: |-
+        <server>
+              <featureManager>
+                <feature>openidConnectClient-1.0</feature>
+              </featureManager>
+              <authFilter id="restFilterOpenID">
+                  <requestUrl id="restUrl" urlPattern="jwt/ibm/api|/dwc/rest/roles|/dwc/ServiceDispatcherServlet?ServiceName=PrefExport|/metrics" matchType="notContain"/>
+              </authFilter>
+               <openidConnectClient id="keycloak" 
+                   clientId={{ .Values.waconsole.console.oidc.clientId | quote }}
+                   clientSecret={{ .Values.waconsole.console.oidc.clientSecret | quote }}
+                   httpsRequired={{ .Values.waconsole.console.oidc.httpsRequired | quote }}
+                   userIdentifier={{ .Values.waconsole.console.oidc.userIdentifier | quote }}
+                   signatureAlgorithm={{ .Values.waconsole.console.oidc.signatureAlgorithm | quote }}
+                   scope={{ .Values.waconsole.console.oidc.scope | quote }}
+                   authFilterRef={{ .Values.waconsole.console.oidc.authFilterRef | quote }}
+                   inboundPropagation={{ .Values.waconsole.console.oidc.inboundPropagation | quote }}
+                   groupIdentifier={{ .Values.waconsole.console.oidc.groupIdentifier | quote }}
+                   groupNameAttribute={{ .Values.waconsole.console.oidc.groupNameAttribute | quote }}
+                   redirectToRPHostAndPort={{ .Values.waconsole.console.oidc.redirectToRPHostAndPort | quote }}
+                   discoveryEndpointUrl={{ .Values.waconsole.console.oidc.discoveryEndpointUrl | quote }}>
+                </openidConnectClient>
+        </server>
+{{- end -}}

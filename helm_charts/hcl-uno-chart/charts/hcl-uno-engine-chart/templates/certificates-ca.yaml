@@ -1,0 +1,31 @@
+{{ $fullName := include "fullname" . }}
+
+{{- if not .Values.config.certificates.useCustomizedCert }} 
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ $fullName }}-uno-selfsigned-issuer
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $fullName }}-selfsigned-ca
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+spec:
+  isCA: true
+  commonName: uno
+  secretName: {{ .Values.config.certificates.caPairSecretName }}
+  privateKey:
+    size: 2048
+    algorithm: RSA
+    encoding: PKCS1
+  issuerRef:
+    name: {{ $fullName }}-uno-selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io
+{{- end -}}

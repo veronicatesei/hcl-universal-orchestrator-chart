@@ -1,0 +1,38 @@
+{{ $fullName := include "fullname" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}-jwtsso
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+data:
+  jwtsso.xml: |-
+        <server>
+
+            <featureManager>
+                <feature>jwtSso-1.0</feature>
+                <feature>mpJwt-1.1</feature>
+            </featureManager>
+
+            <httpSession securityIntegrationEnabled="false" invalidationTimeout="12h" />
+
+            <jwtSso cookieName="wajwt" jwtBuilderRef="jwtBuilder"/>
+
+            <jwtBuilder id="jwtBuilder"
+                jwkEnabled="false"
+                issuer="wa-console"
+                audiences="waconsole"
+                keyStoreRef="twaKeyStore"
+                keyAlias="server"
+                scope="openid groups user_group">
+                <claims>user_group,groups</claims>
+            </jwtBuilder>
+
+            <mpJwt id="mpJwt"
+                jwksUri="https://localhost:9443/jwt/ibm/api/jwtBuilder/jwk"
+                issuer="wa-console"
+                sslRef="twaSSLSettings"
+                audiences="waconsole"
+                clockSkew="5h"/>
+
+        </server>

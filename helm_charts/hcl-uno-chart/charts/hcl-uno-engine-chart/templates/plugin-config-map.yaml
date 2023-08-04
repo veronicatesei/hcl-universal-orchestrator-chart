@@ -1,0 +1,159 @@
+{{ $fullName := include "fullname" . }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}-plugins-config
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+data:
+  plugins.properties: |
+      com.ibm.scheduling.agent.executable
+      com.hcl.scheduling.agent.kubernetes
+      com.hcl.scheduling.agent.udeploycode
+      com.hcl.wa.plugin.ansible
+      com.hcl.wa.plugin.automationanywherebotrunner
+      com.hcl.wa.plugin.automationanywherebottrader
+      com.hcl.wa.plugin.awscloudformation
+      com.hcl.wa.plugin.awslambda
+      com.hcl.wa.plugin.awssns
+      com.hcl.wa.plugin.awssqs
+      com.hcl.wa.plugin.azureresourcemanager
+      com.hcl.wa.plugin.azuredatabricks
+      com.hcl.wa.plugin.azurestorage
+      com.hcl.wa.plugin.blueprism
+      com.hcl.wa.plugin.compression
+      com.hcl.wa.plugin.encryption
+      com.hcl.wa.plugin.gcpcloudstorage
+      com.hcl.wa.plugin.gcpcloudfunction
+      com.hcl.wa.plugin.gcpdeploymentmanager
+      com.hcl.wa.plugin.obiagent
+      com.hcl.wa.plugin.odiloadplan
+      com.hcl.wa.plugin.oraclehcmdataloader
+      com.hcl.wa.plugin.oracleucm
+      com.hcl.wa.plugin.saphanaxsengine
+      com.hcl.wa.plugin.sapdataservices
+      com.hcl.waPlugin.chefbootstrap
+      com.hcl.waPlugin.chefrunlist
+      com.hcl.waPlugin.obirunreport
+      com.hcl.waPlugin.odiscenario
+      com.ibm.scheduling.agent.apachespark
+      com.ibm.scheduling.agent.aws
+      com.ibm.scheduling.agent.azure
+      com.ibm.scheduling.agent.cloudant
+      com.ibm.scheduling.agent.cognos
+      com.ibm.scheduling.agent.database
+      com.ibm.scheduling.agent.datastage
+      com.ibm.scheduling.agent.ejb
+      com.ibm.scheduling.agent.filetransfer
+      com.ibm.scheduling.agent.hadoopfs
+      com.ibm.scheduling.agent.hadoopmapreduce
+      com.hcl.scheduling.agent.hcllaunch
+      com.ibm.scheduling.agent.java
+      com.ibm.scheduling.agent.jobdurationpredictor
+      com.ibm.scheduling.agent.jobmanagement
+      com.ibm.scheduling.agent.jobstreamsubmission
+      com.ibm.scheduling.agent.jsr352javabatch
+      com.ibm.scheduling.agent.mqtt
+      com.ibm.scheduling.agent.mssqljob
+      com.ibm.scheduling.agent.oozie
+      com.ibm.scheduling.agent.oracleebusiness
+      com.ibm.scheduling.agent.pichannel
+      com.ibm.scheduling.agent.powercenter
+      com.ibm.scheduling.agent.restful
+      com.ibm.scheduling.agent.remotecommand
+      com.ibm.scheduling.agent.salesforce
+      com.ibm.scheduling.agent.sapbusinessobjects
+      com.ibm.scheduling.agent.saphanalifecycle
+      com.ibm.scheduling.agent.softlayer
+      com.ibm.scheduling.agent.sterling
+      com.ibm.scheduling.agent.variabletable
+      com.ibm.scheduling.agent.webspheremq
+      com.ibm.scheduling.agent.ws
+      com.hcl.wa.plugin.awsbatch
+      com.hcl.wa.plugin.awss3
+      com.hcl.wa.plugin.awss3batchoperation
+      com.hcl.wa.plugin.axwayst
+      com.hcl.wa.plugin.azuredatafactory
+      com.hcl.wa.plugin.gcpcloudbigquery
+      com.hcl.wa.plugin.gcpclouddataflow
+      com.hcl.wa.plugin.softwaredefinedmainframe
+      com.hcl.wa.plugin.uipath
+      com.ibm.scheduling.agent.ibmi
+      com.ibm.scheduling.agent.j2ee
+
+---
+
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}-plugins-config-all
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+data:
+  plugins.properties: |
+      com.hcl.scheduling.agent.kubernetes
+      com.hcl.scheduling.agent.udeploycode
+      com.hcl.wa.plugin.ansible
+      com.hcl.wa.plugin.automationanywherebotrunner
+      com.hcl.wa.plugin.automationanywherebottrader
+      com.hcl.wa.plugin.awscloudformation
+      com.hcl.wa.plugin.awslambda
+      com.hcl.wa.plugin.awssns
+      com.hcl.wa.plugin.awssqs
+      com.hcl.wa.plugin.azureresourcemanager
+      com.hcl.wa.plugin.azuredatabricks
+      com.hcl.wa.plugin.azurestorage
+      com.hcl.wa.plugin.blueprism
+      com.hcl.wa.plugin.compression
+      com.hcl.wa.plugin.encryption
+      com.hcl.wa.plugin.gcpcloudstorage
+      com.hcl.wa.plugin.gcpcloudfunction
+      com.hcl.wa.plugin.gcpdeploymentmanager
+      com.hcl.wa.plugin.obiagent
+      com.hcl.wa.plugin.odiloadplan
+      com.hcl.wa.plugin.oraclehcmdataloader
+      com.hcl.wa.plugin.oracleucm
+      com.hcl.wa.plugin.saphanaxsengine
+      com.hcl.wa.plugin.sapdataservices
+      com.hcl.waPlugin.chefbootstrap
+      com.hcl.waPlugin.chefrunlist
+      com.hcl.waPlugin.obirunreport
+      com.hcl.waPlugin.odiscenario
+      com.ibm.scheduling.agent.apachespark
+      com.ibm.scheduling.agent.aws
+      com.ibm.scheduling.agent.azure
+      com.ibm.scheduling.agent.biginsights
+      com.ibm.scheduling.agent.centralizedagentupdate
+      com.ibm.scheduling.agent.cloudant
+      com.ibm.scheduling.agent.cognos
+      com.ibm.scheduling.agent.database
+      com.ibm.scheduling.agent.datastage
+      com.ibm.scheduling.agent.ejb
+      com.ibm.scheduling.agent.filetransfer
+      com.ibm.scheduling.agent.hadoopfs
+      com.ibm.scheduling.agent.hadoopmapreduce
+      com.hcl.scheduling.agent.hcllaunch
+      com.ibm.scheduling.agent.j2ee
+      com.ibm.scheduling.agent.java
+      com.ibm.scheduling.agent.jobdurationpredictor
+      com.ibm.scheduling.agent.jobmanagement
+      com.ibm.scheduling.agent.jobstreamsubmission
+      com.ibm.scheduling.agent.jsr352javabatch
+      com.ibm.scheduling.agent.mqtt
+      com.ibm.scheduling.agent.mssqljob
+      com.ibm.scheduling.agent.oozie
+      com.ibm.scheduling.agent.oracleebusiness
+      com.ibm.scheduling.agent.pichannel
+      com.ibm.scheduling.agent.powercenter
+      com.ibm.scheduling.agent.restful
+      com.ibm.scheduling.agent.remotecommand
+      com.ibm.scheduling.agent.salesforce
+      com.ibm.scheduling.agent.sapbusinessobjects
+      com.ibm.scheduling.agent.saphanalifecycle
+      com.ibm.scheduling.agent.softlayer
+      com.ibm.scheduling.agent.sterling
+      com.ibm.scheduling.agent.variabletable
+      com.ibm.scheduling.agent.webspheremq
+      com.ibm.scheduling.agent.ws
