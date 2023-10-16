@@ -1,4 +1,3 @@
-﻿
 # HCL Universal Orchestrator
 
 ## Introduction
@@ -56,19 +55,29 @@ You can access the HCL Universal Orchestrator chart and container images from th
  - hcl-uno-executor 
  - hcl-uno-orchestrator
 
+
 ## Prerequisites
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
 
 **Mandatory**
-- Kubetctl v 1.25.8 or later
-- Kubernetes cluster v 1.25 or later
-- Helm v 3.10 or later
-- Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
-- Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) 
+ - Kubetctl v 1.25.8 or later
+ - Kubernetes cluster v 1.25 or later
+ - Helm v 3.10 or later
+ - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
+ - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) 
+
+**Strongly recommended**
+
+ - Jetstack cert-manager
+
+  We strongly recommend the use of a cert-manager as it automatically generates and updates the required certificates. You can choose not to use it, in which case you need to:
+         
+   - Create your own custom certificates
+   - Insert the certificates inside the correct Kubernetes secrets
+   - Make sure that the names of the Kubernetes secrets match the names specified in the `values.yaml`deployment file
 
 **Optional**
 -   Grafana and Prometheus for monitoring dashboard
--   Jetstack cert-manager
 
 The following are prerequisites specific to each supported cloud provider:
 
@@ -133,6 +142,8 @@ Obtain your entitlement key and store it on your cluster by creating a [Kubernet
 
 
 ### Deploying the product components		
+
+Before starting to deploy the product components, make sure that all the [prerequisites](#prerequisites) are met.
 
 To deploy the HCL Universal Orchestrator, perform the following steps:
 
