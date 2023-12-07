@@ -145,7 +145,7 @@ Obtain your entitlement key and store it on your cluster by creating a [Kubernet
 
 Before starting to deploy the product components, make sure that all the [prerequisites](#prerequisites) are met.
 
-To deploy the HCL Universal Orchestrator, perform the following steps:
+To deploy HCL Universal Orchestrator, perform the following steps:
 
 1. Download the chart from the HCL Entitled Registry: `hclcr.io` and unpack it to a local directory.
 2. Add the repository:
@@ -184,10 +184,15 @@ The following are some useful Helm commands:
 * To update the Helm release:
 
         helm upgrade <uno_release_name> <repo_name>/hcl-uno-chart -f values.yaml -n <uno_namespace>
+		
+* To update helm repo release:
+  
+        helm repo update
 	
 * To delete the Helm release: 
 
         helm uninstall <uno_release_name> -n <uno_namespace>
+
 		
 
 ### Verifying the deployment 
@@ -249,6 +254,20 @@ To ensure the Dynamic Workload Console logout page redirects to the login page, 
        <jndiEntry value="${logout.url}" jndiName="logout.url" />
 
 where the logout.url string in jndiName should be replaced with the logout URL of the provider.
+
+## Upgrading the product components
+
+To upgrade HCL Universal Orchestrator, perform the following steps:
+
+1. Configure each product component by adjusting the values in the `values.yaml` file. The `values.yaml`file contains a detailed explanation for each parameter.
+
+2. Upgrade the instance by running the following command:
+
+         helm upgrade <uno_release_name> <repo_name>/hcl-uno-chart -f values.yaml -n <uno_namespace>
+		 
+ where 
+   <uno_release_name> is the deployment name of the instance. 
+**TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
 	   
 ## Uninstalling the Chart
 
