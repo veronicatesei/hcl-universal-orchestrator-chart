@@ -52,7 +52,8 @@ You can access the HCL Universal Orchestrator chart and container images from th
  - hcl-uno-toolbox
  - hcl-uno-audit
  - hcl-uno-timer
- - hcl-uno-executor 
+ - hcl-uno-executor
+ - hcl-uno-eventmanager 
  - hcl-uno-orchestrator
 
 
