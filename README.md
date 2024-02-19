@@ -148,7 +148,7 @@ Before starting to deploy the product components, make sure that all the [prereq
 
 To deploy HCL Universal Orchestrator, perform the following steps:
 
-1. Log in into the registry:
+1. Log into the registry:
  
         helm registry login hclcr.io  
    
