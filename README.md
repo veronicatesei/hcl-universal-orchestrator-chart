@@ -263,7 +263,7 @@ To upgrade HCL Universal Orchestrator, perform the following steps:
    <uno_release_name> is the deployment name of the instance. 
 **TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
 
-**Note:** When upgrading to a later version of  HCL Universal Orchestrator, you must manually delete the older version of the executable job plug-in.
+**Note:** When upgrading to a later version of HCL Universal Orchestrator from V1.1.0 or V1.1.1, you must manually delete the older version of the executable job plug-in.
 	   
 ## Uninstalling the Chart
 
