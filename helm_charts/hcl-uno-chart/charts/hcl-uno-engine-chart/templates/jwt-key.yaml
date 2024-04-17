@@ -1,3 +1,9 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
 {{ $fullName := include "fullname" . }}
 {{ $fullNameRes := printf "%s-%s"  $fullName "jwt-key" }}
 {{- $ca := genCA "jwtCA" 3650 -}}

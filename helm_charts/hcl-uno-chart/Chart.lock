@@ -1,0 +1,9 @@
+dependencies:
+- name: hcl-uno-engine-chart
+  repository: ""
+  version: 1.1.1
+- name: wa-console-prod
+  repository: ""
+  version: 10.2.1
+digest: sha256:f1ae0eb13b6e1f49f8bfab5d4459873425a4c27ac40bef7f9d6205c40abd77d0
+generated: "2023-12-18T12:11:27.8120976+01:00"

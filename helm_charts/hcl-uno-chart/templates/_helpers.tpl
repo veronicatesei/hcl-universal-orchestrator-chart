@@ -42,7 +42,7 @@ microservice.version: "version"
 {{- end -}}
 
 {{- define "uno.chart.common.label" -}}
-uno.microservice.version: 1.1.0.0
+uno.microservice.version: 1.1.1.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}

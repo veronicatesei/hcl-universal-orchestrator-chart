@@ -1,3 +1,9 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
 {{ $fullName := include "fullname" . }}
 {{ $certIssuer := include "uno.cert.issuer" . }}
 
@@ -19,6 +25,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy_next_upstream_timeout : "180"
     nginx.ingress.kubernetes.io/proxy-body-size: 200m
     nginx.ingress.kubernetes.io/proxy-buffer-size: 128k
+    nginx.ingress.kubernetes.io/proxy-request-buffering: 'off'
 {{- if not .Values.config.certificates.useCustomizedCert }} 
     cert-manager.io/issuer: {{ $certIssuer }}
 {{- end }}

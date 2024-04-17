@@ -1,4 +1,10 @@
 {{- if or (eq (.Values.console.exposeServiceType | upper )  "LOADBALANCER") (eq (.Values.console.exposeServiceType | upper )  "LOADBALANCER_SESSIONAFFINITY") }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
 {{- include "wa.init" (list . "waconsole") }}
 {{ $fullName := include "wa.fullName" . }}
 {{ $dwcServiceName := include "wa.fullName" . }}

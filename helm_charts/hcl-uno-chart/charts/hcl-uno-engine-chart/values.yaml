@@ -1,3 +1,9 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
 
 # Url of flexera license server
 hclFlexnetURL:
@@ -19,11 +25,11 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/wa
   # pluginImageName is the name of the image with tags for Automation Hub integrations.
-  pluginImageName: hcl-workload-automation-plugins:10.2.0.00.20230728
+  pluginImageName: hcl-workload-automation-plugins:10.2.1.00.20231201
   # extraImageRepository is the name of the repository that contains the image with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImageRepository: 
   # extraImageName is the name of the image with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
-  extraImageName: hclcr.io/uno/hcl-uno-external-pod:1.1.0.0
+  extraImageName: hclcr.io/uno/hcl-uno-external-pod:1.1.1.0
   customLabels:
     - name: "environment"
       value: "prod"
@@ -65,6 +71,19 @@ kafka:
   tls: false
   # tlsInsecure specifies whether certificate validation must be skipped. Supported values are true and false.
   tlsInsecure: false
+  # Kafka sasl mechanism as kafka client configuration provides.
+  saslMechanism:
+  # Kafka jass config as kafka client configuration provides.
+  jaasConfig:
+  # Kafka security protocol as kafka client configuration provides.
+  securityProtocol:
+  #kerberos service name
+  kerberosServiceName:
+    
+eventmanager:
+  plugins:
+    gcp:
+      baseServicePath:
 
 config:
   license:
@@ -79,7 +98,7 @@ config:
     # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
     pullPolicy: Always
     # tag is the tag of the image. The default value is latest.
-    tag: 1.1.0.0
+    tag: 1.1.1.0
   planning:
     # max number of days to generate not active instance
     notActiveWindowMax: P9DT0H
@@ -89,6 +108,8 @@ config:
     activeWindowExtension: PT5M
     # How long is the windows of active instance (how long the plan is)
     activeWindow: PT24H
+    # How long is the windows of plan in the past
+    daysRetentionPlan: P7DT0H
   console:
     # hostname is the hostname of the Dynamic Workload Console.
     hostname:
@@ -227,9 +248,12 @@ deployment:
   agentmanager:
     # ingressPrefix is the prefix of the name of the endpoint of the agentmanager microservice.
     ingressPrefix: "agentmanager"
+    #minTargetReplicas: 1
   gateway:
     # ingressPrefix is the prefix of the name of the endpoint of the gateway microservice.
     ingressPrefix: "gateway"
+    #minTargetReplicas: 1
+  eventmanager:
     #minTargetReplicas: 1
   audit: 
     #minTargetReplicas: 1

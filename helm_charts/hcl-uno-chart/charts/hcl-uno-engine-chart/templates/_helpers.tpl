@@ -34,7 +34,7 @@
 {{- end -}}
 
 {{- define "uno.microservices.list" -}}
-{{- $myList := list "agentmanager" "executor" "gateway" "iaa" "orchestrator" "scheduler" "toolbox" "timer" "storage" "audit" -}}
+{{- $myList := list "agentmanager" "executor" "gateway" "eventmanager" "iaa" "orchestrator" "scheduler" "toolbox" "timer" "storage" "audit" -}}
 {{ toJson $myList }}
 {{- end -}}
 
@@ -154,7 +154,7 @@ prometheus.io/path: "/q/metrics"
 
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 1.1.0.0
+uno.microservice.version: 1.1.1.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -316,6 +316,8 @@ release: {{ .Release.Name | quote }}
   value: {{ .Values.config.planning.notActiveWindowMax | quote }} 
 - name: UNO_PLANNING_NOT_ACTIVE_WINDOW_MIN
   value: {{ .Values.config.planning.notActiveWindowMin | quote }} 
+- name: UNO_PLANNING_CLEANUP_RETENTION_DURATION
+  value: {{ .Values.config.planning.daysRetentionPlan | quote }} 
 - name: UNO_PLANNING_ACTIVE_WINDOW_EXTENSION
   value: {{ .Values.config.planning.activeWindowExtension | quote }} 
 - name: UNO_PLANNING_ACTIVE_WINDOW_LICENSE
@@ -324,10 +326,14 @@ release: {{ .Release.Name | quote }}
   value: http://{{ $fullName }}-extra:8080 
 - name: QUARKUS_MONGODB_CONNECTION_STRING
   value: {{ (tpl ( .Values.database.url) .) | quote}}
-- name: QUARKUS_MONGODB_CREDENTIAL.USERNAME
+- name: QUARKUS_MONGODB_CREDENTIAL_USERNAME
   value: {{ .Values.database.username | quote}}
-- name: QUARKUS_MONGODB_CREDENTIAL.PASSWORD
-  value: {{ .Values.database.password | quote}}
+- name: QUARKUS_MONGODB_CREDENTIAL_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: DB_PASSWORD
+      optional: false
 - name: QUARKUS_MONGODB_TLS
   value: {{ .Values.database.tls | quote}}
 - name: QUARKUS_MONGODB_TLS_INSECURE
@@ -337,18 +343,19 @@ release: {{ .Release.Name | quote }}
 - name: KAFKA_BOOTSTRAP_SERVERS
   # if additional bootstrap servers are required, add a comma separated list
   value: {{ (tpl ( .Values.kafka.url) .) | quote}}
+{{- if .Values.kafka.kerberosServiceName }}
+- name: KAFKA_SASL_KERBEROS_SERVICE_NAME
+  value: {{ .Values.kafka.kerberosServiceName | quote}}
+{{- end }}
 {{- if .Values.kafka.username }}
 - name: KAFKA_USER
   value: {{ .Values.kafka.username | quote}}
 - name: KAFKA_PASSWORD
-  value: {{ .Values.kafka.password | quote}}
-{{- else }}
-- name: KAFKA_SASL_JAAS_CONFIG
-  value: ""
-- name: KAFKA_SASL_MECHANISM
-  value: ""
-- name: KAFKA_SECURITY_PROTOCOL
-  value: "PLAINTEXT"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: KAFKA_PASSWORD
+      optional: false
 {{- end }}
 {{- if .Values.kafka.tls }}
 {{- if .Values.kafka.tlsInsecure }}
@@ -358,6 +365,14 @@ release: {{ .Release.Name | quote }}
 - name: KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM
   value: "https"
 {{- end }}
+- name: KAFKA_SASL_MECHANISM
+  value: {{ .Values.kafka.saslMechanism | default "PLAIN"| quote}}
+- name: KAFKA_SECURITY_PROTOCOL
+  value: {{ .Values.kafka.securityProtocol |default "SASL_SSL" | quote}}
+{{- if .Values.kafka.jaasConfig }}
+- name: KAFKA_SASL_JAAS_CONFIG
+  value: {{ .Values.kafka.jaasConfig | quote}}
+{{- end }}
 {{- else }}
 - name: MP_MESSAGING_CONNECTOR_SMALLRYE_KAFKA_SSL_TRUSTSTORE_LOCATION
   value: ""
@@ -365,6 +380,12 @@ release: {{ .Release.Name | quote }}
   value: ""
 - name: MP_MESSAGING_CONNECTOR_SMALLRYE_KAFKA_SSL_TRUSTSTORE_TYPE
   value: ""
+- name: KAFKA_SASL_JAAS_CONFIG
+  value: {{ .Values.kafka.jaasConfig | quote }}
+- name: KAFKA_SASL_MECHANISM
+  value: {{ .Values.kafka.saslMechanism | quote}}
+- name: KAFKA_SECURITY_PROTOCOL
+  value: {{ .Values.kafka.securityProtocol |default "PLAINTEXT" | quote}}
 {{- end }}
 - name: QUARKUS_OPENTELEMETRY_TRACER_EXPORTER_OTLP_ENDPOINT
   value: {{ .Values.config.tracing.otelEndpoint |quote }}
@@ -413,6 +434,16 @@ release: {{ .Release.Name | quote }}
   value: https://{{ $fullName }}-audit:8443
 - name: UNO_TIMER_CLIENT_URL
   value: https://{{ $fullName }}-timer:8443
+- name: UNO_EVENTMANAGER_CLIENT_URL
+  value: https://{{ $fullName }}-eventmanager:8443
+- name: UNO_GATEWAY_PUBLIC_HOST
+  value: {{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}
+- name: UNO_GATEWAY_PUBLIC_PORT
+  value: "443"
+- name: UNO_GATEWAY_PRIVATE_HOST
+  value: {{ $fullName }}-gateway
+- name: UNO_GATEWAY_PRIVATE_PORT
+  value: "8443"
 {{- end -}}
 
 {{- define "common.custom.env.variable" -}}
@@ -499,11 +530,11 @@ volumeMounts:
 {{- end }}
 {{- range .Values.config.certificates.additionalCASecrets }}
   - name: {{.}}-cert-volume
-    mountPath: /security/certs/additionalCAs
+    mountPath: /security/certs/additionalCAs/{{.}}
 {{- end }}
 {{- range .Values.config.certificates.additionalCASecrets }}
   - name: {{.}}-cert-ext-volume
-    mountPath: /security/ext_agt_depot/additionalCAs
+    mountPath: /security/ext_agt_depot/additionalCAs/{{.}}
 {{- end }}    
 {{- end -}}
 
@@ -557,4 +588,11 @@ gcr.io/blackjack-209019/services
 {{- else -}}
 {{ print .Values.global.extraImageRepository }}
 {{- end -}}
+{{- end -}}
+
+{{- define "uno.eventmanager.plugins" -}}
+{{- if .Values.eventmanager.plugins.gcp.baseServicePath }}
+- name: UNO_EVENTMANAGER_GCP_BASESERVICEACCOUNTPATH
+  value: {{ .Values.eventmanager.plugins.gcp.baseServicePath | quote}}
+{{- end }}
 {{- end -}}

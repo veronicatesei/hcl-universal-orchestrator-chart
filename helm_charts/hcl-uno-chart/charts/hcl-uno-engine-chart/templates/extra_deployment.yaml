@@ -1,3 +1,9 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
 {{- if .Values.global.extraImageName }}
 {{ $fullName := include "fullname" . }}
 {{ $baseImageName := include "baseImageName" . }}
@@ -56,7 +62,16 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 3
+          resources:
+            limits:
+              cpu: "0.2"
+              memory: 128Mi
+            requests:
+              cpu: "0.2"
+              memory: 128Mi
           env:
             - name: PACKAGES_URL
               value: http://{{ $fullName }}-extra:8080/
+            - name: LICENSE
+              value: {{ .Values.global.license | quote }}
 {{- end }}

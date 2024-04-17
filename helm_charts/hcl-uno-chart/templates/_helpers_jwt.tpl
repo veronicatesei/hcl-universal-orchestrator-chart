@@ -13,6 +13,6 @@
 {{- define "common.dwc.hidden.secret.volumes.mounts" -}}
 {{- $fullName := include "fullname" . -}}
 - name: config-dwc-jwt-volume
-  mountPath: /opt/wautils/dropins/jwtsso.xml
+  mountPath: /home/wauser/wadata/usr/servers/dwcServer/configDropins/overrides/jwtsso.xml
   subPath: jwtsso.xml
 {{- end -}}

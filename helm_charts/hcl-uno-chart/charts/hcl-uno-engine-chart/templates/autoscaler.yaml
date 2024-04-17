@@ -1,3 +1,9 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
 {{ $fullName := include "fullname" . }}
 
 {{- if gt .Values.deployment.global.maxTargetReplicas .Values.deployment.global.minTargetReplicas }}

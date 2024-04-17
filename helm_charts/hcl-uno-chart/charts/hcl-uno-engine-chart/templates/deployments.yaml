@@ -1,3 +1,9 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
 
 {{ $fullName := include "fullname" . }}
 {{ $baseImageName := include "baseImageName" . }}
@@ -103,12 +109,27 @@ spec:
           env:
             - name: QUARKUS_HTTP_HTTP2
               value: "true"
+            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $root.Release.Name }}-uno-secret
+                  key: KEYSTORE_PASSWORD
+                  optional: false
+            - name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $root.Release.Name }}-uno-secret
+                  key: KEYSTORE_PASSWORD
+                  optional: false
             - name: UNO_MICROSERVICE_JWT_EXPIRATION_DURATION
               value: "{{  $root.Values.config.jwt.internalExpirationDuration }}"
             - name: UNO_MONGODB_DATABASE
               value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.database.databaseName }}"
 {{ include "common.env.variable"  $root | indent 12 }}
 {{ include "common.custom.env.variable"  $root | indent 12 }}
+{{- if eq $k "eventmanager"  }}
+{{ include "uno.eventmanager.plugins" $root | indent 12 }}
+{{- end}}
 {{- if eq $k "iaa"  }}
 {{ include "uno.console.env.variable" $root | indent 12 }}
 {{ include "uno.oidc.enabled.variable" $root | indent 12 }}
