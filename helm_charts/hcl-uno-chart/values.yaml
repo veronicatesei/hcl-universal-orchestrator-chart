@@ -251,6 +251,8 @@ uno:
       #minTargetReplicas: 1
     executor:
       #minTargetReplicas: 1
+      #The supported values are true or false. If set to false, you can write data to the pod file system in Kubernetes. If set to true, writing data to the pod file system is prevented.
+      enableExecutorSandbox:
     orchestrator:
       #minTargetReplicas: 1
       resources:
