@@ -1,6 +1,6 @@
 ######################################################################
 # Licensed Materials Property of HCL*
-# (c) Copyright HCL Technologies Ltd. 2019, 2023. All rights reserved.
+# (c) Copyright HCL Technologies Ltd. 2021, 2023. All rights reserved.
 #
 # * Trademark of HCL Technologies Limited
 ######################################################################
@@ -9,10 +9,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: hcl-uno-grafana-common-dashboard
+  name: {{ $fullName }}-engines-config
   labels:
-     grafana_dashboard: "1"
-spec:
+{{ include "uno.common.label" . | indent 4 }}
 data:
-  k8s-{{ .Release.Name }}-dashboard.json: |-
-{{ .Files.Get "dashboards/WA_Performance_Metrics.json" | indent 5 }}
+  uno.json: |
+      {
+          "name": "UnO",
+          "baseUrl": "https://{{ $fullName }}-gateway:8443"
+      }     

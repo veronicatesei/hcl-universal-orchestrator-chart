@@ -1,0 +1,60 @@
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" -}}
+{{- if or (.Values.routes.enabled) (eq (.Values.exposeServiceType | upper )  "ROUTE")  }} 
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{ $fullName := include "fullname" . }}
+{{ $certIssuer := include "uno.cert.issuer" . }}
+
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: gateway-route
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ $fullName }}-gateway
+    weight: 100
+  port:
+    targetPort: https
+  tls:
+    termination: {{ .Values.routes.termination | default "passthrough" }}
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None
+
+---
+
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: agentmanager-route
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ $fullName }}-agentmanager
+    weight: 100
+  port:
+    targetPort: https
+  tls:
+    termination: {{ .Values.routes.termination | default "passthrough" }}
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None
+
+
+{{- end }}
+{{- end }}

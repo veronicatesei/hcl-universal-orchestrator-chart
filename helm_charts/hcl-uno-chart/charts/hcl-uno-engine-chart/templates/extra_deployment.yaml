@@ -1,39 +1,43 @@
-{{- if .Values.global.extraImageName }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- if .Values.global.extraImages }}
 {{ $fullName := include "fullname" . }}
 {{ $baseImageName := include "baseImageName" . }}
 {{ $pluginConfig := printf "%s-%s" $fullName  "plugins-config" }}
 {{ $dwcInternalHost := include "uno.console.internal.host" . }}
 {{ $saName := include "uno.serviceAccount" . }}
+{{- $extraImageList := include "uno.extraImages" . | fromJsonArray -}}
+{{- $root := . -}}
+{{- range $index, $extraImage := $extraImageList -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullName }}-extra
+  name: {{ $fullName }}-extra-{{ $index }}
   labels:
-    app: {{ $fullName }}-extra
+    app: {{ $fullName }}-extra-{{ $index }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ $fullName }}-extra
-      app.kubernetes.io/instance: {{ $fullName }}-extra
+      app.kubernetes.io/name: {{ $fullName }}-extra-{{ $index }}
+      app.kubernetes.io/instance: {{ $fullName }}-extra-{{ $index }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ $fullName }}-extra
-        app.kubernetes.io/instance: {{ $fullName }}-extra
+        app.kubernetes.io/name: {{ $fullName }}-extra-{{ $index }}
+        app.kubernetes.io/instance: {{ $fullName }}-extra-{{ $index }}
     spec:
-      serviceAccountName: {{ .Values.global.serviceAccountName | default $saName }}
+      serviceAccountName: {{ $root.Values.global.serviceAccountName | default $saName }}
       containers:
-        - name: {{ $fullName }}-extra-container
-          securityContext:
-            privileged: false
-            readOnlyRootFilesystem: false
-            allowPrivilegeEscalation: false     
-            capabilities:
-              drop:
-              - ALL 
-          image:  {{ include "uno.extraImageRepository" . }}/{{ .Values.global.extraImageName }}
-          imagePullPolicy: {{ .Values.config.registry.pullPolicy }}
+        - name: {{ $fullName }}-extra-{{ $index }}-container
+{{ include "uno.containerSecurityContext"  $root | indent 10 }}
+          image:  {{ $extraImage }}
+          imagePullPolicy: {{ $root.Values.config.registry.pullPolicy }}
           ports:
             - name: http
               containerPort: 8080
@@ -56,7 +60,19 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 3
+          resources:
+            limits:
+              cpu: "0.2"
+              memory: 128Mi
+            requests:
+              cpu: "0.2"
+              memory: 128Mi
           env:
             - name: PACKAGES_URL
-              value: http://{{ $fullName }}-extra:8080/
+              value: http://{{ $fullName }}-extra-{{ $index }}:8080/
+            - name: LICENSE
+              value: {{ $root.Values.global.license | quote }}
+---
+
+{{- end }}
 {{- end }}

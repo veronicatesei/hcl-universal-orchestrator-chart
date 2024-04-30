@@ -1,3 +1,9 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
 {{ $fullName := include "fullname" . }}
 
 apiVersion: v1
@@ -8,7 +14,6 @@ metadata:
 {{ include "uno.common.label" . | indent 4 }}
 data:
   plugins.properties: |
-      com.ibm.scheduling.agent.executable
       com.hcl.scheduling.agent.kubernetes
       com.hcl.scheduling.agent.udeploycode
       com.hcl.wa.plugin.ansible
@@ -81,6 +86,25 @@ data:
       com.hcl.wa.plugin.uipath
       com.ibm.scheduling.agent.ibmi
       com.ibm.scheduling.agent.j2ee
+      com.hcl.wa.plugin.azurelogicapps
+      com.hcl.wa.plugin.gcpcloudbatch
+      com.hcl.wa.plugin.gcpubsub
+      com.hcl.wa.plugin.ibmroboticprocessautomation
+      com.hcl.wa.plugin.jdedwards
+      com.hcl.wa.plugin.jira
+      com.hcl.wa.plugin.jsonata
+      com.hcl.wa.plugin.openai
+      com.hcl.wa.plugin.sapibp
+      com.hcl.wa.plugin.servicenow
+      com.hcl.wa.plugin.snowflake
+      com.ibm.scheduling.agent.biginsights
+      com.ibm.scheduling.agent.jcl
+      com.hcl.wa.plugin.awsglue
+      com.hcl.wa.plugin.awsstepfunctions
+      com.hcl.wa.plugin.axwaytransfercft
+      com.hcl.wa.plugin.azureservicebus
+      com.hcl.wa.plugin.mybiros
+      com.hcl.wa.plugin.sendemail
 
 ---
 
@@ -157,3 +181,32 @@ data:
       com.ibm.scheduling.agent.variabletable
       com.ibm.scheduling.agent.webspheremq
       com.ibm.scheduling.agent.ws
+      com.hcl.wa.plugin.awsbatch
+      com.hcl.wa.plugin.awss3
+      com.hcl.wa.plugin.awss3batchoperation
+      com.hcl.wa.plugin.axwayst
+      com.hcl.wa.plugin.azuredatafactory
+      com.hcl.wa.plugin.gcpcloudbigquery
+      com.hcl.wa.plugin.gcpclouddataflow
+      com.hcl.wa.plugin.softwaredefinedmainframe
+      com.hcl.wa.plugin.uipath
+      com.ibm.scheduling.agent.ibmi
+      com.hcl.wa.plugin.azurelogicapps
+      com.hcl.wa.plugin.gcpcloudbatch
+      com.hcl.wa.plugin.gcpubsub
+      com.hcl.wa.plugin.ibmroboticprocessautomation
+      com.hcl.wa.plugin.jdedwards
+      com.hcl.wa.plugin.jira
+      com.hcl.wa.plugin.jsonata
+      com.hcl.wa.plugin.openai
+      com.hcl.wa.plugin.sapibp
+      com.hcl.wa.plugin.servicenow
+      com.hcl.wa.plugin.snowflake
+      com.ibm.scheduling.agent.biginsights
+      com.ibm.scheduling.agent.jcl
+      com.hcl.wa.plugin.awsglue
+      com.hcl.wa.plugin.awsstepfunctions
+      com.hcl.wa.plugin.axwaytransfercft
+      com.hcl.wa.plugin.azureservicebus
+      com.hcl.wa.plugin.mybiros
+      com.hcl.wa.plugin.sendemail

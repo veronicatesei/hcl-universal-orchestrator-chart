@@ -1,10 +1,16 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
 enableNginxServer: true
 global:
   # set to "accept" to accept the license
   license: "not accepted"
   serviceAccountName:
   customPluginImageName: 
-  pluginImageName: hclcr.io/wa/hcl-workload-automation-plugins:10.2.0.00.20230728
+  pluginImageName: hclcr.io/wa/hcl-workload-automation-plugins:10.2.2.00.20240424
   configPlugins:
   language: "en"
   enablePrometheus: true
@@ -14,7 +20,7 @@ global:
 replicaCount: 1
 image:
   repository: hclcr.io/wa/hcl-workload-automation-console
-  tag: 10.2.0.00.20230728
+  tag: 10.2.2.00.20240424
   pullPolicy: Always
 licenseType: "PVU"
 runAsUser: 999
@@ -26,7 +32,15 @@ console:
   adminGroup:
   engineHostName:
   enginePort:
+  otel_sdk_disabled: true
+  otel_traces_exporter: otlp
+  otel_exporter_otlp_endpoint: http://localhost:4317
+  otel_exporter_otlp_traces_endpoint: http://localhost:4317
+  otel_exporter_otlp_protocol: grpc
+  otel_exporter_otlp_traces_protocol: grpc
   db:
+    retryWrites: false
+    readPreference: "secondaryPreferred"
     type: "DB2"
     hostname: dbhost
     alternateHostName:
@@ -43,7 +57,7 @@ console:
     tsTempName:
     tssbspace:
     usepartitioning: true
-    invalidHostnameAllowed:
+    invalidHostnameAllowed: false
     authDb:
   pwdSecretName: wa-pwd-secret
   libConfigName:

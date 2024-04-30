@@ -1,3 +1,9 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
 
 # Global values are values that can be accessed from any chart or subchart by exactly the same name.
 # Globals require explicit declaration. You can’t use an existing non-global as if it were a global.
@@ -25,11 +31,13 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/wa
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-workload-automation-plugins:10.2.0.00.20230728
-  # extraImageRepository is the name of the repository that contains the image with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
-  extraImageRepository: hclcr.io/wa
-  # extraImageName is the name of the image with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
-  extraImageName: hcl-workload-automation-packages:10.2.0.00.20230728
+  pluginImageName: hcl-workload-automation-plugins:10.2.2.00
+  # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
+  extraImages:
+    - registry: hclcr.io/uno
+      name: hcl-uno-external-pod:1.1.2.0
+    - registry: hclcr.io/wa
+      name: hcl-workload-automation-packages:10.2.2.00
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -81,6 +89,12 @@ uno:
     password:
     # tls specifies whether TLS is enabled. Supported values are true and false.
     tls: false
+    # Kafka sasl mechanism as kafka client configuration provides.
+    saslMechanism:
+    # Kafka jass config as kafka client configuration provides.
+    jaasConfig:
+    # Kafka security protocol as kafka client configuration provides.
+    securityProtocol:
     # tlsInsecure specifies whether certificate validation must be skipped. Supported values are true and false.
     tlsInsecure: false
   config:
@@ -91,11 +105,11 @@ uno:
       licenseServerId:
     registry:
       # name is the name of your registry.
-      name:  hclcr.io/uno
+      name: hclcr.io/uno
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 1.1.0.0
+      tag: 1.1.2.0
     planning:
       # max number of days to generate not active instance
       notActiveWindowMax: P9DT0H
@@ -105,6 +119,8 @@ uno:
       activeWindowExtension: PT5M
       # How long is the windows of active instance (how long the plan is)
       activeWindow: PT24H
+      # How long is the windows of plan in the past
+      daysRetentionPlan: P7DT0H
     console:
       # hostname is the hostname of the Dynamic Workload Console.
       hostname:
@@ -179,10 +195,12 @@ uno:
       encryptTokensInCookie: true
       # splitTokensInCookie set false to keep all OIDC-related tokens (ID, access and refresh) in a single session cookie. Set true to minimize session cookie size. This parameter applies when enabled is set to true.
       splitTokensInCookie: true
-      # tlsVerification  enables certificate validation and hostname verification. Supported values are “none”, “required”, “certificate-validation”. This parameter applies when enabled is set to true.
-      tlsVerification: none
-      # applicationType is the application type. Supported values are “web-app”, “service”, “hybrid”. This parameter applies when enabled is set to true.
-      applicationType: web-app
+      # tlsVerification enables both certificate validation and hostname verification. You can use the config.certificates.additionalCASecrets parameter to add a secret for the OpenID Connect (OIDC) server CA. This parameter only applies when enabled is set to true.
+      # Supported values are:
+      # "none"                   : All certificates are trusted and hostname verification is disabled
+      # "required"               : Certificates are validated and hostname verification is enabled
+      # "certificate-validation" : Certificates are validated and hostname verification is disabled
+      tlsVerification: "required"
 
   # bulkhead defines the policy to be used on the gateway endpoint for avoiding bulk requests and block DDOS attacks against these contexts.
   bulkhead:
@@ -191,7 +209,11 @@ uno:
       maxValue: 12
       # waitingTaskQueue defines the maximum number of calls which can be kept waiting in each queue. The value must be greater than 0.
       waitingTaskQueue: 12
-
+  routes:
+    # enabled specifies whether a Openshift route is enabled to route traffic from external sources to the applications in the cluster. Supported values are true and false.
+    enabled: true
+    #  specifies whether a Openshift route ssl termination . Supported values are passthrough and reencrypt.
+    termination:
   ingress:
     # enabled specifies whether an ingress is enabled to route traffic from external sources to the applications in the cluster. Supported values are true and false.
     enabled: true
@@ -231,10 +253,21 @@ uno:
           memory: 1024Mi
         requests:
           # cpu is the minimum amount of cpu services require to run.
-          cpu: "0.3"
+          cpu: "0.6"
           # memory is the minimum amount of memory services require to run.
           memory: 512Mi
     # The properties listed below apply to single microservices. You can use them to override the global settings defined above for one or more microservices.
+    console:
+      # ingressPrefix is the prefix of the name of the endpoint of the console microservice.
+      ingressPrefix: "console"
+      resources:
+        limits:
+          cpu: "2"
+          memory: "384Mi"
+        requests:
+          cpu: "0.3"
+          memory: "192Mi"
+      #minTargetReplicas: 1
     agentmanager:
       # ingressPrefix is the prefix of the name of the endpoint of the agentmanager microservice.
       ingressPrefix: agentmanager
@@ -242,6 +275,8 @@ uno:
     gateway:
       # ingressPrefix is the prefix of the name of the endpoint of the gateway microservice.
       ingressPrefix: "gateway"
+      #minTargetReplicas: 1
+    eventmanager:
       #minTargetReplicas: 1
     audit:
       #minTargetReplicas: 1
@@ -251,6 +286,7 @@ uno:
       #minTargetReplicas: 1
     executor:
       #minTargetReplicas: 1
+      enableExecutorSandbox: "false"
     orchestrator:
       #minTargetReplicas: 1
       resources:
@@ -258,7 +294,7 @@ uno:
           cpu: "2"
           memory: 1024Mi
         requests:
-          cpu: "0.3"
+          cpu: "0.6"
           memory: 1024Mi
     scheduler:
       #minTargetReplicas: 1
@@ -310,7 +346,11 @@ waconsole:
       # sslConnection specifies whether the connection to the database is in SSL mode.
       sslConnection: false
       # Only for mongodb disable TLS hostname verification 
-      invalidHostnameAllowed:
+      invalidHostnameAllowed: false
+      # Only for documentdb specify the retryWrites option. Supported values are true and false.
+      retryWrites: "false"
+      # Only for documentdb specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, nearest.
+      readPreference: "secondaryPreferred"
       # Only for mongodb optially specify the admin database  
       authDb:
       # tsName is the name of the DATA table space.
@@ -382,7 +422,7 @@ waconsole:
     # tz sets the timezone (TZ) operating system environment variable.
     tz:
     # libConfigName is the name of the ConfigMap to store all custom Liberty configurations.
-    libConfigName:
+    libConfigName: null
     # Enable the following row to configure DWC with oidc provider
     #libConfigName: hcl-uno-oidc-config
     disableAccessControl:
@@ -405,7 +445,7 @@ waconsole:
     # repository is the Dynamic Workload Console image repository. Mandatory parameter.
     repository: hclcr.io/wa/hcl-workload-automation-console
     # tag is the Dynamic Workload Console image tag. Mandatory parameter.
-    tag: 10.2.0.00.20230728
+    tag: 10.2.2.00
   persistence:
     dataPVC:
       # name is the prefix for the Persistent Volumes Claim name.

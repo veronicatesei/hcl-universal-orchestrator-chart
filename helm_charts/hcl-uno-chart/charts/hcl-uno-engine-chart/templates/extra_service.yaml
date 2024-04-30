@@ -1,12 +1,22 @@
-{{- if .Values.global.extraImageName }}
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+{{- if .Values.global.extraImages }}
 {{ $fullName := include "fullname" . }}
+{{- $extraImageList := include "uno.extraImages" . | fromJsonArray -}}
+{{- $root := . -}}
+{{- range $index, $extraImage := $extraImageList -}}
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $fullName }}-extra
+  name: {{ $fullName }}-extra-{{ $index }}
   labels:
-    app: {{ $fullName }}-extra
-{{ include "uno.common.label" . | indent 4 }}
+    app: {{ $fullName }}-extra-{{ $index }}
+{{ include "uno.common.label" $root | indent 4 }}
 spec:
   type: ClusterIP
   ports:
@@ -15,6 +25,8 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: {{ $fullName }}-extra
-    app.kubernetes.io/instance: {{ $fullName }}-extra
+    app.kubernetes.io/name: {{ $fullName }}-extra-{{ $index }}
+    app.kubernetes.io/instance: {{ $fullName }}-extra-{{ $index }}
+---
+{{- end -}}
 {{- end }}
