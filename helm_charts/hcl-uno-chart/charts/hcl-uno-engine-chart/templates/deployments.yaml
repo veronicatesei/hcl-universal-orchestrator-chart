@@ -1,3 +1,9 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
 
 {{ $fullName := include "fullname" . }}
 {{ $baseImageName := include "baseImageName" . }}
@@ -82,13 +88,8 @@ spec:
           mountPath: /storage
         command: [/opt/wautils/copy_plugins.sh]
         args: ["/opt/wa_cloud_plugins/", "/storage"]
-        securityContext:
-          privileged: false
-          readOnlyRootFilesystem: false
-          allowPrivilegeEscalation: false     
-          capabilities:
-            drop:
-            - ALL
+{{ include "uno.containerSecurityContext"  $root | indent 8 }}
+
 {{- end }} 
 {{- end }} 
       containers:
@@ -96,6 +97,8 @@ spec:
 {{ include "uno.resources" $data | indent 10 }}
           image: {{ include "uno.repouno" $root }}/{{ $baseImageName }}{{ $k }}:{{  $root.Values.config.registry.tag }}
           imagePullPolicy: {{  $root.Values.config.registry.pullPolicy }}
+{{ include "uno.containerSecurityContext"  $root | indent 10 }}
+
 {{ include "uno.readiness" $root | indent 10 }}
           ports:
             - name: https
@@ -103,12 +106,27 @@ spec:
           env:
             - name: QUARKUS_HTTP_HTTP2
               value: "true"
+            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $root.Release.Name }}-uno-secret
+                  key: KEYSTORE_PASSWORD
+                  optional: false
+            - name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $root.Release.Name }}-uno-secret
+                  key: KEYSTORE_PASSWORD
+                  optional: false
             - name: UNO_MICROSERVICE_JWT_EXPIRATION_DURATION
               value: "{{  $root.Values.config.jwt.internalExpirationDuration }}"
             - name: UNO_MONGODB_DATABASE
               value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.database.databaseName }}"
 {{ include "common.env.variable"  $root | indent 12 }}
 {{ include "common.custom.env.variable"  $root | indent 12 }}
+{{- if eq $k "eventmanager"  }}
+{{ include "uno.eventmanager.plugins" $root | indent 12 }}
+{{- end}}
 {{- if eq $k "iaa"  }}
 {{ include "uno.console.env.variable" $root | indent 12 }}
 {{ include "uno.oidc.enabled.variable" $root | indent 12 }}
@@ -148,6 +166,9 @@ spec:
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{- end}}
 
+{{- if eq $k "console"  }}
+{{ include "uno.oidc.env.variable" $root | indent 12 }}
+{{- end}}
 
 {{ include "uno.secret.volumes.mounts" $root | indent 10 }}
 {{- if eq $k "agentmanager" }}
@@ -156,7 +177,13 @@ spec:
             - name: config-plugin
               mountPath: /config/plugins.properties
               subPath: plugins.properties
+{{- end }}
+
+{{- if eq $k "console" }}
+            - name: engines
+              mountPath: /config/engines
 {{- end }}   
+
 {{- if eq $k "audit"  }}
             - name: emptydir
               mountPath: /opt/app/audit
@@ -170,6 +197,7 @@ spec:
               memory: 32Mi
           image:  {{ include "uno.repouno" $root }}/{{ $baseImageName }}{{ $k }}:{{ $root.Values.config.registry.tag }}
           imagePullPolicy: {{ $root.Values.config.registry.pullPolicy }}
+{{ include "uno.containerSecurityContext"  $root | indent 10 }}
           args: [/bin/sh, -c, 'touch /opt/app/audit/audit.json ;tail -n+1 -F /opt/app/audit/audit.json']
           volumeMounts:
           - name: emptydir
@@ -184,6 +212,7 @@ spec:
               memory: 32Mi
           image:  {{ include "uno.repouno" $root }}/{{ $baseImageName }}{{ $k }}:{{ $root.Values.config.registry.tag }}
           imagePullPolicy: {{ $root.Values.config.registry.pullPolicy }}
+{{ include "uno.containerSecurityContext"  $root | indent 10 }}
           args: [/bin/sh, -c, 'touch /opt/app/audit/errors.json ;tail -n+1 -F /opt/app/audit/errors.json']
           volumeMounts:
           - name: emptydir
@@ -198,6 +227,12 @@ spec:
             items:
             - key: plugins.properties
               path: plugins.properties
+{{- end}}
+{{- if eq $k "console" }}
+        - name: engines
+          configMap:
+            name: {{ $fullName }}-engines-config
+            optional: false
 {{- end}}
 
 ---

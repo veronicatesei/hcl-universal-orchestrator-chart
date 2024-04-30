@@ -11,7 +11,7 @@ data:
 
             <featureManager>
                 <feature>jwtSso-1.0</feature>
-                <feature>mpJwt-1.1</feature>
+                <feature>mpJwt-2.1</feature>
             </featureManager>
 
             <httpSession securityIntegrationEnabled="false" invalidationTimeout="12h" />

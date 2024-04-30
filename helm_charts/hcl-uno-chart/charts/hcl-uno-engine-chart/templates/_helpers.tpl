@@ -34,8 +34,14 @@
 {{- end -}}
 
 {{- define "uno.microservices.list" -}}
-{{- $myList := list "agentmanager" "executor" "gateway" "iaa" "orchestrator" "scheduler" "toolbox" "timer" "storage" "audit" -}}
+{{- $tmpList := list "agentmanager" "executor" "gateway" "eventmanager" "iaa" "orchestrator" "scheduler" "toolbox" "timer" "storage" "audit" -}}
+{{- if .Values.global.enableUI -}}
+{{- $myList := prepend $tmpList "console" -}}
 {{ toJson $myList }}
+{{- else }}
+{{- $myList := $tmpList -}}
+{{ toJson $myList }}
+{{- end -}}
 {{- end -}}
 
 {{- define "uno.console.public.host" -}}
@@ -51,6 +57,10 @@
 {{- define "uno.console.public.port" -}}
 {{ $fullName := include "fullname" . }}
 {{- printf "%s"  "9443" -}}
+{{- end -}}
+
+{{- define "uno.console.sofy.port" -}}
+{{- printf "%s"  "443" -}}
 {{- end -}}
 
 {{- define "uno.serviceAccount" -}}
@@ -84,6 +94,20 @@ livenessProbe:
 
 {{- end -}}
 
+
+{{- define "uno.containerSecurityContext" -}}
+securityContext:
+  runAsNonRoot: true
+  seccompProfile: 
+    type: RuntimeDefault
+  privileged: false
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false     
+  capabilities:
+    drop:
+    - ALL 
+{{- end -}}
+
 {{/*
 Returns the securityContext
 */}}
@@ -93,9 +117,12 @@ hostPID: false
 hostIPC: false
 securityContext:
         runAsNonRoot: true
+        {{- if not (.Capabilities.APIVersions.Has "security.openshift.io/v1") }} 
         runAsUser: 1001
         runAsGroup: 1001
         fsGroup: 1001
+        {{- end }}
+        supplementalGroups: [{{ .Values.supplementalGroupId | default 999 }}]
 {{- end -}}
 
 
@@ -154,7 +181,7 @@ prometheus.io/path: "/q/metrics"
 
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 1.1.0.0
+uno.microservice.version: 1.1.2.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -170,8 +197,19 @@ release: {{ .Release.Name | quote }}
 {{ $fullName := include "fullname" . }}
 {{ $consolePublicHost :=  include "uno.console.public.host" . }}
 {{ $consolePublicPort :=  include "uno.console.public.port" . }}
+{{ $consoleSofyPort :=  include "uno.console.sofy.port" . }}
 
-{{- if ((.Values).global).enableConsole }}
+{{- if ((.Values).global).sofySolutionContext }}
+- name: HOSTNAME_DOMAIN
+  valueFrom:
+    configMapKeyRef:
+      name: {{ $fullName }}-domain
+      key: HOST
+- name: UNO_AUTHENTICATION_CONSOLE_HOSTNAME
+  value: "waconsole.$(HOSTNAME_DOMAIN)"
+- name: UNO_AUTHENTICATION_CONSOLE_PORT
+  value: {{ $consoleSofyPort | quote }}
+{{- else if ((.Values).global).enableConsole }}
 - name: UNO_AUTHENTICATION_CONSOLE_HOSTNAME
   valueFrom:
     configMapKeyRef:
@@ -237,8 +275,6 @@ release: {{ .Release.Name | quote }}
   value: {{ .Values.authentication.oidc.splitTokensInCookie | quote }}
 - name: QUARKUS_OIDC_TLS_VERIFICATION
   value: {{ .Values.authentication.oidc.tlsVerification | quote }}
-- name: QUARKUS_OIDC_APPLICATION_TYPE
-  value: {{ .Values.authentication.oidc.applicationType | quote }}
 {{- else }}
 - name: QUARKUS_OIDC_TENANT_ENABLED
   value: "false"
@@ -298,6 +334,15 @@ release: {{ .Release.Name | quote }}
 {{- end }}
 {{- end -}}
 
+{{- define "uno.extra.packages.url" -}}
+  {{- $size := len .Values.global.extraImages -}}
+  {{ $fullName := include "fullname" . }}
+  {{- range $index, $_ := .Values.global.extraImages -}}
+    {{- printf "http://%s-extra-%d:8080" $fullName $index -}}
+    {{ if ne $index (sub $size 1) }},{{- end -}}
+  {{- end }}
+{{- end -}}
+
 {{- define "common.env.variable" -}}
 {{ $flexUrl := include "common.flexUrl" . }}
 {{ $flexId := include "common.flexId" . }}
@@ -316,18 +361,24 @@ release: {{ .Release.Name | quote }}
   value: {{ .Values.config.planning.notActiveWindowMax | quote }} 
 - name: UNO_PLANNING_NOT_ACTIVE_WINDOW_MIN
   value: {{ .Values.config.planning.notActiveWindowMin | quote }} 
+- name: UNO_PLANNING_CLEANUP_RETENTION_DURATION
+  value: {{ .Values.config.planning.daysRetentionPlan | quote }} 
 - name: UNO_PLANNING_ACTIVE_WINDOW_EXTENSION
   value: {{ .Values.config.planning.activeWindowExtension | quote }} 
 - name: UNO_PLANNING_ACTIVE_WINDOW_LICENSE
   value: {{ .Values.config.planning.activeWindow | quote }} 
 - name: UNO_EXTERNAL_NGINX_URL
-  value: http://{{ $fullName }}-extra:8080 
+  value: {{ include "uno.extra.packages.url" . }}
 - name: QUARKUS_MONGODB_CONNECTION_STRING
   value: {{ (tpl ( .Values.database.url) .) | quote}}
-- name: QUARKUS_MONGODB_CREDENTIAL.USERNAME
+- name: QUARKUS_MONGODB_CREDENTIAL_USERNAME
   value: {{ .Values.database.username | quote}}
-- name: QUARKUS_MONGODB_CREDENTIAL.PASSWORD
-  value: {{ .Values.database.password | quote}}
+- name: QUARKUS_MONGODB_CREDENTIAL_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: DB_PASSWORD
+      optional: false
 - name: QUARKUS_MONGODB_TLS
   value: {{ .Values.database.tls | quote}}
 - name: QUARKUS_MONGODB_TLS_INSECURE
@@ -337,18 +388,19 @@ release: {{ .Release.Name | quote }}
 - name: KAFKA_BOOTSTRAP_SERVERS
   # if additional bootstrap servers are required, add a comma separated list
   value: {{ (tpl ( .Values.kafka.url) .) | quote}}
+{{- if .Values.kafka.kerberosServiceName }}
+- name: KAFKA_SASL_KERBEROS_SERVICE_NAME
+  value: {{ .Values.kafka.kerberosServiceName | quote}}
+{{- end }}
 {{- if .Values.kafka.username }}
 - name: KAFKA_USER
   value: {{ .Values.kafka.username | quote}}
 - name: KAFKA_PASSWORD
-  value: {{ .Values.kafka.password | quote}}
-{{- else }}
-- name: KAFKA_SASL_JAAS_CONFIG
-  value: ""
-- name: KAFKA_SASL_MECHANISM
-  value: ""
-- name: KAFKA_SECURITY_PROTOCOL
-  value: "PLAINTEXT"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: KAFKA_PASSWORD
+      optional: false
 {{- end }}
 {{- if .Values.kafka.tls }}
 {{- if .Values.kafka.tlsInsecure }}
@@ -358,6 +410,14 @@ release: {{ .Release.Name | quote }}
 - name: KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM
   value: "https"
 {{- end }}
+- name: KAFKA_SASL_MECHANISM
+  value: {{ .Values.kafka.saslMechanism | default "PLAIN"| quote}}
+- name: KAFKA_SECURITY_PROTOCOL
+  value: {{ .Values.kafka.securityProtocol |default "SASL_SSL" | quote}}
+{{- if .Values.kafka.jaasConfig }}
+- name: KAFKA_SASL_JAAS_CONFIG
+  value: {{ .Values.kafka.jaasConfig | quote}}
+{{- end }}
 {{- else }}
 - name: MP_MESSAGING_CONNECTOR_SMALLRYE_KAFKA_SSL_TRUSTSTORE_LOCATION
   value: ""
@@ -365,6 +425,12 @@ release: {{ .Release.Name | quote }}
   value: ""
 - name: MP_MESSAGING_CONNECTOR_SMALLRYE_KAFKA_SSL_TRUSTSTORE_TYPE
   value: ""
+- name: KAFKA_SASL_JAAS_CONFIG
+  value: {{ .Values.kafka.jaasConfig | quote }}
+- name: KAFKA_SASL_MECHANISM
+  value: {{ .Values.kafka.saslMechanism | quote}}
+- name: KAFKA_SECURITY_PROTOCOL
+  value: {{ .Values.kafka.securityProtocol |default "PLAINTEXT" | quote}}
 {{- end }}
 - name: QUARKUS_OPENTELEMETRY_TRACER_EXPORTER_OTLP_ENDPOINT
   value: {{ .Values.config.tracing.otelEndpoint |quote }}
@@ -392,9 +458,11 @@ release: {{ .Release.Name | quote }}
 - name: QUARKUS_LOG_CATEGORY__COM_HCL__LEVEL
   value: {{ .Values.deployment.global.traceLevel | quote }}
 - name: QUARKUS_LOG_LEVEL
-  value: "ALL"
+  value: {{ .Values.deployment.global.quarkusTraceLevel |default "INFO" | quote }}
 - name: QUARKUS_SHUTDOWN_TIMEOUT
   value: "PT20S"
+- name: UNO_SECURITY_ENABLE_EXECUTOR_SANDBOX
+  value: {{ .Values.deployment.executor.enableExecutorSandbox | quote}}
 - name: UNO_IAA_CLIENT_URL
   value: https://{{ $fullName }}-iaa:8443
 - name: UNO_CALENDAR_CLIENT_URL
@@ -413,6 +481,16 @@ release: {{ .Release.Name | quote }}
   value: https://{{ $fullName }}-audit:8443
 - name: UNO_TIMER_CLIENT_URL
   value: https://{{ $fullName }}-timer:8443
+- name: UNO_EVENTMANAGER_CLIENT_URL
+  value: https://{{ $fullName }}-eventmanager:8443
+- name: UNO_GATEWAY_PUBLIC_HOST
+  value: {{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}
+- name: UNO_GATEWAY_PUBLIC_PORT
+  value: "443"
+- name: UNO_GATEWAY_PRIVATE_HOST
+  value: {{ $fullName }}-gateway
+- name: UNO_GATEWAY_PRIVATE_PORT
+  value: "8443"
 {{- end -}}
 
 {{- define "common.custom.env.variable" -}}
@@ -499,11 +577,11 @@ volumeMounts:
 {{- end }}
 {{- range .Values.config.certificates.additionalCASecrets }}
   - name: {{.}}-cert-volume
-    mountPath: /security/certs/additionalCAs
+    mountPath: /security/certs/additionalCAs/{{.}}
 {{- end }}
 {{- range .Values.config.certificates.additionalCASecrets }}
   - name: {{.}}-cert-ext-volume
-    mountPath: /security/ext_agt_depot/additionalCAs
+    mountPath: /security/ext_agt_depot/additionalCAs/{{.}}
 {{- end }}    
 {{- end -}}
 
@@ -544,17 +622,37 @@ gcr.io/blackjack-209019/services
 {{- end -}}
 {{- end -}}
 
-
-{{- define "uno.extraImageRepository" -}}
-{{- if eq .Values.global.hclImageRegistry "hclcr.io/sofy" -}}
-hclcr.io/wa
-{{- else if eq .Values.global.hclImageRegistry "hclcr.io" -}}
-hclcr.io/wa
-{{- else if eq .Values.global.hclImageRegistry "gcr.io/blackjack-209019" -}}
-gcr.io/blackjack-209019/services
-{{- else if  .Values.global.hclImageRegistry  -}}
-{{ print .Values.global.hclImageRegistry }}
-{{- else -}}
-{{ print .Values.global.extraImageRepository }}
+{{- define "uno.extraImages" -}}
+  {{- $root := . -}}
+  {{- $imagesList := list -}}
+  {{- range $_, $images := $root.Values.global.extraImages -}}
+    {{- $imagesRepository := "" -}}
+    {{- if eq $root.Values.global.hclImageRegistry "hclcr.io/sofy" -}}
+    {{ $imagesRepository = "hclcr.io/wa" }}
+    {{- else if eq $root.Values.global.hclImageRegistry "hclcr.io" -}}
+    {{ $imagesRepository = "hclcr.io/wa" }}
+    {{- else if eq $root.Values.global.hclImageRegistry "gcr.io/blackjack-209019" -}}
+        {{- if contains "/uno" $images.registry -}}
+            {{ $imagesRepository = "gcr.io/blackjack-209019/services/uno"}}
+        {{- else if contains "/wa" $images.registry -}}
+            {{ $imagesRepository = "gcr.io/blackjack-209019/services/workload-automation"}}
+        {{- else -}}
+            {{ $imagesRepository = "gcr.io/blackjack-209019/services"}}
+        {{- end -}}
+    {{- else if $root.Values.global.hclImageRegistry  -}}
+    {{ $imagesRepository = print $root.Values.global.hclImageRegistry }}
+    {{- else -}}
+    {{ $imagesRepository = print $images.registry }}
+    {{- end -}}
+    {{- $completeImage := printf "%s/%s" $imagesRepository $images.name  -}}
+    {{- $imagesList = append $imagesList $completeImage -}}
+  {{- end -}}
+  {{- toJson $imagesList -}}
 {{- end -}}
+
+{{- define "uno.eventmanager.plugins" -}}
+{{- if .Values.eventmanager.plugins.gcp.baseServicePath }}
+- name: UNO_EVENTMANAGER_GCP_BASESERVICEACCOUNTPATH
+  value: {{ .Values.eventmanager.plugins.gcp.baseServicePath | quote}}
+{{- end }}
 {{- end -}}

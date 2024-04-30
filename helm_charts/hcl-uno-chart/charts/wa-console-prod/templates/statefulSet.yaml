@@ -1,3 +1,9 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
 {{- include "wa.init" (list . "waconsole") }}
 {{ $dataPvcName := .Values.persistence.dataPVC.name }}
 {{ $statefulSetName := include "wa.fullName" . }}
@@ -189,6 +195,16 @@ spec:
           value:  {{ .Values.console.db.invalidHostnameAllowed | quote }}
         - name: DB_AUTHDB
           value:  {{ .Values.console.db.authDb | quote }}
+        {{- end}}
+        {{- if eq (.Values.console.db.type | upper) "DOCUMENTDB" }}
+        - name: DB_INVALID_HOSTNAME_ALLOWED
+          value:  {{ .Values.console.db.invalidHostnameAllowed | quote }}
+        - name: DB_AUTHDB
+          value:  {{ .Values.console.db.authDb | quote }}
+        - name: DB_RETRY_WRITES
+          value:  {{ .Values.console.db.retryWrites | quote }}
+        - name: DB_READ_PREFERENCE
+          value:  {{ .Values.console.db.readPreference | quote }}
         {{- end}}
         {{- if eq (.Values.console.db.type | upper) "ORACLE" }} 
         - name: DB_SKIP_CHECK

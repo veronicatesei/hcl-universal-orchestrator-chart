@@ -1,6 +1,12 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
 name: wa-console-prod
-version: 1.6.6
-appVersion: 10.2.0.00
+version: 10.2.2
+appVersion: 10.2.2.00
 description: Helm chart for configuring HCL Workload Automation.
 keywords:
 - Commercial

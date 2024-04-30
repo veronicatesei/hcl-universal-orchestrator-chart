@@ -1,4 +1,10 @@
 {{/*
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
 */}}
 {{/*
 Initialize parameters by merging them with the root context
