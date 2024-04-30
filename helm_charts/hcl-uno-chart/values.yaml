@@ -313,6 +313,10 @@ waconsole:
       sslConnection: false
       # Only for mongodb disable TLS hostname verification 
       invalidHostnameAllowed:
+      #Only for documentdb specify the retryWrites option. Supported values are true and false.
+      retryWrites: false
+      #Only for documentdb specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, nearest.
+      readPreference: "secondaryPreferred"
       # Only for mongodb optially specify the admin database  
       authDb:
       # tsName is the name of the DATA table space.
