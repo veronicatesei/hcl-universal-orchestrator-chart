@@ -263,7 +263,7 @@ To upgrade HCL Universal Orchestrator, perform the following steps:
    <uno_release_name> is the deployment name of the instance. 
 **TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
 
-**Note:** When upgrading to a later version of  HCL Universal Orchestrator, you must manually delete the older version of the executable job plug-in.
+**Note:** When upgrading HCL Universal Orchestrator from V1.1.0 to V1.1.2 or later, or from V1.1.1 to V1.1.2 or later, you must manually delete the older version of the executable job plug-in.
 	   
 ## Uninstalling the Chart
 
@@ -425,6 +425,21 @@ If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCus
       $ kubectl create secret generic release_name-secret --from-file=TWSServerTrustFile.jks --from-file=TWSServerKeyFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=TWSServerKeyFile.jks.pwd --namespace=<uno_namespace>
         
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
+
+**Managing DocumentDB during AWS deployment**
+
+When deploying Universal orchestrator on AWS, you can leverage DocumentDB, a fully managed NoSQL database service provided by AWS. You must configure few parameters in the values.yaml file to ensure compatibility with DocumentDB. The parameters that must be configured are as follows:
+In db section,
+•	type: Specify the preferred remote database server, DocumentDB in this case.
+•	hostname: Specify the hostname or the IP address of the DocumentDB database server.
+•	name: Specify the name of the DocumentDB database server.
+•	port: Specify the port of the DocumentDB database server.
+•	sslConnection: Set the value to true.
+•	retryWrites: Only for documentDB. Supported values are true or false.
+•	readPreference: Only for documentDB. Specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, 		nearest.
+You must also set the following parameters under the certificates section to connect your machine to the DocumentDB. 
+•	UseCustomizedCert: Set the value to true and add the certificate as a secret.
+•	AdditionalCASecrets : Specify the name of the certificate that you set as a secret.
 
 ## Metrics monitoring 
 

@@ -286,6 +286,7 @@ uno:
       #minTargetReplicas: 1
     executor:
       #minTargetReplicas: 1
+      #The supported values are true or false. If set to false, you can write data to the pod file system in Kubernetes. If set to true, writing data to the pod file system is prevented.
       enableExecutorSandbox: "false"
     orchestrator:
       #minTargetReplicas: 1
@@ -346,10 +347,10 @@ waconsole:
       # sslConnection specifies whether the connection to the database is in SSL mode.
       sslConnection: false
       # Only for mongodb disable TLS hostname verification 
-      invalidHostnameAllowed: false
-      # Only for documentdb specify the retryWrites option. Supported values are true and false.
-      retryWrites: "false"
-      # Only for documentdb specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, nearest.
+      invalidHostnameAllowed:
+      #Only for documentdb specify the retryWrites option. Supported values are true and false.
+      retryWrites: false
+      #Only for documentdb specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, nearest.
       readPreference: "secondaryPreferred"
       # Only for mongodb optially specify the admin database  
       authDb:
