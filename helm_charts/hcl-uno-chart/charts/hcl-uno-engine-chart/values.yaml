@@ -25,7 +25,7 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/wa
   # pluginImageName is the name of the image with tags for Automation Hub integrations.
-  pluginImageName: hcl-workload-automation-plugins:10.2.2.00
+  pluginImageName: hcl-workload-automation-plugins:10.2.2.00.20240424
   # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImages:
     - registry: hclcr.io/uno

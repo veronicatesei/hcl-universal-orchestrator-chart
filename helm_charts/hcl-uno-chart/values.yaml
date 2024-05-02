@@ -31,13 +31,13 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/wa
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-workload-automation-plugins:10.2.2.00
+  pluginImageName: hcl-workload-automation-plugins:10.2.2.00.20240424
   # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImages:
     - registry: hclcr.io/uno
       name: hcl-uno-external-pod:1.1.2.0
     - registry: hclcr.io/wa
-      name: hcl-workload-automation-packages:10.2.2.00
+      name: hcl-workload-automation-packages:10.2.2.00.20240424
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -446,7 +446,7 @@ waconsole:
     # repository is the Dynamic Workload Console image repository. Mandatory parameter.
     repository: hclcr.io/wa/hcl-workload-automation-console
     # tag is the Dynamic Workload Console image tag. Mandatory parameter.
-    tag: 10.2.2.00
+    tag: 10.2.2.00.20240424
   persistence:
     dataPVC:
       # name is the prefix for the Persistent Volumes Claim name.
