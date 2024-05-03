@@ -65,7 +65,7 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Kubernetes cluster v 1.25 or later
  - Helm v 3.10 or later
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
- - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) 
+ - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB for AWS deployment.
 
 **Strongly recommended**
 
@@ -429,17 +429,18 @@ If you define custom certificates, you are in charge of keeping them up to date,
 **Managing DocumentDB during AWS deployment**
 
 When deploying Universal orchestrator on AWS, you can leverage DocumentDB, a fully managed NoSQL database service provided by AWS. You must configure few parameters in the values.yaml file to ensure compatibility with DocumentDB. The parameters that must be configured are as follows:
-In db section,
-•	type: Specify the preferred remote database server, DocumentDB in this case.
-•	hostname: Specify the hostname or the IP address of the DocumentDB database server.
-•	name: Specify the name of the DocumentDB database server.
-•	port: Specify the port of the DocumentDB database server.
-•	sslConnection: Set the value to true.
-•	retryWrites: Only for documentDB. Supported values are true or false.
-•	readPreference: Only for documentDB. Specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, 		nearest.
-You must also set the following parameters under the certificates section to connect your machine to the DocumentDB. 
-•	UseCustomizedCert: Set the value to true and add the certificate as a secret.
-•	AdditionalCASecrets : Specify the name of the certificate that you set as a secret.
+In **db** section,
+* type: Specify the preferred remote database server, DocumentDB in this case.
+* hostname: Specify the hostname or the IP address of the DocumentDB database server.
+* name: Specify the name of the DocumentDB database server.
+* port: Specify the port of the DocumentDB database server.
+* sslConnection: Set the value to true.
+* retryWrites: Only for documentDB. Supported values are true or false.
+* readPreference: Only for documentDB. Specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, nearest.
+
+You must also set the following parameters under the **certificates** section to connect your machine to the DocumentDB. 
+* UseCustomizedCert: Set the value to true and add the certificate as a secret.
+* AdditionalCASecrets : Specify the name of the certificate that you set as a secret.
 
 ## Metrics monitoring 
 
