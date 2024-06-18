@@ -34,10 +34,12 @@ HCL Universal Orchestrator can be deployed across a single cluster, but you can 
 - ![Microsoft Azure](images/tagmsa.png "Microsoft Azure") Azure Kubernetes Service (AKS) on amd64: 64-bit Intel/AMD x86
 - ![Google GKE](images/taggke.png "Google GKE") Google Kubernetes Engine (GKE) on amd64: 64-bit Intel/AMD x86
 - ![OpenShift](images/tagOpenShift.png "OpenShift") OpenShift (OCP)
-- Any Kubernetes platform from V1.20 and above
+- Any Kubernetes platform from V1.29 and above
+
+HCL Universal Orchestrator supports all the platforms supported by the runtime provider of your choice.
 
 ### Openshift support
-You can deploy HCL Universal Orchestrator on Openshift 4.2 or later version by following the instruction in this documentation and using helm charts. 
+You can deploy HCL Universal Orchestrator on Openshift by following the instruction in this documentation and using helm charts. 
 Ensure you modify the value of the `waconsole.console.exposeServiceType` parameter from `LoadBalancer` to `Routes`.
 	
 ## Accessing the container images
@@ -61,9 +63,9 @@ You can access the HCL Universal Orchestrator chart and container images from th
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
 
 **Mandatory**
- - Kubetctl v 1.25.8 or later
- - Kubernetes cluster v 1.25 or later
- - Helm v 3.10 or later
+ - Kubectl v 1.29.4 or later
+ - Kubernetes cluster v 1.29 or later
+ - Helm v 3.12 or later
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
  - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) 
 
