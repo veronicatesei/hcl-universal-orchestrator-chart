@@ -50,7 +50,7 @@ global:
       value: prod
   customPodAnnotations:
     env.name: ""
-  # In cutomEnv properties you can add the variables as key-value pairs to customize the environment. These optional key-value pairs helps you to tailor the environment for your needs. The variables that you can add in customEnv are specified in the documentation for HCL universal orchestrator. 
+  # In cutomEnv properties you can add the variables as key-value pairs to customize the environment. These optional key-value pairs help in tailoring the environment to your needs. The variables that you can add in customEnv are specified in the documentation for HCL universal orchestrator. 
   # For example, if you want to set the active-window.extension value as 10 minutes, add the variable as follows under customEnv:
   # - name: UNO_PLANNING_ACTIVE_WINDOW_EXTENSION
   #   value: PT1M
