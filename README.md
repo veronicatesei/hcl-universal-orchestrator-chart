@@ -57,6 +57,8 @@ You can access the HCL Universal Orchestrator chart and container images from th
  - hcl-uno-executor
  - hcl-uno-eventmanager 
  - hcl-uno-orchestrator
+ - hcl-uno-console
+ - hcl-uno-notification
 
 
 ## Prerequisites
@@ -67,7 +69,14 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Kubernetes cluster v 1.29 or later
  - Helm v 3.12 or later
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
- - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB for AWS deployment.
+ - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB for AWS deployment
+ - Enablement of an OIDC provider. You can enable an OIDC user registry by configuring the `values.yaml` deployment file as follows:
+
+        uno.authentication.oidc.enabled=true
+
+   Enter the required values into the `authentication` section of the `values.yaml` file, according to your OIDC provider. If the OIDC you are using has custom certificates, to connect your machine to your OIDC provider you must use the certificate as secret in the following parameter of under `certificates` section:
+
+        uno.config.certificates.additionalCASecrets : Specify the secret.
 
 **Strongly recommended**
 
@@ -156,7 +165,7 @@ To deploy HCL Universal Orchestrator, perform the following steps:
    
 2. Pull the Helm chart:
 
-        helm pull oci://hclcr.io/uno/hcl-uno-chart
+        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart
 	
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
