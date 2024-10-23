@@ -165,7 +165,7 @@ To deploy HCL Universal Orchestrator, perform the following steps:
    
 2. Pull the Helm chart:
 
-        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart
+        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.0-beta1
 	
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
