@@ -428,22 +428,6 @@ If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCus
         
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
-**Managing DocumentDB during AWS deployment**
-
-When deploying Universal orchestrator on AWS, you can leverage DocumentDB, a fully managed NoSQL database service provided by AWS. You must configure few parameters in the values.yaml file to ensure compatibility with DocumentDB. The parameters that must be configured are as follows:
-In **db** section,
-* type: Specify the preferred remote database server, DocumentDB in this case.
-* hostname: Specify the hostname or the IP address of the DocumentDB database server.
-* name: Specify the name of the DocumentDB database server.
-* port: Specify the port of the DocumentDB database server.
-* sslConnection: Set the value to true.
-* retryWrites: Only for documentDB. Supported values are true or false.
-* readPreference: Only for documentDB. Specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, nearest.
-
-You must also set the following parameters under the **certificates** section to connect your machine to the DocumentDB. 
-* UseCustomizedCert: Set the value to true and add the certificate as a secret.
-* AdditionalCASecrets : Specify the name of the certificate that you set as a secret.
-
 ## Metrics monitoring 
 
 HCL Universal Orchestrator uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application server (Open Liberty), your workload, your workstations, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. HCL Universal Orchestrator cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected.
