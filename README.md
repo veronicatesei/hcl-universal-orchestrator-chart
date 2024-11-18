@@ -18,12 +18,9 @@ For more information about HCL Universal Orchestrator, see the product documenta
 
 ## Details
 
-By default, all microservices and the Dynamic Workload Console (console) are installed. 
+All microservices and the UnO Console are installed. The Dynamic Workload Console is available by enabling a specific parameter in the values.yaml file.
 
-To achieve high availability in an HCL Universal Orchestrator environment, the minimum base configuration is composed of 2 Dynamic Workload Consoles and 2 replicas of all microservices. For more details about HCL Universal Orchestrator and high availability, see: 
-
-
-[An active-active high availability scenario](https://help.hcltechsw.com/UnO/v1.1/Mobile_guides/highavailability.html).
+To achieve high availability in an HCL Universal Orchestrator environment, the minimum base configuration is composed of 2 replicas of all microservices.
 
 HCL Universal Orchestrator can be deployed across a single cluster, but you can add multiple instances of the product microservices by using a different namespace in the cluster. The product microservices can run in multiple failure zones in a single cluster.
 
@@ -46,6 +43,8 @@ Ensure you modify the value of the `waconsole.console.exposeServiceType` paramet
 
 You can access the HCL Universal Orchestrator chart and container images from the Entitled Registry. See [Create the secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
 
+Core:
+
  - hcl-uno-agentmanager
  - hcl-uno-gateway
  - hcl-uno-iaa
@@ -57,7 +56,17 @@ You can access the HCL Universal Orchestrator chart and container images from th
  - hcl-uno-executor
  - hcl-uno-eventmanager 
  - hcl-uno-orchestrator
+ - hcl-uno-console
+ - hcl-uno-notification
+ - hcl-uno-external-pod
 
+UnO AI Pilot:
+
+ - hcl-uno-pilot-notification
+ - hcl-aipilot-core
+ - hcl-aipilot-actions
+ - hcl-aipilot-nlg
+ - pgvector
 
 ## Prerequisites
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
@@ -68,6 +77,7 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Helm v 3.12 or later
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
  - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB for AWS deployment.
+ - Enablement of an OIDC provider.
 
 **Strongly recommended**
 
@@ -103,9 +113,14 @@ The following are prerequisites specific to each supported cloud provider:
  
 | Component | Container resource limit | Container resource request |
 |--|--|--|
-|**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.3, Memory: 1 GB|
-|**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.3, Memory: 0.5 GB  |
-|**Console**  | CPU: 4, Memory: 16 GB  |CPU: 1, Memory: 4 GB, Storage: 5 GB  |
+|**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 1 GB|
+|**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 0.5 GB  |
+|**Dynamic Workload Console**  | CPU: 4, Memory: 16 GB  |CPU: 1, Memory: 4 GB, Storage: 5 GB  |
+|**AIPilot-core** | CPU : 1, Memory: 2.5GB | CPU 0.5, Memory: 2GB
+|**AIPilot-action**| CPU: 0.3, Memory: 0.3GB | CPU: 0.1, Memory: 0.2GB
+|**AIPilot-nlg**| CPU: 0.3, Memory: 0.5GB | CPU: 0.1, Memory: 0.3GB
+|**AIPilot-rag**| CPU: 0.8, Memory: 1Gi | CPU: 0.2 , Memory: 0.2Gi
+|**PgVector**| CPU: 0.15 Memory: 0.192GB Ephemeral-storage : 2Gi |  CPU: 0.1 Memory: 0.1Gi Ephemeral-storage: 50Mi
 
 No disk space is required for the microservices, however, at least 100 GB are recommended for Kafka and 100 GB for MongoDB. Requirements vary depending on your workload.
 
@@ -160,7 +175,45 @@ To deploy HCL Universal Orchestrator, perform the following steps:
 	
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
-3. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. The `values.yaml`file contains a detailed explanation for each parameter. 
+3. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. The `values.yaml`file contains a detailed explanation for each parameter.
+
+   **Accepting the license agreement**
+
+   The licence parameter determines whether the licence agreement is accepter or not. Supported values are 'accept' and 'not accepted'. To accept the license agreement, set the value as:
+
+               global.license=accept
+
+   **Configuring the database section in the values.yaml file**
+
+   The values specified in this section must reflect the values used in the configuration used to deploy the database. Specify the values for the following parameters in the values.yaml file:
+
+   '''url: URL of the database.
+
+   url: mongodb://hcl-uno-db-mongodb.db.svc.cluster.local:27017
+
+   type: database type and supported value is mongodb.
+
+   databaseName: database name and supported value is uno.
+
+   username: name of the database user.
+
+   password: password of the database user.
+
+   tls: specifies whether TLS is enabled or not and supported values are true or false.
+
+   tlsInsecure: tlsInsecure specifies whether certificate validation must be skipped or not and supported values are true or false.'''
+
+   **Configuring the kafka section in the values.yaml file**
+
+   The licence parameter determines whether the licence agreement is accepter or not. Supported values are 'accept' and 'not accepted'.
+
+   **Configuring the authentication.oidc section in the values.yaml file**
+
+   The licence parameter determines whether the licence agreement is accepter or not. Supported values are 'accept' and 'not accepted'
+
+3a\. Enablement of the UnoAIPilot. You can enable UnoAIPilot by configuring the values.yaml deployment file as follows: 
+		
+		global.enableUnoAIPilot=true 
 
 4. Deploy the instance by running the following command: 
 
@@ -428,6 +481,28 @@ If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCus
         
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
+When using custom certificates make sure to update the following fields:
+		
+		uno.hclaipilot.certificates:
+			useCustomizedCert: true
+			caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			AND/OR
+			certSecretName: <the name of the custom certificate you want to use>
+		
+		-----------
+
+		uno.hclaipilot.rag.certificates:
+			useCustomizedCert: true
+			caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			AND/OR
+			certSecretName: <the name of the custom certificate you want to use>
+		
+		-----------
+		uno.hclaipilot.pgvector.tls:
+			caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			AND/OR
+			certificatesSecret: <the name of the custom certificate you want to use>
+
 ## Metrics monitoring 
 
 HCL Universal Orchestrator uses Grafana to display performance data related to the product. This data includes metrics related to the server and console application server (Open Liberty), your workload, your workstations, message queues, the database connection status, and more. Grafana is an open source tool for visualizing application metrics. Metrics provide insight into the state, health, and performance of your deployments and infrastructure. HCL Universal Orchestrator cloud metric monitoring uses an opensource Cloud Native Computing Foundation (CNCF) project called Prometheus. It is particularly useful for collecting time series data that can be easily queried. Prometheus integrates with Grafana to visualize the metrics collected.
@@ -493,6 +568,8 @@ For more information about using Grafana dashboards see [Dashboards overview](ht
 *  Limited to amd64 platforms.
 *  Anonymous connections are not permitted.
 
+## AI Pilot Knowledge base
+To ensure a user can import, export, or delete the custom knowledge base, they must have the AI_PILOT_ADMINISTRATOR role. By default, this role is assigned to all administrator accounts.
 
 ## Documentation
 
