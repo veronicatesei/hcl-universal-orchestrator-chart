@@ -177,48 +177,75 @@ To deploy HCL Universal Orchestrator, perform the following steps:
 	
 3. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. The `values.yaml`file contains a detailed explanation for each parameter.
 
-   **Accepting the license agreement**
+**Accepting the license agreement**
 
-   The licence parameter determines whether the licence agreement is accepter or not. Supported values are 'accept' and 'not accepted'. To accept the license agreement, set the value as:
+The licence parameter determines whether the licence agreement is accepter or not. Supported values are 'accept' and 'not accepted'. To accept the license agreement, set the value as:
 
-               global.license=accept
+    global.license: accept
 
-   **Configuring the database section in the values.yaml file**
 
-   The values specified in this section must reflect the values used in the configuration used to deploy the database. Specify the values for the following parameters in the values.yaml file:
+**Configuring the database section in the values.yaml file**
 
-   '''url: URL of the database.
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the database deployment configuration.
 
-   url: mongodb://hcl-uno-db-mongodb.db.svc.cluster.local:27017
+    uno.database.url: mongodb://hcl-uno-db-mongodb.db.svc.cluster.local:27017
+    uno.database.type: mongodb
+    uno.database.databaseName: uno
+    uno.database.username: mongouser
+    uno.database.password: mongopassword
+    uno.database.tls: false
+    uno.database.tlsInsecure: false
+   
 
-   type: database type and supported value is mongodb.
+**Configuring the kafka section in the values.yaml file**
 
-   databaseName: database name and supported value is uno.
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the kafka deployment configuration.
 
-   username: name of the database user.
+    uno.kafka.url: hcl-uno-kafka-0.kafka-headless.kafka.svc.cluster.local:9092
+    uno.kafka.username: kafkauser
+    uno.kafka.password: kafkapassword
+    uno.kafka.tls: false
+    uno.kafka.saslMechanism: PLAIN
+    uno.kafka.jaasConfig: org.apache.kafka.common.security.plain.PlainLoginModule required username="my-username" password="my-password";
+    uno.kafka.securityProtocol: SASL_PLAINTEXT
+    uno.kafka.tlsInsecure: false
+    uno.kafka.kerberosServiceName: kerberosservicenameexample
+    uno.kafka.topicReplicas: 1
 
-   password: password of the database user.
+**Configuring the authentication.oidc section in the values.yaml file**
 
-   tls: specifies whether TLS is enabled or not and supported values are true or false.
+You can enable an OIDC user registry by configuring the values.yaml deployment file as follows:
 
-   tlsInsecure: tlsInsecure specifies whether certificate validation must be skipped or not and supported values are true or false.'''
+    uno.authentication.oidc.enabled: true
 
-   **Configuring the kafka section in the values.yaml file**
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the OIDC deployment configuration.
 
-   The licence parameter determines whether the licence agreement is accepter or not. Supported values are 'accept' and 'not accepted'.
+    uno.authentication.oidc.server: https://unokeycloak.k8s.uat.uno/realms/uno
+    uno.authentication.oidc.clientId: uno-service
+    uno.authentication.oidc.credentialSecret: put_oidc_secret_here
+    uno.authentication.oidc.tlsVerification: required
+    uno.authentication.oidc.
+ 
+To connect your HCL Universal Orchestrator deployment to your OIDC provider when using custom certificates, you must assign the custom certificate value as a secret to the following parameter:
 
-   **Configuring the authentication.oidc section in the values.yaml file**
+ uno.config.certificates.additionalCASecrets: Specify the secret.
 
-   The licence parameter determines whether the licence agreement is accepter or not. Supported values are 'accept' and 'not accepted'
+To make sure HCL Universal Orchestrator tusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
+
 
 3a\. Enablement of the UnoAIPilot. You can enable UnoAIPilot by configuring the values.yaml deployment file as follows: 
 		
-		global.enableUnoAIPilot=true 
+		global.enableUnoAIPilot: true 
 
 4. Deploy the instance by running the following command: 
 
         helm install -f values.yaml <uno_release_name> <repo_name>/hcl-uno-chart -n <uno_namespace>
+   
+Configuring the optional product components:
 
+. Enablement of the UnoAIPilot. You can enable UnoAIPilot by configuring the values.yaml deployment file as follows: 
+		
+		global.enableUnoAIPilot: true 
 
  where 
    <uno_release_name> is the deployment name of the instance. 
