@@ -18,12 +18,9 @@ For more information about HCL Universal Orchestrator, see the product documenta
 
 ## Details
 
-By default, all microservices and the Dynamic Workload Console (console) are installed. 
+All microservices and the UnO Console are installed. The Dynamic Workload Console is available by enabling a specific parameter in the values.yaml file.
 
-To achieve high availability in an HCL Universal Orchestrator environment, the minimum base configuration is composed of 2 Dynamic Workload Consoles and 2 replicas of all microservices. For more details about HCL Universal Orchestrator and high availability, see: 
-
-
-[An active-active high availability scenario](https://help.hcltechsw.com/UnO/v1.1/Mobile_guides/highavailability.html).
+To achieve high availability in an HCL Universal Orchestrator environment, the minimum base configuration is composed of 2 replicas of all microservices.
 
 HCL Universal Orchestrator can be deployed across a single cluster, but you can add multiple instances of the product microservices by using a different namespace in the cluster. The product microservices can run in multiple failure zones in a single cluster.
 
@@ -46,6 +43,8 @@ Ensure you modify the value of the `waconsole.console.exposeServiceType` paramet
 
 You can access the HCL Universal Orchestrator chart and container images from the Entitled Registry. See [Create the secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
 
+Core:
+
  - hcl-uno-agentmanager
  - hcl-uno-gateway
  - hcl-uno-iaa
@@ -57,7 +56,17 @@ You can access the HCL Universal Orchestrator chart and container images from th
  - hcl-uno-executor
  - hcl-uno-eventmanager 
  - hcl-uno-orchestrator
+ - hcl-uno-console
+ - hcl-uno-notification
+ - hcl-uno-external-pod
 
+UnO AI Pilot:
+
+ - hcl-uno-pilot-notification
+ - hcl-aipilot-core
+ - hcl-aipilot-actions
+ - hcl-aipilot-nlg
+ - pgvector
 
 ## Prerequisites
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
@@ -68,6 +77,7 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Helm v 3.12 or later
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
  - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB for AWS deployment.
+ - Enablement of an OIDC provider.
 
 **Strongly recommended**
 
@@ -103,9 +113,14 @@ The following are prerequisites specific to each supported cloud provider:
  
 | Component | Container resource limit | Container resource request |
 |--|--|--|
-|**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.3, Memory: 1 GB|
-|**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.3, Memory: 0.5 GB  |
-|**Console**  | CPU: 4, Memory: 16 GB  |CPU: 1, Memory: 4 GB, Storage: 5 GB  |
+|**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 1 GB|
+|**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 0.5 GB  |
+|**Dynamic Workload Console**  | CPU: 4, Memory: 16 GB  |CPU: 1, Memory: 4 GB, Storage: 5 GB  |
+|**AIPilot-core** | CPU : 1, Memory: 2.5GB | CPU 0.5, Memory: 2GB
+|**AIPilot-action**| CPU: 0.3, Memory: 0.3GB | CPU: 0.1, Memory: 0.2GB
+|**AIPilot-nlg**| CPU: 0.3, Memory: 0.5GB | CPU: 0.1, Memory: 0.3GB
+|**AIPilot-rag**| CPU: 0.8, Memory: 1Gi | CPU: 0.2 , Memory: 0.2Gi
+|**PgVector**| CPU: 0.15 Memory: 0.192GB Ephemeral-storage : 2Gi |  CPU: 0.1 Memory: 0.1Gi Ephemeral-storage: 50Mi
 
 No disk space is required for the microservices, however, at least 100 GB are recommended for Kafka and 100 GB for MongoDB. Requirements vary depending on your workload.
 
@@ -116,7 +131,8 @@ Deploying and configuring HCL Universal Orchestrator involves the following high
 1. [Creating the Namespace](#creating-the-namespace)
 2. [Creating a Kubernetes Secret](#creating-the-secret) by accessing the entitled registry to store an entitlement key for the HCL Universal Orchestrator offering on your cluster. 
 3. [Deploying the product components](#deploying-the-product-components)
-4. [Verifying the deployment](#verifying-the-deployment)
+4. [Configuring optional product components](#configuring-optional-product-components)
+5. [Verifying the deployment](#verifying-the-deployment)
 
 
 ### Creating the Namespace
@@ -160,15 +176,69 @@ To deploy HCL Universal Orchestrator, perform the following steps:
 	
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
-3. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. The `values.yaml`file contains a detailed explanation for each parameter. 
+3. Customize the deployment.
+
+   Configure each product component by adjusting the values in the **values.yaml** file. The **values.yaml** file contains a detailed explanation for each parameter.
+
+- Accepting the license agreement
+
+The licence parameter determines whether the licence agreement is accepted or not. Supported values are `accept` and `not accepted`. To accept the license agreement, set the value as:
+
+    global.license: accept
+
+
+- Configuring the database section in the values.yaml file
+
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the database deployment configuration.
+
+    uno.database.url: mongodb://hcl-uno-db-mongodb.db.svc.cluster.local:27017
+    uno.database.type: mongodb
+    uno.database.databaseName: uno
+    uno.database.username: mongouser
+    uno.database.password: mongopassword
+    uno.database.tls: false
+    uno.database.tlsInsecure: false
+   
+
+- Configuring the kafka section in the values.yaml file
+
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the kafka deployment configuration.
+
+    uno.kafka.url: hcl-uno-kafka-0.kafka-headless.kafka.svc.cluster.local:9092
+    uno.kafka.username: kafkauser
+    uno.kafka.password: kafkapassword
+    uno.kafka.tls: false
+    uno.kafka.saslMechanism: PLAIN
+    uno.kafka.jaasConfig: org.apache.kafka.common.security.plain.PlainLoginModule required username="my-username" password="my-password";
+    uno.kafka.securityProtocol: SASL_PLAINTEXT
+    uno.kafka.tlsInsecure: false
+    uno.kafka.kerberosServiceName: kerberosservicenameexample
+    uno.kafka.topicReplicas: 1
+
+- Configuring the authentication.oidc section in the values.yaml file
+
+You can enable an OIDC user registry by configuring the values.yaml deployment file as follows:
+
+    uno.authentication.oidc.enabled: true
+
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the OIDC deployment configuration.
+
+    uno.authentication.oidc.server: https://unokeycloak.k8s.uat.uno/realms/uno
+    uno.authentication.oidc.clientId: uno-service
+    uno.authentication.oidc.credentialSecret: put_oidc_secret_here
+    uno.authentication.oidc.tlsVerification: required
+
+To make sure HCL Universal Orchestrator tusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
+
+    uno.config.certificates.additionalCASecrets: certificatesecret
 
 4. Deploy the instance by running the following command: 
 
         helm install -f values.yaml <uno_release_name> <repo_name>/hcl-uno-chart -n <uno_namespace>
 
-
  where 
-   <uno_release_name> is the deployment name of the instance. 
+   <uno_release_name> is the deployment name of the instance.
+   
 **TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
 
 The following are some useful Helm commands:
@@ -189,7 +259,13 @@ The following are some useful Helm commands:
 
         helm uninstall <uno_release_name> -n <uno_namespace>
 
+### Configuring optional product components
+
+- UnoAIPilot
+
+  You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
 		
+		global.enableUnoAIPilot: true 
 
 ### Verifying the deployment 
 
@@ -428,21 +504,27 @@ If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCus
         
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
-**Managing DocumentDB during AWS deployment**
+When using custom certificates make sure to update the following fields:
+		
+		uno.hclaipilot.certificates:
+			useCustomizedCert: true
+			caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			AND/OR
+			certSecretName: <the name of the custom certificate you want to use>
+		
+		-----------
 
-When deploying Universal orchestrator on AWS, you can leverage DocumentDB, a fully managed NoSQL database service provided by AWS. You must configure few parameters in the values.yaml file to ensure compatibility with DocumentDB. The parameters that must be configured are as follows:
-In **db** section,
-* type: Specify the preferred remote database server, DocumentDB in this case.
-* hostname: Specify the hostname or the IP address of the DocumentDB database server.
-* name: Specify the name of the DocumentDB database server.
-* port: Specify the port of the DocumentDB database server.
-* sslConnection: Set the value to true.
-* retryWrites: Only for documentDB. Supported values are true or false.
-* readPreference: Only for documentDB. Specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, nearest.
-
-You must also set the following parameters under the **certificates** section to connect your machine to the DocumentDB. 
-* UseCustomizedCert: Set the value to true and add the certificate as a secret.
-* AdditionalCASecrets : Specify the name of the certificate that you set as a secret.
+		uno.hclaipilot.rag.certificates:
+			useCustomizedCert: true
+			caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			AND/OR
+			certSecretName: <the name of the custom certificate you want to use>
+		
+		-----------
+		uno.hclaipilot.pgvector.tls:
+			caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			AND/OR
+			certificatesSecret: <the name of the custom certificate you want to use>
 
 ## Metrics monitoring 
 
@@ -509,6 +591,8 @@ For more information about using Grafana dashboards see [Dashboards overview](ht
 *  Limited to amd64 platforms.
 *  Anonymous connections are not permitted.
 
+## AI Pilot Knowledge base
+To ensure a user can import, export, or delete the custom knowledge base, they must have the AI_PILOT_ADMINISTRATOR role. By default, this role is assigned to all administrator accounts.
 
 ## Documentation
 
