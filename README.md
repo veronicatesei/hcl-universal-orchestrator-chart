@@ -131,7 +131,8 @@ Deploying and configuring HCL Universal Orchestrator involves the following high
 1. [Creating the Namespace](#creating-the-namespace)
 2. [Creating a Kubernetes Secret](#creating-the-secret) by accessing the entitled registry to store an entitlement key for the HCL Universal Orchestrator offering on your cluster. 
 3. [Deploying the product components](#deploying-the-product-components)
-4. [Verifying the deployment](#verifying-the-deployment)
+4. [Configuring optional product components](#configuring-optional-product-components)
+5. [Verifying the deployment](#verifying-the-deployment)
 
 
 ### Creating the Namespace
@@ -175,16 +176,18 @@ To deploy HCL Universal Orchestrator, perform the following steps:
 	
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
-3. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. The `values.yaml`file contains a detailed explanation for each parameter.
+3. Customize the deployment.
 
-**Accepting the license agreement**
+   Configure each product component by adjusting the values in the **values.yaml** file. The **values.yaml** file contains a detailed explanation for each parameter.
 
-The licence parameter determines whether the licence agreement is accepter or not. Supported values are 'accept' and 'not accepted'. To accept the license agreement, set the value as:
+- Accepting the license agreement
+
+The licence parameter determines whether the licence agreement is accepted or not. Supported values are `accept` and `not accepted`. To accept the license agreement, set the value as:
 
     global.license: accept
 
 
-**Configuring the database section in the values.yaml file**
+- Configuring the database section in the values.yaml file
 
 The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the database deployment configuration.
 
@@ -197,7 +200,7 @@ The values of the following parameters are placeholders used as an example. When
     uno.database.tlsInsecure: false
    
 
-**Configuring the kafka section in the values.yaml file**
+- Configuring the kafka section in the values.yaml file
 
 The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the kafka deployment configuration.
 
@@ -212,7 +215,7 @@ The values of the following parameters are placeholders used as an example. When
     uno.kafka.kerberosServiceName: kerberosservicenameexample
     uno.kafka.topicReplicas: 1
 
-**Configuring the authentication.oidc section in the values.yaml file**
+- Configuring the authentication.oidc section in the values.yaml file
 
 You can enable an OIDC user registry by configuring the values.yaml deployment file as follows:
 
@@ -224,31 +227,18 @@ The values of the following parameters are placeholders used as an example. When
     uno.authentication.oidc.clientId: uno-service
     uno.authentication.oidc.credentialSecret: put_oidc_secret_here
     uno.authentication.oidc.tlsVerification: required
-    uno.authentication.oidc.
- 
-To connect your HCL Universal Orchestrator deployment to your OIDC provider when using custom certificates, you must assign the custom certificate value as a secret to the following parameter:
-
- uno.config.certificates.additionalCASecrets: Specify the secret.
 
 To make sure HCL Universal Orchestrator tusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
 
-
-3a\. Enablement of the UnoAIPilot. You can enable UnoAIPilot by configuring the values.yaml deployment file as follows: 
-		
-		global.enableUnoAIPilot: true 
+    uno.config.certificates.additionalCASecrets: certificatesecret
 
 4. Deploy the instance by running the following command: 
 
         helm install -f values.yaml <uno_release_name> <repo_name>/hcl-uno-chart -n <uno_namespace>
-   
-Configuring the optional product components:
-
-. Enablement of the UnoAIPilot. You can enable UnoAIPilot by configuring the values.yaml deployment file as follows: 
-		
-		global.enableUnoAIPilot: true 
 
  where 
-   <uno_release_name> is the deployment name of the instance. 
+   <uno_release_name> is the deployment name of the instance.
+   
 **TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
 
 The following are some useful Helm commands:
@@ -269,7 +259,13 @@ The following are some useful Helm commands:
 
         helm uninstall <uno_release_name> -n <uno_namespace>
 
+### Configuring optional product components
+
+- UnoAIPilot
+
+  You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
 		
+		global.enableUnoAIPilot: true 
 
 ### Verifying the deployment 
 
