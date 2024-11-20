@@ -215,9 +215,9 @@ The values of the following parameters are placeholders used as an example. When
     uno.kafka.kerberosServiceName: kerberosservicenameexample
     uno.kafka.topicReplicas: 1
 
-- Configuring the authentication.oidc section in the values.yaml file
+- Configuring the authentication.oidc section in the **values.yaml** file
 
-You can enable an OIDC user registry by configuring the values.yaml deployment file as follows:
+You can enable an OIDC user registry by configuring the **values.yaml** deployment file as follows:
 
     uno.authentication.oidc.enabled: true
 
@@ -261,11 +261,53 @@ The following are some useful Helm commands:
 
 ### Configuring optional product components
 
-- UnoAIPilot
+**UnoAIPilot**
 
-  You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
+You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
 		
-		global.enableUnoAIPilot: true 
+		global.enableUnoAIPilot: true
+  
+  
+**Session timeout**
+
+After a period of inactivity on the UI, users are automatically logged out. You can change the session timeout value, which is set by default to 30 minutes, by modifying the following parameter in the **values.yaml** file of the Helm chart:
+
+    uno.config.console.sessionTimeoutMinutes: 30
+
+**Log out option**
+
+To enable the log out option, set the following parameter in the **values.yaml** file of the Helm chart to true:
+
+     uno.config.console.enableLogout: true
+
+**Generative workflows and knowledege base**
+
+You can enable the generative features of the UnO AI Pilot for both workflow generation and generative knowledge base by setting the following parameter in the **values.yaml** file of the Helm chart to true:
+
+    uno.config.genai.enabled: true
+
+**Justifications**
+
+The administrator can enable justifications so that users are prompted to provide information when saving or performing changes to items in the environment. To enable justifications, set the following parameter in the **values.yaml** file of the Helm chart to true:
+
+    uno.config.engine.justificationEnabled: true
+
+You can configure different justification levels by setting the related parameters in the values.yaml file of the Helm chart as follows:
+
+     uno.config.engine.justificationCategoryRequired: true
+     uno.config.engine.justificationTicketNumberRequire: true
+     uno.config.engine.justificationDescriptionRequired: true
+
+For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1/Deployment/justifications.html).
+
+**Administrative user customization**
+
+You can change the name of the default administrative user modifying the parameter in the **values.yaml** file of the Helm chart:
+
+     uno.authentication.adminName: wauser
+
+
+Check the **values.yaml** file for more customization options.
 
 ### Verifying the deployment 
 
@@ -277,48 +319,27 @@ Run the following command to verify the pods installed in the <uno_namespace>:
    
            kubectl get pods -n <uno_namespace>
 
- **Verify that the default engine connection is created from the Dynamic Workload Console**
 
-Verifying the default engine connection depends on the network enablement configuration you implement. To determine the URL to be used to connect to the console, follow the procedure for the appropriate network enablement configuration.
+ **Verifying the microservices network ingresses**
 
-**For load balancer:**
+To obtain the URLs related to the ingresses of the different microservices, use the following command:
 
-1. Run the following command to obtain the token to be inserted in https://\<loadbalancer>:9443/console to connect to the console:
+    kubectl get ingress <uno_release_name>-uno-ingress -n <uno_namespace> -o json | jq -r '.spec.rules[] | .host + .http.paths[].path'
 
-![Amazon EKS](images/tagawseks.png "Amazon EKS") 
+To obtain the OpenShift routes of the different microservices, use the following command:
+
+    kubectl get route -n <uno_namespace>
+
+
+**Logging into the UnO console:**
+
+Logging in the UnO console is only possible if an OIDC provider has been previously configured.
+
+1. Log in to the UnO console by using the URLs obtained in the previous step, and inserting the previously defined administrative user credentials and the password associated to that user in the OIDC provider.
 	
-        kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..hostname}' -n <workload_automation_namespace>
-
-![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
-
-       kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..ipaddress}' -n <workload_automation_namespace>
-       
-
-![Google GKE](images/taggke.png "Google GKE")
-
-       kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..ipaddress}' -n <workload_automation_namespace>
-
-
-2. With the output obtained, replace \<loadbalancer> in the URL https://\<loadbalancer>:9443/console.
-
-**For ingress:**
-
-1. Run the following command to obtain the token to be inserted in https://\<ingress>/console to connect to the console:
-
-
-        kubectl get ingress/<workload_automation_release_name>-waconsole -o 'jsonpath={..host}'-n <workload_automation_namespace>
-  
-2.   With the output obtained, replace \<ingress> in the URL https://\<ingress>/console.
-
-**Logging into the console:**
-
-1. Log in to the console by using the URLs obtained in the previous step.
-
-2. For the credentials, specify the user name (wauser) and password (wa-pwd-secret, the password specified when you created the secrets file to store passwords for the server, console and database).
+2. From the navigation toolbar, select **Administration -> Manage Engines**.
 	
-3. From the navigation toolbar, select **Administration -> Manage Engines**.
-	
-4.  Verify that the default engine, **engine_<release_name>-gateway** is displayed in the Manage Engines list:
+3.  Verify that the default engine, **engine_<release_name>-gateway** is displayed in the Manage Engines list:
 
 To ensure the Dynamic Workload Console logout page redirects to the login page, modify the value of the logout url entry available in file authentication_config.xml:
 
