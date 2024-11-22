@@ -228,6 +228,21 @@ The values of the following parameters are placeholders used as an example. When
     uno.authentication.oidc.credentialSecret: put_oidc_secret_here
     uno.authentication.oidc.tlsVerification: required
 
+- Configuring the networking in the **values.yaml** file
+
+The HCL Universal Orchestrator server and console can use two different ways to route external traffic into the Kubernetes Service cluster:
+
+* **Ingress** and OpenShift **routes** services that manage external access to the services in the cluster.
+
+To configure an ingress control for the microservices, set the following parameters in the **values.yaml** file:
+
+uno.ingress.ingressClassName: nginx
+uno.ingress.baseDomainName: .k8s.uat.uno
+
+If you are using OpenShift routes, set the following parameter is the **values.yaml** file to false:
+
+uno.ingress.enabled: false
+
 To make sure HCL Universal Orchestrator tusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
 
     uno.config.certificates.additionalCASecrets: certificatesecret
@@ -337,22 +352,13 @@ Logging in the UnO console is only possible if an OIDC provider has been previou
 
 1. Log in to the UnO console by using the URLs obtained in the previous step, and inserting the previously defined administrative user credentials and the password associated to that user in the OIDC provider.
 	
-2. From the navigation toolbar, select **Administration -> Manage Engines**.
-	
-3.  Verify that the default engine, **engine_<release_name>-gateway** is displayed in the Manage Engines list:
-
-To ensure the Dynamic Workload Console logout page redirects to the login page, modify the value of the logout url entry available in file authentication_config.xml:
-
-
-       <jndiEntry value="${logout.url}" jndiName="logout.url" />
-
-where the logout.url string in jndiName should be replaced with the logout URL of the provider.
+2. Verify that the UnO console is successfully connected to the engine by accessing either the Graphical Designer or the Orchestration Monitor.
 
 ## Upgrading the product components
 
 To upgrade HCL Universal Orchestrator, perform the following steps:
 
-1. Configure each product component by adjusting the values in the `values.yaml` file. The `values.yaml`file contains a detailed explanation for each parameter.
+1. Configure each product component by adjusting the values in the **values.yaml** file. The **values.yaml** file contains a detailed explanation for each parameter.
 
 2. Upgrade the instance by running the following command:
 
@@ -360,9 +366,8 @@ To upgrade HCL Universal Orchestrator, perform the following steps:
 		 
  where 
    <uno_release_name> is the deployment name of the instance. 
+   
 **TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
-
-**Note:** When upgrading HCL Universal Orchestrator from V1.1.0 to V1.1.2 or later, or from V1.1.1 to V1.1.2 or later, you must manually delete the older version of the executable job plug-in.
 	   
 ## Uninstalling the Chart
 
@@ -379,173 +384,45 @@ Configuration parameters are available in the **values.yaml** files, together wi
 
 The following procedures are ways in which you can configure the default deployment of the product components. They include the following configuration topics:
 
-* [Network enablement](#network-enablement)
 * [Scaling the product](#scaling-the-product)
 * [Managing your custom certificates](#managing-your-custom-certificates)
-
-### Network enablement
-
-The HCL Universal Orchestrator server and console can use two different ways to route external traffic into the Kubernetes Service cluster:
-
-* A **load balancer** service that redirects traffic
-* An **ingress** service that manages external access to the services in the cluster
-
-You can freely switch between these two types of configuration.
-
-#### Network policy
-
-You can specify an egress network policy to include a list of allowed egress rules for each components. Each rule allows traffic leaving the cluster which matches both the "to" and "ports" sections. For example, the following sample demonstrates how to allow egress to another destination:
-
-networkpolicyEgress:
-
-	- name: to-mdm
-	  egress:
-	  - to:
-	    - podSelector:
-	        matchLabels:
-		  app.kubernetes.io/name: waserver
-	    - port: 31116
-	      protocol: TCP
-	- name: dns
-	  egress:
-	    - to:
-	      - namespaceSelector:
-	          matchLabels:
-		    name: kube-system
-	    - ports:
-	        - port: 53
-		  protocol: UDP
-		- port: 53
-		  protocol: TCP
-
-For more information, see [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/).
-
-#### Node affinity Required
-You can also specify node affinity required to determine on which nodes a component can be deployed using custom labels on nodes and label selectors specified in pods. The following is an example:
-
-nodeAffinityRequired:
-
-	-key: iwa-node
-	  operator: In
-	  values:
-	  - 'true'
-
-where **iwa-node** represents the value of the node affinity required.
-
-#### Load balancer service
-
-
-  To configure a load balancer, follow these steps:
-
-1. Locate the following parameters in the `values.yaml` file:
-
-		exposeServiceType
-		exposeServiceAnnotation
-
-For more information about these configurable parameters, see the explanatory comments available in the **values.yaml** file.
-
-2. Set the value of the `exposeServiceType` parameter to `LoadBalancer`.
-
-3. In the `exposeServiceAnnotation` section, uncomment the lines in this section as follows:
-
-![Amazon EKS](images/tagawseks.png "Amazon EKS") 
-
-		service.beta.kubernetes.io/aws-load-balancer-type: nlb
-		service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-		
-![Microsoft Azure](images/tagmsa.png "Microsoft Azure") 
-
-		service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-
-![Google GKE](images/taggke.png "Google GKE") 
-
-		networking.gke.io/load-balancer-type: "Internal"
-
-
-4. Specify the load balancer type and set the load balancer to internal by specifying "true".
-
-
-#### Ingress service
-
-  To configure an ingress for the server, follow these steps:
-
-1. Locate the following parameters in the `values.yaml` file:
-
-		exposeServiceType
-		exposeServiceAnnotation
-
-   For more information about these configurable parameters, see the explanatory comments available in the **values.yaml** file.
-
-2. Set the value of the `exposeServiceType`parameter to `Ingress`.
-
-3. In the `exposeServiceAnnotation` section, leave the following lines as comments:
-
-![Amazon EKS](images/tagawseks.png "Amazon EKS") 
-
-		#service.beta.kubernetes.io/aws-load-balancer-type:nlb
-		#service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-
-![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
-
-		#service.beta.kubernetes.io/azure-load-balancer-internal: "true"	
-		
-![Google GKE](images/taggke.png "Google GKE") 
-
-                #networking.gke.io/load-balancer-type: "Internal"
 
 	
 ### Scaling the product 
 
-HCL Universal Orchestrator is installed by default with autoscaling enabled. A single Dynamic Workload Console is installed. To scale the Dynamic Workload Console, increase or decrease the values of the `replicaCount` parameter in the `values.yaml` file and save the changes.
+HCL Universal Orchestrator is installed by default with autoscaling enabled. To enable high availability, set the following parameter in the `values.yaml` file to 2:
+
+    uno.deployment.global.minTargetReplicas: 2
 
 **Note**: HCL Universal Orchestrator Helm chart does not support scaling to zero nor proportional scaling.
 		  
 ### Managing your custom certificates
     
-  If you want to use custom certificates, set `useCustomizedCert:true` and use kubectl to apply the secret in the \<uno_namespace>.
- Type the following command:
- 
- ```
-kubectl create secret generic waserver-cert-secret --from-file=TWSClientKeyStore.kdb --from-file=TWSClientKeyStore.sth --from-file=TWSClientKeyStoreJKS.jks --from-file=TWSClientKeyStoreJKS.sth --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd -n <workload-automation-namespace>   
- ``` 
-  
-    
-> **Note:** if you set `db.sslConnection:true`, you must also set the `useCustomizedCert` setting to true on both UnO and Dynamic Workload Console charts and, in addition, you must add the following certificates in the customized SSL certificates secret on both UnO and Dynamic Workload Console charts:
+To use custom certificates: 
 
-  * ca.crt
-  * tls.key
-  * tls.crt
+1. Genereta your custom certificates
+2. Set `uno.congfig.certificates.useCustomizedCert: true`
+3. Assign the certificate values as secrets in the certificates section of the **values.yaml** file:
 
- Customized files must have the same name as the ones listed above.
-         
-If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCustomizedCert:true`, then use kubectl to create the secret in the same namespace where you want to deploy the chart:
+    uno.config.certificates.caPairSecretName: ca-key-pair
+    uno.config.certificates.certSecretName: uno-certificate
+    uno.config.certificates.certExtAgtSecretName: uno-certificate-ext-agt
 
-      bash
-      $ kubectl create secret generic release_name-secret --from-file=TWSServerTrustFile.jks --from-file=TWSServerKeyFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=TWSServerKeyFile.jks.pwd --namespace=<uno_namespace>
         
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
 When using custom certificates make sure to update the following fields:
 		
-		uno.hclaipilot.certificates:
-			useCustomizedCert: true
-			caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
-			AND/OR
-			certSecretName: <the name of the custom certificate you want to use>
+			uno.hclaipilot.certificates.useCustomizedCert: true
+			uno.hclaipilot.certificates.caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			uno.hclaipilot.certificates.certSecretName: <the name of the custom certificate you want to use>
 		
-		-----------
-
-		uno.hclaipilot.rag.certificates:
-			useCustomizedCert: true
-			caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
-			AND/OR
-			certSecretName: <the name of the custom certificate you want to use>
-		
-		-----------
-		uno.hclaipilot.pgvector.tls:
-			caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
-			AND/OR
-			certificatesSecret: <the name of the custom certificate you want to use>
+			uno.hclaipilot.rag.certificates.useCustomizedCert: true
+			uno.hclaipilot.rag.certificates.caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			uno.hclaipilot.rag.certificates.certSecretName: <the name of the custom certificate you want to use>
+	
+			uno.hclaipilot.pgvector.tls.caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			uno.hclaipilot.pgvector.tls.certificatesSecret: <the name of the custom certificate you want to use>
 
 ## Metrics monitoring 
 
@@ -619,11 +496,5 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 
 To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.0/index.html).
 
-
-
-## Change history
-
-### Added August 2023
-First release
 
 
