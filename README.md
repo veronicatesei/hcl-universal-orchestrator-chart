@@ -230,20 +230,20 @@ The values of the following parameters are placeholders used as an example. When
 
 - Configuring the networking in the **values.yaml** file
 
-The HCL Universal Orchestrator server and console can use two different ways to route external traffic into the Kubernetes Service cluster:
+  The HCL Universal Orchestrator server and console can use two different ways to route external traffic into the Kubernetes Service cluster:
 
 * **Ingress** and OpenShift **routes** services that manage external access to the services in the cluster.
 
-To configure an ingress control for the microservices, set the following parameters in the **values.yaml** file:
+  To configure an ingress control for the microservices, set the following parameters in the **values.yaml** file:
 
-uno.ingress.ingressClassName: nginx
-uno.ingress.baseDomainName: .k8s.uat.uno
+      uno.ingress.ingressClassName: nginx
+      uno.ingress.baseDomainName: .k8s.uat.uno
 
-If you are using OpenShift routes, set the following parameter is the **values.yaml** file to false:
+  If you are using OpenShift routes, set the following parameter is the **values.yaml** file to false:
 
-uno.ingress.enabled: false
+      uno.ingress.enabled: false
 
-To make sure HCL Universal Orchestrator tusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
+  To make sure HCL Universal Orchestrator tusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
 
     uno.config.certificates.additionalCASecrets: certificatesecret
 
