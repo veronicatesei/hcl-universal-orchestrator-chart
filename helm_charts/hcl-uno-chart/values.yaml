@@ -54,6 +54,7 @@ global:
   # For example, if you want to set the active-window.extension value as 10 minutes, add the variable as follows under customEnv:
   # - name: UNO_PLANNING_ACTIVE_WINDOW_EXTENSION
   #   value: PT1M
+  #You can also cutomize the values for UNO_WAITING_JOB_EXPIRE_TIMEOUT and UNO_WAITING_JOB_EXPIRE_FREQUENCY with a value either in seconds or minutes.
   customEnv:
   #- name: "MY_ENVKEY"
   #  value: "MY_EN_VALUE"
@@ -103,10 +104,23 @@ uno:
     tlsInsecure: false
   config:
     license:
-      # Url of flexera license server
-      licenseServerUrl: 
-      # Id of flexera license instance
-      licenseServerId:
+      # Url of the MHS license server
+      licenseServerUrl: https://api.hcltechsw.com
+      # Key to deploy the MHS license server.
+      licenseServerKey:
+      # optional proxy configuration to access the MHS license server.
+      proxy:
+        # The hostname of the proxy server.
+        hostname:
+        # The port of the proxy server.
+        port:
+        # The username to authenticate to the proxy server.
+        username:
+        # The password to authenticate to the proxy server.
+        password:
+    audit:
+        # max number of days to keep audit logs.
+        retentionDays: P400D
     registry:
       # name is the name of your registry.
       name: hclcr.io/uno
@@ -140,13 +154,17 @@ uno:
       certSecretName: uno-certificate
       # certExtAgtSecretName is the name of the secret of the external agent. This parameter applies if you set useCustomizedCert to true.
       certExtAgtSecretName: uno-certificate-ext-agt
+      # caDuration is the validity period of the CA certificates before expiry. This parameter is applicable when useCustomizedCert parameter is set to false.
+      caDuration: 3y
+      # caRenewBefore is the Specifies the time before the expiry of CA certificates when the certificate manager initiates renewal attempts. This parameter is applicable when useCustomizedCert parameter is set to false.
+      caRenewBefore: 2y350d
       # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to true.
       duration: 2160h
       # renewBefore is the time before the certificate expires when the certificate manager service begins attempts to renew the certificate. This parameter applies if you set useCustomizedCert to true.
       renewBefore: 360h
       # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to true.
       organization: hcl
-      # additionalCASecrets contains additional secrets, for example to trust MongoDb or Kafka certificates. This parameter applies if you set useCustomizedCert to true.
+      # additionalCASecrets contains additional secrets, for example to trust MongoDb or Kafka certificates.
       additionalCASecrets: 
       #  - secretname1
     apiKey:
