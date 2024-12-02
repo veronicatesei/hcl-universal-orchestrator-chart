@@ -336,7 +336,7 @@ For more information on verifying a file with gpg keys, see [GnuPG documentation
 
 When you decrypt the files with the public key and if the signature is valid, you can see a message indicating the file is correctly signed and the key ID matches with the public key. If the signature is invalid, you can see an error message, means the file is corrupted. 
 
-By verifying the file, you can ensure that it is not tampered during the download and can confirm the file is genuinely valid. You can download the public key from [here](https://github.com/CherianMani/hcl-universal-orchestrator-chart/blob/task/WA-135255/HCL_Universal_Orchestrator_public_key.gpg).
+By verifying the file, you can ensure that it is not tampered during the download and can confirm the file is genuinely valid. You can download the public key from [here](https://github.com/HCL-TECH-SOFTWARE/hcl-universal-orchestrator-chart/blob/main/HCL_Universal_Orchestrator_public_key.gpg).
 
 
 ### Verifying the deployment 
