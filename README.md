@@ -78,6 +78,7 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
  - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB for AWS deployment.
  - Enablement of an OIDC provider.
+ - HCL UnO agent: Java SDK21.
 
 **Strongly recommended**
 
@@ -323,6 +324,20 @@ You can change the name of the default administrative user modifying the paramet
 
 
 Check the **values.yaml** file for more customization options.
+
+
+### Security and verification for OCLI and UnO agent binaries 
+
+To ensure the integrity and authenticity of the downloaded files, we use GPG (GNU Privacy Guard) encryption. You must have the GPG tool installed on your system to decrypt and verify the files. 
+
+The Orchestration CLI and HCL UnO agent packages are signed with our private key. A corresponding .asc signature file accompanies the downloadable file. You can extract the file and use the public key to decrypt and verify the files. 
+
+For more information on verifying a file with gpg keys, see [GnuPG documentation](https://www.gnupg.org/gph/en/manual.html). 
+
+When you decrypt the files with the public key and if the signature is valid, you can see a message indicating the file is correctly signed and the key ID matches with the public key. If the signature is invalid, you can see an error message, means the file is corrupted. 
+
+By verifying the file, you can ensure that it is not tampered during the download and can confirm the file is genuinely valid. You can download the public key from [here](https://github.com/CherianMani/hcl-universal-orchestrator-chart/blob/task/WA-135255/HCL_Universal_Orchestrator_public_key.gpg).
+
 
 ### Verifying the deployment 
 
