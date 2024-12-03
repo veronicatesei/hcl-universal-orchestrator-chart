@@ -5,7 +5,7 @@
 # * Trademark of HCL Technologies Limited
 ######################################################################
 {{ $fullName := include "fullname" . }}
-{{ $certIssuer := include "uno.cert.issuer" . }}
+{{ $certIssuer := include "uno.cert.ingressIssuer" . }}
 
 {{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
@@ -33,14 +33,11 @@ spec:
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   tls:
     - hosts:
-{{- if .Values.global.enableUI }}
       - {{.Values.deployment.console.ingressPrefix }}{{.Values.ingress.baseDomainName }}
-{{- end }}
       - {{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}
       - {{.Values.deployment.agentmanager.ingressPrefix }}{{.Values.ingress.baseDomainName }}
       secretName: {{ $fullName }}-uno-tls-secret
   rules:
-{{- if .Values.global.enableUI }}
     - host: {{.Values.deployment.console.ingressPrefix }}{{.Values.ingress.baseDomainName }}
       http:
         paths:
@@ -51,7 +48,6 @@ spec:
                 name: {{ $fullName }}-console
                 port:
                   number: 8443
-{{- end }}
     - host: {{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}
       http:
         paths:

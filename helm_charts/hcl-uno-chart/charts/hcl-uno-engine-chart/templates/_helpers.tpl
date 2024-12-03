@@ -9,23 +9,23 @@
 {{- printf "%s"  $name | trunc 42 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "common.flexUrl" -}}
-{{- if .Values.hclFlexnetURL }}
-{{- printf "%s"  (tpl ( .Values.hclFlexnetURL |default "") .)  -}}
-{{- else if .Values.global.hclFlexnetURL }}
-{{- printf "%s"  (tpl ( .Values.global.hclFlexnetURL |default "") .)  -}}
+{{- define "common.mhsUrl" -}}
+{{- if .Values.licenseServerUrl }}
+{{- printf "%s"  (tpl ( .Values.licenseServerUrl |default "") .)  -}}
+{{- else if .Values.global.licenseServerUrl }}
+{{- printf "%s"  (tpl ( .Values.global.licenseServerUrl |default "") .)  -}}
 {{- else  }}
 {{- printf "%s"  (tpl ( .Values.config.license.licenseServerUrl |default "") .)  -}}
 {{- end -}}
 {{- end -}}
 
-{{- define "common.flexId" -}}
-{{- if .Values.hclFlexnetID }}
-{{- printf "%s"  (tpl ( .Values.hclFlexnetID |default "") .)  -}}
-{{- else if .Values.global.hclFlexnetID }}
-{{- printf "%s"  (tpl ( .Values.global.hclFlexnetID |default "") .)  -}}
+{{- define "common.mhsKey" -}}
+{{- if .Values.licenseServerKey }}
+{{- printf "%s"  (tpl ( .Values.licenseServerKey |default "") .)  -}}
+{{- else if .Values.global.licenseServerKey }}
+{{- printf "%s"  (tpl ( .Values.global.licenseServerKey |default "") .)  -}}
 {{- else  }}
-{{- printf "%s"  (tpl ( .Values.config.license.licenseServerId |default "") .)  -}}
+{{- printf "%s"  (tpl ( .Values.config.license.licenseServerKey |default "") .)  -}}
 {{- end -}}
 {{- end -}}
 
@@ -34,14 +34,11 @@
 {{- end -}}
 
 {{- define "uno.microservices.list" -}}
-{{- $tmpList := list "agentmanager" "executor" "gateway" "eventmanager" "iaa" "orchestrator" "scheduler" "toolbox" "timer" "storage" "audit" -}}
-{{- if .Values.global.enableUI -}}
-{{- $myList := prepend $tmpList "console" -}}
-{{ toJson $myList }}
-{{- else }}
-{{- $myList := $tmpList -}}
-{{ toJson $myList }}
+{{- $myList := list "console" "agentmanager" "executor" "gateway" "eventmanager" "iaa" "orchestrator" "scheduler" "toolbox" "timer" "storage" "audit" "notification" -}}
+{{- if .Values.global.enableUnoAIPilot }}
+{{- $myList =  append $myList "pilot-notification" -}}
 {{- end -}}
+{{ toJson $myList }}
 {{- end -}}
 
 {{- define "uno.console.public.host" -}}
@@ -178,10 +175,8 @@ prometheus.io/port: "8443"
 prometheus.io/path: "/q/metrics"
 {{- end -}}
 
-
-
 {{- define "uno.common.label" -}}
-uno.microservice.version: 1.1.2.0
+uno.microservice.version: 2.1.0.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -268,7 +263,11 @@ release: {{ .Release.Name | quote }}
 - name: QUARKUS_OIDC_CLIENT_ID
   value: {{ .Values.authentication.oidc.clientId | quote }}
 - name: QUARKUS_OIDC_CREDENTIALS_SECRET
-  value: {{ .Values.authentication.oidc.credentialSecret | quote }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: OIDC_SECRET
+      optional: true
 - name: QUARKUS_OIDC_TOKEN_STATE_MANAGER_ENCRYPTION_REQUIRED
   value: {{ .Values.authentication.oidc.encryptTokensInCookie | quote }}
 - name: QUARKUS_OIDC_TOKEN_STATE_MANAGER_SPLIT_TOKENS
@@ -344,17 +343,29 @@ release: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{- define "common.env.variable" -}}
-{{ $flexUrl := include "common.flexUrl" . }}
-{{ $flexId := include "common.flexId" . }}
+{{ $mhsUrl := include "common.mhsUrl" . }}
+{{ $mhsKey := include "common.mhsKey" . }}
 {{ $fullName := include "fullname" . }}
 {{- if .Values.deployment.global.debug }}
 - name: UNO_DEBUG_SCRIPTS
   value: {{ .Values.deployment.global.debug | quote }}
 {{- end }}
-- name: UNO_LICENSE_SERVER_FLEXERA_URL
-  value: {{ $flexUrl | quote }} 
-- name: UNO_LICENSE_SERVER_FLEXERA_ID
-  value: {{ $flexId  | quote }}   
+- name: UNO_LICENSE_SERVER_MHS_URL
+  value: {{ $mhsUrl | quote }}
+- name: UNO_LICENSE_SERVER_MHS_KEY
+  value: {{ $mhsKey  | quote }}
+- name: UNO_LICENSE_PROXY_HOSTNAME
+  value: {{ .Values.config.license.proxy.hostname | quote }}
+- name: UNO_LICENSE_PROXY_PORT
+  value: {{ .Values.config.license.proxy.port | quote }}
+- name: UNO_LICENSE_PROXY_USER
+  value: {{ .Values.config.license.proxy.username | quote }}
+- name: UNO_LICENSE_PROXY_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: LICENSE_PROXY_PASSWORD
+      optional: true
 - name: LICENSE
   value: {{ .Values.global.license | quote }} 
 - name: UNO_PLANNING_NOT_ACTIVE_WINDOW_MAX
@@ -366,14 +377,38 @@ release: {{ .Release.Name | quote }}
 - name: UNO_PLANNING_ACTIVE_WINDOW_EXTENSION
   value: {{ .Values.config.planning.activeWindowExtension | quote }} 
 - name: UNO_PLANNING_ACTIVE_WINDOW_LICENSE
-  value: {{ .Values.config.planning.activeWindow | quote }} 
+  value: {{ .Values.config.planning.activeWindow | quote }}
+- name: UNO_GENAI_CLIENT_ENABLED
+  value: {{ .Values.config.genai.enabled | quote }}
+- name: UNO_GENAI_CLIENT_URL
+  value: {{ .Values.config.genai.serviceUrl | quote }}
+- name: UNO_GENAI_CLIENT_PROXY_HOSTNAME
+  value: {{ .Values.config.genai.proxy.hostname | quote }}
+- name: UNO_GENAI_CLIENT_PROXY_PORT
+  value: {{ .Values.config.genai.proxy.port | quote }}
+- name: UNO_GENAI_CLIENT_PROXY_USERNAME
+  value: {{ .Values.config.genai.proxy.username | quote }}
+- name: UNO_GENAI_CLIENT_PROXY_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: GENAI_PROXY_PASSWORD
+      optional: true
+- name: ENGINE_JUSTIFICATION_ENABLED
+  value: {{ .Values.config.engine.justificationEnabled | quote }}
+- name: ENGINE_JUSTIFICATION_CATEGORY_REQUIRED
+  value: {{ .Values.config.engine.justificationCategoryRequired | quote }}
+- name: ENGINE_JUSTIFICATION_TICKET_NUMBER_REQUIRED
+  value: {{ .Values.config.engine.justificationTicketNumberRequired | quote }}
+- name: ENGINE_JUSTIFICATION_DESCRIPTION_REQUIRED
+  value: {{ .Values.config.engine.justificationDescriptionRequired | quote }}
 - name: UNO_EXTERNAL_NGINX_URL
   value: {{ include "uno.extra.packages.url" . }}
 - name: QUARKUS_MONGODB_CONNECTION_STRING
   value: {{ (tpl ( .Values.database.url) .) | quote}}
-- name: QUARKUS_MONGODB_CREDENTIAL_USERNAME
+- name: QUARKUS_MONGODB_CREDENTIALS_USERNAME
   value: {{ .Values.database.username | quote}}
-- name: QUARKUS_MONGODB_CREDENTIAL_PASSWORD
+- name: QUARKUS_MONGODB_CREDENTIALS_PASSWORD
   valueFrom:
     secretKeyRef:
       name: {{ .Release.Name }}-uno-secret
@@ -391,6 +426,10 @@ release: {{ .Release.Name | quote }}
 {{- if .Values.kafka.kerberosServiceName }}
 - name: KAFKA_SASL_KERBEROS_SERVICE_NAME
   value: {{ .Values.kafka.kerberosServiceName | quote}}
+{{- end }}
+{{- if .Values.kafka.prefix }}
+- name: KAFKA_DEPLOYMENT_PREFIX
+  value: {{ .Values.kafka.prefix | quote}}
 {{- end }}
 {{- if .Values.kafka.username }}
 - name: KAFKA_USER
@@ -455,6 +494,8 @@ release: {{ .Release.Name | quote }}
   value: "true"
 - name: UNO_CREATE_TOPICS_PARTITION
   value: {{ mul .Values.deployment.global.maxTargetReplicas 2 | quote }}
+- name: UNO_CREATE_TOPICS_REPLICA
+  value: {{ .Values.kafka.topicReplicas | quote }}
 - name: QUARKUS_LOG_CATEGORY__COM_HCL__LEVEL
   value: {{ .Values.deployment.global.traceLevel | quote }}
 - name: QUARKUS_LOG_LEVEL
@@ -463,6 +504,10 @@ release: {{ .Release.Name | quote }}
   value: "PT20S"
 - name: UNO_SECURITY_ENABLE_EXECUTOR_SANDBOX
   value: {{ .Values.deployment.executor.enableExecutorSandbox | quote}}
+- name: UNO_IAA_ADMIN_USERNAME
+  value: {{ .Values.authentication.adminName | quote}}
+- name: UNO_DISABLE_HOSTNAMEVERIFY
+  value: {{ .Values.config.certificates.disableHostnameVerification | quote}}
 - name: UNO_IAA_CLIENT_URL
   value: https://{{ $fullName }}-iaa:8443
 - name: UNO_CALENDAR_CLIENT_URL
@@ -483,6 +528,8 @@ release: {{ .Release.Name | quote }}
   value: https://{{ $fullName }}-timer:8443
 - name: UNO_EVENTMANAGER_CLIENT_URL
   value: https://{{ $fullName }}-eventmanager:8443
+- name: UNO_NOTIFICATION_CLIENT_URL
+  value: https://{{ $fullName }}-notification:8443
 - name: UNO_GATEWAY_PUBLIC_HOST
   value: {{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}
 - name: UNO_GATEWAY_PUBLIC_PORT
@@ -491,6 +538,10 @@ release: {{ .Release.Name | quote }}
   value: {{ $fullName }}-gateway
 - name: UNO_GATEWAY_PRIVATE_PORT
   value: "8443"
+- name: CONSOLE_LOGOUT_ENABLED
+  value: {{ .Values.config.console.enableLogout | default "false" | quote}}
+- name: CONSOLE_SESSION_TIMEOUT_MINUTES
+  value: {{ .Values.config.console.sessionTimeoutMinutes | default "30" | quote}}
 {{- end -}}
 
 {{- define "common.custom.env.variable" -}}
@@ -509,6 +560,16 @@ release: {{ .Release.Name | quote }}
 {{- printf "waconsole-cert-secret"    -}}
 {{- else  }}
 {{- printf ""    -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "uno.dwcissuer" -}}
+{{- if (.Values.global.dwcconsole).dwcissuer }}
+{{- printf "%s"  (.Values.global.dwcconsole).dwcissuer  -}}
+{{- else if .Values.global.enableConsole }}
+{{- printf "%s%s%s" "https://" .Release.Name "-waconsole-h:9443"    -}}
+{{- else  }}
+{{- printf "%s%s%s" "https://" .Release.Name "-waconsole-h:9443"    -}}
 {{- end -}}
 {{- end -}}
 
@@ -587,11 +648,21 @@ volumeMounts:
 
 
 {{- define "uno.cert.issuer" -}}
+{{- if .Values.config.certificates.customIssuer -}}
+{{- print .Values.config.certificates.customIssuer -}}
+{{- else -}}
 {{ $fullName := include "fullname" . }}
 {{- printf "%s-%s"  $fullName "uno-issuer" -}}
-
+{{- end -}}
 {{- end -}}
 
+{{- define "uno.cert.ingressIssuer" -}}
+{{- if .Values.config.certificates.customIngressIssuer -}}
+{{- print .Values.config.certificates.customIngressIssuer -}}
+{{- else -}}
+{{ include "uno.cert.issuer" . }}
+{{- end -}}
+{{- end -}}
 
 {{- define "uno.repouno" -}}
 {{- if eq .Values.global.hclImageRegistry "hclcr.io/sofy" -}}
@@ -628,9 +699,17 @@ gcr.io/blackjack-209019/services
   {{- range $_, $images := $root.Values.global.extraImages -}}
     {{- $imagesRepository := "" -}}
     {{- if eq $root.Values.global.hclImageRegistry "hclcr.io/sofy" -}}
-    {{ $imagesRepository = "hclcr.io/wa" }}
+        {{- if contains "/uno" $images.registry -}}
+          {{ $imagesRepository = "hclcr.io/uno" }}
+        {{- else -}}
+          {{ $imagesRepository = "hclcr.io/wa" }}
+        {{- end -}}
     {{- else if eq $root.Values.global.hclImageRegistry "hclcr.io" -}}
-    {{ $imagesRepository = "hclcr.io/wa" }}
+        {{- if contains "/uno" $images.registry -}}
+          {{ $imagesRepository = "hclcr.io/uno" }}
+        {{- else -}}
+          {{ $imagesRepository = "hclcr.io/wa" }}
+        {{- end -}}
     {{- else if eq $root.Values.global.hclImageRegistry "gcr.io/blackjack-209019" -}}
         {{- if contains "/uno" $images.registry -}}
             {{ $imagesRepository = "gcr.io/blackjack-209019/services/uno"}}
@@ -654,5 +733,12 @@ gcr.io/blackjack-209019/services
 {{- if .Values.eventmanager.plugins.gcp.baseServicePath }}
 - name: UNO_EVENTMANAGER_GCP_BASESERVICEACCOUNTPATH
   value: {{ .Values.eventmanager.plugins.gcp.baseServicePath | quote}}
+{{- end }}
+{{- end -}}
+
+{{- define "uno.plugins.max.size" -}}
+{{- if .Values.config.plugins.maxSize }}
+- name: QUARKUS_HTTP_LIMITS_MAX_BODY_SIZE
+  value: {{ .Values.config.plugins.maxSize | quote}}
 {{- end }}
 {{- end -}}

@@ -42,7 +42,7 @@ microservice.version: "version"
 {{- end -}}
 
 {{- define "uno.chart.common.label" -}}
-uno.microservice.version: 1.1.2.0
+uno.microservice.version: 2.1.0.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -52,10 +52,6 @@ release: {{ .Release.Name | quote }}
 {{- range .Values.global.customLabels }}
 {{ .name }}: {{ .value | quote }} 
 {{- end }}
-{{- end -}}
-
-{{- define "uno.cert.issuer" -}}
-{{- printf "%s"  "wa-ca-issuer" -}}
 {{- end -}}
 
 {{- define "common.dwc.hidden.env" -}}
@@ -68,6 +64,11 @@ release: {{ .Release.Name | quote }}
 {{- define "waconsole.packagesUrl" -}}
 {{- $name := default .Release.Name -}}
 {{- printf "%s%s-%s" "https://" $name "storage:8443/ui/downloads/" -}}
+{{- end -}}
+
+{{- define "uno.audit.max.retention.duration" -}}
+- name: UNO_AUDIT_MAX_RETENTION_DURATION
+  value: {{ .Values.uno.config.audit.retentionDays }}
 {{- end -}}
 
 
