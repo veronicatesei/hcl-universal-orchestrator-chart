@@ -1,0 +1,24 @@
+######################################################################
+# Licensed Materials Property of HCL*
+  # (c) Copyright HCL Technologies Ltd. 2021, 2024. All rights reserved.
+  #
+  # * Trademark of HCL Technologies Limited
+  ######################################################################
+{{- if .Values.uno.deployment.global.podDisruptionBudget.enabled }}
+
+{{ $fullName := include "fullname" . }}
+
+apiVersion: v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $fullName }}-pdb
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+spec:
+  maxUnavailable: {{ .Values.uno.deployment.global.podDisruptionBudget.maxUnavailable }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: { { .Release.Name | quote } }
+      uno.microservice.version: 2.1.0.0
+
+{{- end }}

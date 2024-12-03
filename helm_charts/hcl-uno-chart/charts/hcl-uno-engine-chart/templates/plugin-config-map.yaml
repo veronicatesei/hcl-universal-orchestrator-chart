@@ -84,7 +84,6 @@ data:
       com.hcl.wa.plugin.gcpclouddataflow
       com.hcl.wa.plugin.softwaredefinedmainframe
       com.hcl.wa.plugin.uipath
-      com.ibm.scheduling.agent.ibmi
       com.ibm.scheduling.agent.j2ee
       com.hcl.wa.plugin.azurelogicapps
       com.hcl.wa.plugin.gcpcloudbatch
@@ -105,7 +104,12 @@ data:
       com.hcl.wa.plugin.azureservicebus
       com.hcl.wa.plugin.mybiros
       com.hcl.wa.plugin.sendemail
-
+      com.hcl.wa.plugin.azurebatch
+      com.hcl.wa.plugin.gcworkflows
+      com.hcl.wa.plugin.watsonxai
+      com.hcl.wa.plugin.gcpcloudrun
+      com.hcl.wa.plugin.gcpvertexai
+      com.hcl.wa.plugin.wait
 ---
 
 
@@ -190,7 +194,6 @@ data:
       com.hcl.wa.plugin.gcpclouddataflow
       com.hcl.wa.plugin.softwaredefinedmainframe
       com.hcl.wa.plugin.uipath
-      com.ibm.scheduling.agent.ibmi
       com.hcl.wa.plugin.azurelogicapps
       com.hcl.wa.plugin.gcpcloudbatch
       com.hcl.wa.plugin.gcpubsub
@@ -210,3 +213,9 @@ data:
       com.hcl.wa.plugin.azureservicebus
       com.hcl.wa.plugin.mybiros
       com.hcl.wa.plugin.sendemail
+      com.hcl.wa.plugin.gcworkflows
+      com.hcl.wa.plugin.watsonxai
+      com.hcl.wa.plugin.gcpcloudrun
+      com.hcl.wa.plugin.gcpvertexai
+      com.hcl.wa.plugin.wait
+      com.hcl.wa.plugin.azurebatch

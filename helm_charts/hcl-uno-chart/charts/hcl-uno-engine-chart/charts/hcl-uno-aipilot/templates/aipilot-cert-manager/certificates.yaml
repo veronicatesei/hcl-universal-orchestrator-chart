@@ -1,0 +1,67 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019, 2024. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
+
+{{ $fullName := include "aipilot.fullName" . }}
+{{ $certIssuer := include "aipilot.cert.issuer" . }}
+
+{{- if not (or (and .Values.certificates (or  .Values.certificates.useCustomizedCert  .Values.certificates.customIssuer))) }} 
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1"}}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1"}}
+apiVersion: certmanager.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" }}
+apiVersion: cert-manager.io/v1alpha2
+{{- else if .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1"}}
+apiVersion: certmanager.k8s.io/v1alpha1
+{{- end }}
+kind: Certificate
+metadata:
+  name: {{ include "aipilot.cert.name" . }}
+  labels:
+{{ include "aipilot.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "aipilot.cert.name" . }}
+  duration: {{ .Values.certificates.duration }} # 90d
+  renewBefore: {{ .Values.certificates.renewBefore }} # 15d
+{{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1" ) ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1" ) }}
+  subject:
+    organizations:
+      - {{ default .Values.certificates.organization }}
+{{- else if or ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" ) ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" ) }}
+  organization:
+  - {{  default .Values.certificates.organization }}
+{{- end }}
+  commonName: aipilot
+  isCA: false
+{{- if or ( .Capabilities.APIVersions.Has "certmanager.k8s.io/v1alpha1" ) ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2" )  }}
+{{- if not ( .Capabilities.APIVersions.Has "cert-manager.io/v1" )  }}
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+{{- end }}
+{{- end }}
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+{{- $myList := include "aipilot.microservices.list" . | fromJsonArray -}}
+{{- range $myList}}
+  - {{ $fullName }}-{{ . }}
+{{- end -}}
+{{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
+  privateKey:
+    rotationPolicy: Always
+{{- if ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
+    size: 2048
+    algorithm: RSA
+    encoding: PKCS1
+{{- end }}
+{{- end }}
+  issuerRef:
+    name: {{ $certIssuer }}
+    kind: Issuer
+{{- end }}

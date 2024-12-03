@@ -1,0 +1,98 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+{{ $fullName := include "aipilot.fullName" . }}
+{{- $root := . -}}
+#####################################################################
+#
+#####################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ $fullName }}-{{ .Values.pilotNlg.name }}"
+  labels:
+    {{- include "aipilot.labels" . | nindent 4 }}
+spec:
+  replicas: {{ default .Values.replicaCount .Values.pilotNlg.replicaCount }}
+  selector:
+    matchLabels:
+{{ include "aipilot.selectorLabels.backend" (list $root .Values.pilotNlg ) | indent 6}}
+      app: nlg
+      tier: backend
+      track: {{ .Values.track }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels: {{- include "aipilot.selectorLabels.backend" (list $root .Values.pilotNlg ) | nindent 8 }}
+        app: nlg
+        tier: backend
+        track: {{ .Values.track }}
+    spec:
+{{ include "aipilot.pull.secret" . | indent 6 }}
+{{ include "aipilot.serviceAccountName" . | indent 6 }}
+      securityContext:
+{{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: https-cert
+          secret:
+            secretName: {{ include "aipilot.cert.name" . }}
+        {{- if .Values.translation.google.credentials }}
+        - name: google-credentials
+          secret: 
+            secretName: {{ .Release.Name }}-aipilot-google-credentials
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      containers:
+        - name: "{{ $fullName }}-{{ .Values.pilotNlg.name }}"
+          {{- include "aipilot.image" (list $root .Values.pilotNlg) | nindent 10 -}}
+          {{- include "aipilot.imagePullPolicy" (list $root .Values.pilotNlg) | nindent 10 -}}          
+          command: ["/bin/bash", "-c", "uvicorn nlg.app:app --host=0.0.0.0 --port={{ .Values.pilotNlg.port }} --log-level=debug --ssl-certfile /var/nlg-secret/tls.crt --ssl-keyfile /var/nlg-secret/tls.key" ]
+          ports:
+            - containerPort: {{ default 5001 .Values.pilotNlg.port }}
+              name: port-{{ default 5001 .Values.pilotNlg.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: "{{ $fullName }}-{{ .Values.pilotNlg.name }}-configmap"
+            - configMapRef:
+                name: {{ .Release.Name }}-aipilot-translation-config
+          volumeMounts:
+            {{- if .Values.translation.google.credentials }}
+            - name: google-credentials
+              subPath: google-credentials.json
+              mountPath: /tmp/google-credentials.json
+              readOnly: true
+            {{- end }}
+            - name: https-cert
+              mountPath: "/var/nlg-secret"
+              readOnly: true
+            - name: https-cert
+              mountPath: "/opt/app-root/lib/python3.9/site-packages/certifi/cacert.pem"
+              subPath: ca.crt
+              readOnly: true
+            - name: https-cert
+              mountPath: "/etc/pki/ca-trust/source/anchors/ca-cert.crt"
+              subPath: ca.crt
+              readOnly: true
+          {{- include "aipilot.resources" .Values.pilotNlg | nindent 10 }}

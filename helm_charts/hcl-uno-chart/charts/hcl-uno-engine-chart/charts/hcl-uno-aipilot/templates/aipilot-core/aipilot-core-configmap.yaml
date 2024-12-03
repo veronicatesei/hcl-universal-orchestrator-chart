@@ -1,0 +1,51 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+{{ $fullName := include "aipilot.fullName" . }}
+apiVersion:  v1
+kind:  ConfigMap
+metadata: 
+  name:  "{{ $fullName }}-{{ .Values.pilotCore.name }}-configmap"
+data: 
+{{- if .Values.pilotCore.config }}
+{{ toYaml .Values.pilotCore.config | indent 2 }}
+{{ end }}
+  JWT_PRIVATE_KEY_PEM_PATH: "/var/core-secret/tls.key"
+  PUBLIC_KEY_CERT_PATH: "/var/core-secret/tls.crt"
+  POSTGRES_DB_RASA: "rasa"
+  endpoints.yml: |
+    # Event broker which all conversation events should be streamed to.
+    # https://rasa.com/docs/rasa/event-brokers
+
+    # Server which generates the responses.
+    # https://rasa.com/docs/rasa/nlg/
+
+    action_endpoint:
+      url: ${PILOT_ACTIONS_URL}/webhook
+      cafile: ${ROOT_CA_FOLDER}/cacert.pem
+
+    tracker_store:
+        type: SQL
+        dialect: "postgresql"  # the dialect used to interact with the db
+        url: ${POSTGRES_DB}  # (optional) host of the sql db, e.g. "localhost"
+        db: ${POSTGRES_DB_RASA}  # path to your db
+        username: ${POSTGRES_USER} # username used for authentication
+        password: ${PASSWORD_TRACKERSTORE} # password used for authentication
+    
+    lock_store:
+        type:  rasa_custom_components.pg_lock_store.PgLockStore
+        url: ${POSTGRES_DB} # (optional) host of the sql db, e.g. "localhost"
+        db: ${POSTGRES_DB_RASA}   # path to your db
+        username: ${POSTGRES_USER} # username used for authentication
+        password: ${PASSWORD_LOCKSTORE} # password used for authentication
+        port: 5432 # port of your sql instance, usually 5432
+        cafile: /security/postgres/certs/ca.crt
+        certfile: /security/postgres/certs/tls.crt
+        keyfile: /security/postgres/certs/tls.key
+    nlg:
+      url: ${PILOT_NLG_URL}/nlg
+      cafile: ${ROOT_CA_FOLDER}/cacert.pem
