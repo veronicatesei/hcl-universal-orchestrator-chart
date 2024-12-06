@@ -14,16 +14,13 @@ To respond to the growing request to make automation opportunities more accessib
 
 HCL Universal Orchestrator is a complete, modern solution to orchestrate calendar-based and event-driven tasks, business and IT processes. It enables organizations to gain complete visibility and control over attended or unattended workflows. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
-For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v1.1/index.html).
+For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.0/index.html).
 
 ## Details
 
-By default, all microservices and the Dynamic Workload Console (console) are installed. 
+All microservices and the UnO Console are installed. The Dynamic Workload Console is available by enabling a specific parameter in the values.yaml file.
 
-To achieve high availability in an HCL Universal Orchestrator environment, the minimum base configuration is composed of 2 Dynamic Workload Consoles and 2 replicas of all microservices. For more details about HCL Universal Orchestrator and high availability, see: 
-
-
-[An active-active high availability scenario](https://help.hcltechsw.com/UnO/v1.1/Mobile_guides/highavailability.html).
+To achieve high availability in an HCL Universal Orchestrator environment, the minimum base configuration is composed of 2 replicas of all microservices.
 
 HCL Universal Orchestrator can be deployed across a single cluster, but you can add multiple instances of the product microservices by using a different namespace in the cluster. The product microservices can run in multiple failure zones in a single cluster.
 
@@ -46,6 +43,8 @@ Ensure you modify the value of the `waconsole.console.exposeServiceType` paramet
 
 You can access the HCL Universal Orchestrator chart and container images from the Entitled Registry. See [Create the secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
 
+Core:
+
  - hcl-uno-agentmanager
  - hcl-uno-gateway
  - hcl-uno-iaa
@@ -59,7 +58,15 @@ You can access the HCL Universal Orchestrator chart and container images from th
  - hcl-uno-orchestrator
  - hcl-uno-console
  - hcl-uno-notification
+ - hcl-uno-external-pod
 
+UnO AI Pilot:
+
+ - hcl-uno-pilot-notification
+ - hcl-aipilot-core
+ - hcl-aipilot-actions
+ - hcl-aipilot-nlg
+ - pgvector
 
 ## Prerequisites
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
@@ -69,14 +76,8 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Kubernetes cluster v 1.29 or later
  - Helm v 3.12 or later
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
- - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB for AWS deployment
- - Enablement of an OIDC provider. You can enable an OIDC user registry by configuring the `values.yaml` deployment file as follows:
-
-        uno.authentication.oidc.enabled=true
-
-   Enter the required values into the `authentication` section of the `values.yaml` file, according to your OIDC provider. If the OIDC you are using has custom certificates, to connect your machine to your OIDC provider you must use the certificate as secret in the following parameter of under `certificates` section:
-
-        uno.config.certificates.additionalCASecrets : Specify the secret.
+ - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB for AWS deployment.
+ - Enablement of an OIDC provider.
 
 **Strongly recommended**
 
@@ -112,9 +113,14 @@ The following are prerequisites specific to each supported cloud provider:
  
 | Component | Container resource limit | Container resource request |
 |--|--|--|
-|**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.3, Memory: 1 GB|
-|**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.3, Memory: 0.5 GB  |
-|**Console**  | CPU: 4, Memory: 16 GB  |CPU: 1, Memory: 4 GB, Storage: 5 GB  |
+|**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 1 GB|
+|**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 0.5 GB  |
+|**Dynamic Workload Console**  | CPU: 4, Memory: 16 GB  |CPU: 1, Memory: 4 GB, Storage: 5 GB  |
+|**AIPilot-core** | CPU : 1, Memory: 2.5GB | CPU 0.5, Memory: 2GB
+|**AIPilot-action**| CPU: 0.3, Memory: 0.3GB | CPU: 0.1, Memory: 0.2GB
+|**AIPilot-nlg**| CPU: 0.3, Memory: 0.5GB | CPU: 0.1, Memory: 0.3GB
+|**AIPilot-rag**| CPU: 0.8, Memory: 1Gi | CPU: 0.2 , Memory: 0.2Gi
+|**PgVector**| CPU: 0.15 Memory: 0.192GB Ephemeral-storage : 2Gi |  CPU: 0.1 Memory: 0.1Gi Ephemeral-storage: 50Mi
 
 No disk space is required for the microservices, however, at least 100 GB are recommended for Kafka and 100 GB for MongoDB. Requirements vary depending on your workload.
 
@@ -125,7 +131,8 @@ Deploying and configuring HCL Universal Orchestrator involves the following high
 1. [Creating the Namespace](#creating-the-namespace)
 2. [Creating a Kubernetes Secret](#creating-the-secret) by accessing the entitled registry to store an entitlement key for the HCL Universal Orchestrator offering on your cluster. 
 3. [Deploying the product components](#deploying-the-product-components)
-4. [Verifying the deployment](#verifying-the-deployment)
+4. [Configuring optional product components](#configuring-optional-product-components)
+5. [Verifying the deployment](#verifying-the-deployment)
 
 
 ### Creating the Namespace
@@ -165,19 +172,88 @@ To deploy HCL Universal Orchestrator, perform the following steps:
    
 2. Pull the Helm chart:
 
-        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.0-beta1
+        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.1-beta1
 	
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
-3. Customize the deployment. Configure each product component by adjusting the values in the `values.yaml` file. The `values.yaml`file contains a detailed explanation for each parameter. 
+3. Customize the deployment.
+
+   Configure each product component by adjusting the values in the **values.yaml** file. The **values.yaml** file contains a detailed explanation for each parameter.
+
+- Accepting the license agreement
+
+The licence parameter determines whether the licence agreement is accepted or not. Supported values are `accept` and `not accepted`. To accept the license agreement, set the value as:
+
+    global.license: accept
+
+
+- Configuring the database section in the values.yaml file
+
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the database deployment configuration.
+
+    uno.database.url: mongodb://hcl-uno-db-mongodb.db.svc.cluster.local:27017
+    uno.database.type: mongodb
+    uno.database.databaseName: uno
+    uno.database.username: mongouser
+    uno.database.password: mongopassword
+    uno.database.tls: false
+    uno.database.tlsInsecure: false
+   
+
+- Configuring the kafka section in the values.yaml file
+
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the kafka deployment configuration.
+
+    uno.kafka.url: hcl-uno-kafka-0.kafka-headless.kafka.svc.cluster.local:9092
+    uno.kafka.username: kafkauser
+    uno.kafka.password: kafkapassword
+    uno.kafka.tls: false
+    uno.kafka.saslMechanism: PLAIN
+    uno.kafka.jaasConfig: org.apache.kafka.common.security.plain.PlainLoginModule required username="my-username" password="my-password";
+    uno.kafka.securityProtocol: SASL_PLAINTEXT
+    uno.kafka.tlsInsecure: false
+    uno.kafka.kerberosServiceName: kerberosservicenameexample
+    uno.kafka.topicReplicas: 1
+
+- Configuring the authentication.oidc section in the **values.yaml** file
+
+You can enable an OIDC user registry by configuring the **values.yaml** deployment file as follows:
+
+    uno.authentication.oidc.enabled: true
+
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the OIDC deployment configuration.
+
+    uno.authentication.oidc.server: https://unokeycloak.k8s.uat.uno/realms/uno
+    uno.authentication.oidc.clientId: uno-service
+    uno.authentication.oidc.credentialSecret: put_oidc_secret_here
+    uno.authentication.oidc.tlsVerification: required
+
+- Configuring the networking in the **values.yaml** file
+
+  The HCL Universal Orchestrator server and console can use two different ways to route external traffic into the Kubernetes Service cluster:
+
+* **Ingress** and OpenShift **routes** services that manage external access to the services in the cluster.
+
+  To configure an ingress control for the microservices, set the following parameters in the **values.yaml** file:
+
+      uno.ingress.ingressClassName: nginx
+      uno.ingress.baseDomainName: .k8s.uat.uno
+
+  If you are using OpenShift routes, set the following parameter is the **values.yaml** file to false:
+
+      uno.ingress.enabled: false
+
+  To make sure HCL Universal Orchestrator tusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
+
+    uno.config.certificates.additionalCASecrets: certificatesecret
 
 4. Deploy the instance by running the following command: 
 
         helm install -f values.yaml <uno_release_name> <repo_name>/hcl-uno-chart -n <uno_namespace>
 
-
  where 
-   <uno_release_name> is the deployment name of the instance. 
+   <uno_release_name> is the deployment name of the instance.
+   
 **TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
 
 The following are some useful Helm commands:
@@ -198,7 +274,55 @@ The following are some useful Helm commands:
 
         helm uninstall <uno_release_name> -n <uno_namespace>
 
+### Configuring optional product components
+
+**UnoAIPilot**
+
+You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
 		
+		global.enableUnoAIPilot: true
+  
+  
+**Session timeout**
+
+After a period of inactivity on the UI, users are automatically logged out. You can change the session timeout value, which is set by default to 30 minutes, by modifying the following parameter in the **values.yaml** file of the Helm chart:
+
+    uno.config.console.sessionTimeoutMinutes: 30
+
+**Log out option**
+
+To enable the log out option, set the following parameter in the **values.yaml** file of the Helm chart to true:
+
+     uno.config.console.enableLogout: true
+
+**Generative workflows and knowledege base**
+
+You can enable the generative features of the UnO AI Pilot for both workflow generation and generative knowledge base by setting the following parameter in the **values.yaml** file of the Helm chart to true:
+
+    uno.config.genai.enabled: true
+
+**Justifications**
+
+The administrator can enable justifications so that users are prompted to provide information when saving or performing changes to items in the environment. To enable justifications, set the following parameter in the **values.yaml** file of the Helm chart to true:
+
+    uno.config.engine.justificationEnabled: true
+
+You can configure different justification levels by setting the related parameters in the values.yaml file of the Helm chart as follows:
+
+     uno.config.engine.justificationCategoryRequired: true
+     uno.config.engine.justificationTicketNumberRequire: true
+     uno.config.engine.justificationDescriptionRequired: true
+
+For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1/Deployment/justifications.html).
+
+**Administrative user customization**
+
+You can change the name of the default administrative user modifying the parameter in the **values.yaml** file of the Helm chart:
+
+     uno.authentication.adminName: wauser
+
+
+Check the **values.yaml** file for more customization options.
 
 ### Verifying the deployment 
 
@@ -210,61 +334,31 @@ Run the following command to verify the pods installed in the <uno_namespace>:
    
            kubectl get pods -n <uno_namespace>
 
- **Verify that the default engine connection is created from the Dynamic Workload Console**
 
-Verifying the default engine connection depends on the network enablement configuration you implement. To determine the URL to be used to connect to the console, follow the procedure for the appropriate network enablement configuration.
+ **Verifying the microservices network ingresses**
 
-**For load balancer:**
+To obtain the URLs related to the ingresses of the different microservices, use the following command:
 
-1. Run the following command to obtain the token to be inserted in https://\<loadbalancer>:9443/console to connect to the console:
+    kubectl get ingress <uno_release_name>-uno-ingress -n <uno_namespace> -o json | jq -r '.spec.rules[] | .host + .http.paths[].path'
 
-![Amazon EKS](images/tagawseks.png "Amazon EKS") 
+To obtain the OpenShift routes of the different microservices, use the following command:
+
+    kubectl get route -n <uno_namespace>
+
+
+**Logging into the UnO console:**
+
+Logging in the UnO console is only possible if an OIDC provider has been previously configured.
+
+1. Log in to the UnO console by using the URLs obtained in the previous step, and inserting the previously defined administrative user credentials and the password associated to that user in the OIDC provider.
 	
-        kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..hostname}' -n <workload_automation_namespace>
-
-![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
-
-       kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..ipaddress}' -n <workload_automation_namespace>
-       
-
-![Google GKE](images/taggke.png "Google GKE")
-
-       kubectl get svc <workload_automation_release_name>-waconsole-lb  -o 'jsonpath={..status.loadBalancer.ingress..ipaddress}' -n <workload_automation_namespace>
-
-
-2. With the output obtained, replace \<loadbalancer> in the URL https://\<loadbalancer>:9443/console.
-
-**For ingress:**
-
-1. Run the following command to obtain the token to be inserted in https://\<ingress>/console to connect to the console:
-
-
-        kubectl get ingress/<workload_automation_release_name>-waconsole -o 'jsonpath={..host}'-n <workload_automation_namespace>
-  
-2.   With the output obtained, replace \<ingress> in the URL https://\<ingress>/console.
-
-**Logging into the console:**
-
-1. Log in to the console by using the URLs obtained in the previous step.
-
-2. For the credentials, specify the user name (wauser) and password (wa-pwd-secret, the password specified when you created the secrets file to store passwords for the server, console and database).
-	
-3. From the navigation toolbar, select **Administration -> Manage Engines**.
-	
-4.  Verify that the default engine, **engine_<release_name>-gateway** is displayed in the Manage Engines list:
-
-To ensure the Dynamic Workload Console logout page redirects to the login page, modify the value of the logout url entry available in file authentication_config.xml:
-
-
-       <jndiEntry value="${logout.url}" jndiName="logout.url" />
-
-where the logout.url string in jndiName should be replaced with the logout URL of the provider.
+2. Verify that the UnO console is successfully connected to the engine by accessing either the Graphical Designer or the Orchestration Monitor.
 
 ## Upgrading the product components
 
 To upgrade HCL Universal Orchestrator, perform the following steps:
 
-1. Configure each product component by adjusting the values in the `values.yaml` file. The `values.yaml`file contains a detailed explanation for each parameter.
+1. Configure each product component by adjusting the values in the **values.yaml** file. The **values.yaml** file contains a detailed explanation for each parameter.
 
 2. Upgrade the instance by running the following command:
 
@@ -272,9 +366,8 @@ To upgrade HCL Universal Orchestrator, perform the following steps:
 		 
  where 
    <uno_release_name> is the deployment name of the instance. 
+   
 **TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
-
-**Note:** When upgrading HCL Universal Orchestrator from V1.1.0 to V1.1.2 or later, or from V1.1.1 to V1.1.2 or later, you must manually delete the older version of the executable job plug-in.
 	   
 ## Uninstalling the Chart
 
@@ -291,167 +384,45 @@ Configuration parameters are available in the **values.yaml** files, together wi
 
 The following procedures are ways in which you can configure the default deployment of the product components. They include the following configuration topics:
 
-* [Network enablement](#network-enablement)
 * [Scaling the product](#scaling-the-product)
 * [Managing your custom certificates](#managing-your-custom-certificates)
-
-### Network enablement
-
-The HCL Universal Orchestrator server and console can use two different ways to route external traffic into the Kubernetes Service cluster:
-
-* A **load balancer** service that redirects traffic
-* An **ingress** service that manages external access to the services in the cluster
-
-You can freely switch between these two types of configuration.
-
-#### Network policy
-
-You can specify an egress network policy to include a list of allowed egress rules for each components. Each rule allows traffic leaving the cluster which matches both the "to" and "ports" sections. For example, the following sample demonstrates how to allow egress to another destination:
-
-networkpolicyEgress:
-
-	- name: to-mdm
-	  egress:
-	  - to:
-	    - podSelector:
-	        matchLabels:
-		  app.kubernetes.io/name: waserver
-	    - port: 31116
-	      protocol: TCP
-	- name: dns
-	  egress:
-	    - to:
-	      - namespaceSelector:
-	          matchLabels:
-		    name: kube-system
-	    - ports:
-	        - port: 53
-		  protocol: UDP
-		- port: 53
-		  protocol: TCP
-
-For more information, see [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/).
-
-#### Node affinity Required
-You can also specify node affinity required to determine on which nodes a component can be deployed using custom labels on nodes and label selectors specified in pods. The following is an example:
-
-nodeAffinityRequired:
-
-	-key: iwa-node
-	  operator: In
-	  values:
-	  - 'true'
-
-where **iwa-node** represents the value of the node affinity required.
-
-#### Load balancer service
-
-
-  To configure a load balancer, follow these steps:
-
-1. Locate the following parameters in the `values.yaml` file:
-
-		exposeServiceType
-		exposeServiceAnnotation
-
-For more information about these configurable parameters, see the explanatory comments available in the **values.yaml** file.
-
-2. Set the value of the `exposeServiceType` parameter to `LoadBalancer`.
-
-3. In the `exposeServiceAnnotation` section, uncomment the lines in this section as follows:
-
-![Amazon EKS](images/tagawseks.png "Amazon EKS") 
-
-		service.beta.kubernetes.io/aws-load-balancer-type: nlb
-		service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-		
-![Microsoft Azure](images/tagmsa.png "Microsoft Azure") 
-
-		service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-
-![Google GKE](images/taggke.png "Google GKE") 
-
-		networking.gke.io/load-balancer-type: "Internal"
-
-
-4. Specify the load balancer type and set the load balancer to internal by specifying "true".
-
-
-#### Ingress service
-
-  To configure an ingress for the server, follow these steps:
-
-1. Locate the following parameters in the `values.yaml` file:
-
-		exposeServiceType
-		exposeServiceAnnotation
-
-   For more information about these configurable parameters, see the explanatory comments available in the **values.yaml** file.
-
-2. Set the value of the `exposeServiceType`parameter to `Ingress`.
-
-3. In the `exposeServiceAnnotation` section, leave the following lines as comments:
-
-![Amazon EKS](images/tagawseks.png "Amazon EKS") 
-
-		#service.beta.kubernetes.io/aws-load-balancer-type:nlb
-		#service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-
-![Microsoft Azure](images/tagmsa.png "Microsoft Azure")
-
-		#service.beta.kubernetes.io/azure-load-balancer-internal: "true"	
-		
-![Google GKE](images/taggke.png "Google GKE") 
-
-                #networking.gke.io/load-balancer-type: "Internal"
 
 	
 ### Scaling the product 
 
-HCL Universal Orchestrator is installed by default with autoscaling enabled. A single Dynamic Workload Console is installed. To scale the Dynamic Workload Console, increase or decrease the values of the `replicaCount` parameter in the `values.yaml` file and save the changes.
+HCL Universal Orchestrator is installed by default with autoscaling enabled. To enable high availability, set the following parameter in the `values.yaml` file to 2:
+
+    uno.deployment.global.minTargetReplicas: 2
 
 **Note**: HCL Universal Orchestrator Helm chart does not support scaling to zero nor proportional scaling.
 		  
 ### Managing your custom certificates
     
-  If you want to use custom certificates, set `useCustomizedCert:true` and use kubectl to apply the secret in the \<uno_namespace>.
- Type the following command:
- 
- ```
-kubectl create secret generic waserver-cert-secret --from-file=TWSClientKeyStore.kdb --from-file=TWSClientKeyStore.sth --from-file=TWSClientKeyStoreJKS.jks --from-file=TWSClientKeyStoreJKS.sth --from-file=TWSServerKeyFile.jks --from-file=TWSServerKeyFile.jks.pwd --from-file=TWSServerTrustFile.jks --from-file=TWSServerTrustFile.jks.pwd -n <workload-automation-namespace>   
- ``` 
-  
-    
-> **Note:** if you set `db.sslConnection:true`, you must also set the `useCustomizedCert` setting to true on both UnO and Dynamic Workload Console charts and, in addition, you must add the following certificates in the customized SSL certificates secret on both UnO and Dynamic Workload Console charts:
+To use custom certificates: 
 
-  * ca.crt
-  * tls.key
-  * tls.crt
+1. Genereta your custom certificates
+2. Set `uno.congfig.certificates.useCustomizedCert: true`
+3. Assign the certificate values as secrets in the certificates section of the **values.yaml** file:
 
- Customized files must have the same name as the ones listed above.
-         
-If you want to use SSL connection to DB, set `db.sslConnection:true` and `useCustomizedCert:true`, then use kubectl to create the secret in the same namespace where you want to deploy the chart:
+    uno.config.certificates.caPairSecretName: ca-key-pair
+    uno.config.certificates.certSecretName: uno-certificate
+    uno.config.certificates.certExtAgtSecretName: uno-certificate-ext-agt
 
-      bash
-      $ kubectl create secret generic release_name-secret --from-file=TWSServerTrustFile.jks --from-file=TWSServerKeyFile.jks --from-file=TWSServerTrustFile.jks.pwd --from-file=TWSServerKeyFile.jks.pwd --namespace=<uno_namespace>
         
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
-**Managing DocumentDB during AWS deployment**
-
-When deploying Universal orchestrator on AWS, you can leverage DocumentDB, a fully managed NoSQL database service provided by AWS. You must configure few parameters in the values.yaml file to ensure compatibility with DocumentDB. The parameters that must be configured are as follows:
-In **db** section,
-* type: Specify the preferred remote database server, DocumentDB in this case.
-* hostname: Specify the hostname or the IP address of the DocumentDB database server.
-* name: Specify the name of the DocumentDB database server.
-* port: Specify the port of the DocumentDB database server.
-* sslConnection: Set the value to true.
-* retryWrites: Only for documentDB. Supported values are true or false.
-* readPreference: Only for documentDB. Specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, nearest.
-
-You must also set the following parameters under the **certificates** section to connect your machine to the DocumentDB. 
-* UseCustomizedCert: Set the value to true and add the certificate as a secret.
-* AdditionalCASecrets : Specify the name of the certificate that you set as a secret.
+When using custom certificates make sure to update the following fields:
+		
+			uno.hclaipilot.certificates.useCustomizedCert: true
+			uno.hclaipilot.certificates.caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			uno.hclaipilot.certificates.certSecretName: <the name of the custom certificate you want to use>
+		
+			uno.hclaipilot.rag.certificates.useCustomizedCert: true
+			uno.hclaipilot.rag.certificates.caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			uno.hclaipilot.rag.certificates.certSecretName: <the name of the custom certificate you want to use>
+	
+			uno.hclaipilot.pgvector.tls.caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+			uno.hclaipilot.pgvector.tls.certificatesSecret: <the name of the custom certificate you want to use>
 
 ## Metrics monitoring 
 
@@ -461,7 +432,7 @@ HCL Universal Orchestrator uses Grafana to display performance data related to t
 
 The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<uno_namespace> <uno_release_name>**:
 
-For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/UnO/v1.1/Monitoring/awsrgmonprom.html).
+For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/UnO/v2.1.0/Monitoring/awsrgmonprom.html).
   
   ### Setting the Grafana service
 Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Promotheus](https://github.com/helm/charts/tree/master/stable/prometheus).
@@ -518,16 +489,12 @@ For more information about using Grafana dashboards see [Dashboards overview](ht
 *  Limited to amd64 platforms.
 *  Anonymous connections are not permitted.
 
+## AI Pilot Knowledge base
+To ensure a user can import, export, or delete the custom knowledge base, they must have the AI_PILOT_ADMINISTRATOR role. By default, this role is assigned to all administrator accounts.
 
 ## Documentation
 
-To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v1.1/index.html).
+To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.0/index.html).
 
-
-
-## Change history
-
-### Added August 2023
-First release
 
 
