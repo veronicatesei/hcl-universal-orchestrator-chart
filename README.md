@@ -76,9 +76,8 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Kubernetes cluster v 1.29 or later
  - Helm v 3.12 or later
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
- - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB for AWS deployment.
+ - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 for AWS deployment.
  - Enablement of an OIDC provider.
- - HCL UnO agent: Java SDK21.
 
 **Strongly recommended**
 
@@ -316,6 +315,12 @@ You can configure different justification levels by setting the related paramete
 
 For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1/Deployment/justifications.html).
 
+**Encryption**
+
+You can configure the password or key to encrypt data, such as passwords, agent database, and kafka messages by configuring the **values.yaml** file as follows: 
+		
+    uno.config.encryption.key: yourpassword
+
 **Administrative user customization**
 
 You can change the name of the default administrative user modifying the parameter in the **values.yaml** file of the Helm chart:
@@ -330,7 +335,45 @@ Check the **values.yaml** file for more customization options.
 
 To ensure the integrity and authenticity of the downloaded files, we use GPG (GNU Privacy Guard) encryption. You must have the GPG tool installed on your system to decrypt and verify the files. 
 
-The Orchestration CLI and HCL UnO agent packages are signed with our private key. A corresponding .asc signature file accompanies the downloadable file. You can extract the file and use the public key to decrypt and verify the files. 
+The Orchestration CLI and HCL UnO agent packages are signed with our private key. A corresponding .asc signature file accompanies the downloadable file. You can extract the file and use the public key to decrypt and verify the files.
+
+Importing the GPG Public Key
+
+1.  Import the HCL public GPG key using the following command:
+
+    ```bash
+    gpg --import path-to-gpg-public-key
+    ```
+
+    A successful import generates an output similar to the following:
+
+    ```
+    gpg: /root/.gnupg/trustdb.gpg: trustdb created
+    gpg: key 1E4A814A2159AC84: public key "HCL America Inc." imported
+    gpg: Total number processed: 1
+    gpg:                 imported: 1
+    ```
+
+Verifying the OCLI File
+
+2.  Verify the OCLI file's signature using the following command:
+
+    ```bash
+    gpg --verify path-to-OCLI-file
+    ```
+
+    A successful verification produces an output similar to the following:
+
+    ```
+    gpg: Signature made Tue Jan 14 16:24:39 2025 CET
+    gpg:                using RSA key 1E4A814A2159AC84
+    gpg: Good signature from "HCL America Inc." [unknown]
+    gpg: WARNING: This key is not certified with a trusted signature!
+    gpg:         There is no indication that the signature belongs to the owner.
+    Primary key fingerprint: A2E5 F8D8 6EB5 1D05 BD14 EFA2 1E4A 814A 2159 AC84
+    ```
+
+    The warning about the uncertified signature can be safely ignored if the fingerprint matches the expected value.
 
 For more information on verifying a file with gpg keys, see [GnuPG documentation](https://www.gnupg.org/gph/en/manual.html). 
 
