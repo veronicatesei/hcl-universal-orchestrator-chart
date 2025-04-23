@@ -30,4 +30,5 @@ data:
   SSL_CERT_DIR: /etc/ssl/certs/
   REQUESTS_CA_BUNDLE: /var/actions-secret/ca.crt
   JWT_PRIVATE_KEY_PEM_PATH: /var/actions-secret/tls.key
+  ENABLE_OIDC_APIKEY_RAG_ACTIONS : "true"
   

@@ -66,6 +66,14 @@
 {{- printf "%s-%s" $fullName  $name  -}}
 {{- end -}}
 
+{{- define "common.baseDomainName" -}}
+{{- if .Values.global.sofySolutionContext }}
+{{- printf ".$(SOFY_HOSTNAME)" -}}
+{{- else }}
+{{- printf "%s" .Values.ingress.baseDomainName -}}
+{{- end -}}
+{{- end -}}
+
 {{/*
 Returns the readinessProbe
 */}}
@@ -176,7 +184,7 @@ prometheus.io/path: "/q/metrics"
 {{- end -}}
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 2.1.0.0
+uno.microservice.version: 2.1.1.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -247,6 +255,16 @@ release: {{ .Release.Name | quote }}
 {{- end }}
 {{- end -}}
 
+{{- define "uno.sofy.env.variables" -}}
+{{- if .Values.global.sofySolutionContext }}
+- name: SOFY_HOSTNAME
+  valueFrom:
+    configMapKeyRef:
+      name: {{ .Release.Name }}-domain
+      key: HOST
+{{- end }}
+{{- end -}}
+
 {{- define "uno.oidc.env.variable" -}}
 {{- if .Values.authentication.oidc.connectionTimeout }}
 - name: QUARKUS_OIDC_CONNECTION_TIMEOUT
@@ -255,19 +273,33 @@ release: {{ .Release.Name | quote }}
 - name: QUARKUS_OIDC_CONNECTION_TIMEOUT
   value: "PT1M"
 {{- end }}
-{{- if .Values.authentication.oidc.enabled }}
+{{- if or .Values.authentication.oidc.enabled .Values.global.sofySolutionContext}}
 - name: QUARKUS_OIDC_TENANT_ENABLED
   value: "true"
+{{- if (.Values.global.sofySolutionContext) }}
 - name: QUARKUS_OIDC_AUTH_SERVER_URL
-  value: {{ .Values.authentication.oidc.server | quote }}
+  value: https://sofy-kc.$(SOFY_HOSTNAME)/auth/realms/sofySolution
+{{- else }}
+- name: QUARKUS_OIDC_AUTH_SERVER_URL
+  value: {{ tpl .Values.authentication.oidc.server . | quote }}
+{{- end }}
 - name: QUARKUS_OIDC_CLIENT_ID
   value: {{ .Values.authentication.oidc.clientId | quote }}
+{{- if (.Values.global.sofySolutionContext) }}
+- name: QUARKUS_OIDC_CREDENTIALS_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ printf "%s-%s-%s" .Release.Name "client" "secret" }}
+      key: client-secret
+      optional: true
+{{- else }}
 - name: QUARKUS_OIDC_CREDENTIALS_SECRET
   valueFrom:
     secretKeyRef:
       name: {{ .Release.Name }}-uno-secret
       key: OIDC_SECRET
       optional: true
+{{- end }}
 - name: QUARKUS_OIDC_TOKEN_STATE_MANAGER_ENCRYPTION_REQUIRED
   value: {{ .Values.authentication.oidc.encryptTokensInCookie | quote }}
 - name: QUARKUS_OIDC_TOKEN_STATE_MANAGER_SPLIT_TOKENS
@@ -283,9 +315,25 @@ release: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{- define "uno.oidc.enabled.variable" -}}
-{{- if .Values.authentication.oidc.enabled }}
+{{- if or .Values.authentication.oidc.enabled .Values.global.sofySolutionContext}}
 - name: UNO_AUTHENTICATION_OIDC_ENABLE
   value: "true"
+{{- if .Values.authentication.oidc.groupClaimPath }}
+- name: QUARKUS_OIDC_ROLES_ROLE_CLAIM_PATH
+  value: {{ .Values.authentication.oidc.groupClaimPath | quote }}
+{{- end }}
+{{- if .Values.authentication.oidc.principalClaim }}
+- name: QUARKUS_OIDC_TOKEN_PRINCIPAL_CLAIM
+  value: {{ .Values.authentication.oidc.principalClaim | quote }}
+{{- end }}
+{{- if .Values.authentication.oidc.authenticationScope }}
+- name: QUARKUS_OIDC_AUTHENTICATION_SCOPES
+  value: {{ .Values.authentication.oidc.authenticationScope | quote }}
+{{- end }}
+{{- if .Values.authentication.oidc.jwtGroupClaimPath }}
+- name: SMALLRYE_JWT_PATH_GROUPS
+  value: {{ .Values.authentication.oidc.jwtGroupClaimPath | quote }}
+{{- end }}
 {{- if .Values.authentication.oidc.useToManageApiKeys }}
 - name: UNO_AUTHENTICATION_ON_FAIL_USE_OIDC
   value: "true"
@@ -322,7 +370,7 @@ release: {{ .Release.Name | quote }}
 {{- if .Values.ingress.enabled }}
 {{- if .Values.ingress.baseDomainName }}
 - name: UNO_AUTHENTICATION_API_HOSTNAME
-  value: "gateway{{ .Values.ingress.baseDomainName }}"
+  value: "gateway{{ include "common.baseDomainName" . }}"
 {{- else }}
 - name: UNO_AUTHENTICATION_API_HOSTNAME
   value: {{ .Values.authentication.apiHostname | quote }}
@@ -374,12 +422,25 @@ release: {{ .Release.Name | quote }}
   value: {{ .Values.config.planning.notActiveWindowMin | quote }} 
 - name: UNO_PLANNING_CLEANUP_RETENTION_DURATION
   value: {{ .Values.config.planning.daysRetentionPlan | quote }} 
+- name: UNO_PLANNING_CLEANUP_FAILED_JOBS_RETENTION_DURATION
+  value: {{ .Values.config.planning.daysRetentionFailPlan | quote }} 
+- name: UNO_PLANNING_CLEANUP_FAILED_JOBS_FREQUENCY
+  value: {{ .Values.config.planning.frequencyFailJobCleanUp | quote }} 
 - name: UNO_PLANNING_ACTIVE_WINDOW_EXTENSION
   value: {{ .Values.config.planning.activeWindowExtension | quote }} 
 - name: UNO_PLANNING_ACTIVE_WINDOW_LICENSE
   value: {{ .Values.config.planning.activeWindow | quote }}
+{{- if .Values.config.orchestrator.maxNestingLevel}}
+- name: UNO_MAX_NESTING_LEVEL
+  value: {{ .Values.config.orchestrator.maxNestingLevel | quote }}
+{{- end }}
+{{- if .Values.global.sofySolutionContext}}
 - name: UNO_GENAI_CLIENT_ENABLED
   value: {{ .Values.config.genai.enabled | quote }}
+{{ else }}
+- name: UNO_GENAI_CLIENT_ENABLED
+  value: {{ .Values.config.genai.enabled | quote }}
+{{- end }}
 - name: UNO_GENAI_CLIENT_URL
   value: {{ .Values.config.genai.serviceUrl | quote }}
 - name: UNO_GENAI_CLIENT_PROXY_HOSTNAME
@@ -426,6 +487,14 @@ release: {{ .Release.Name | quote }}
 {{- if .Values.kafka.kerberosServiceName }}
 - name: KAFKA_SASL_KERBEROS_SERVICE_NAME
   value: {{ .Values.kafka.kerberosServiceName | quote}}
+{{- end }}
+{{- if .Values.kafka.oauthLoginCallbackHandlerClass }}
+- name: KAFKA_SASL_LOGIN_CALLBACK_HANDLER_CLASS
+  value: {{ .Values.kafka.oauthLoginCallbackHandlerClass | quote}}
+{{- end }}
+{{- if .Values.kafka.oauthTokenEndpointUrl }}
+- name: KAFKA_SASL_OAUTHBEARER_TOKEN_ENDPOINT_URL
+  value: {{ .Values.kafka.oauthTokenEndpointUrl | quote}}
 {{- end }}
 {{- if .Values.kafka.prefix }}
 - name: KAFKA_DEPLOYMENT_PREFIX
@@ -542,6 +611,14 @@ release: {{ .Release.Name | quote }}
   value: {{ .Values.config.console.enableLogout | default "false" | quote}}
 - name: CONSOLE_SESSION_TIMEOUT_MINUTES
   value: {{ .Values.config.console.sessionTimeoutMinutes | default "30" | quote}}
+{{- if .Values.config.encryption.key }}
+- name: UNO_AES_ENCRYPTION_PASSKEY
+  valueFrom:
+      secretKeyRef:
+        name: {{ .Release.Name }}-uno-secret
+        key: ENCRYPTION_KEY
+        optional: false
+{{- end }}
 {{- end -}}
 
 {{- define "common.custom.env.variable" -}}
@@ -602,22 +679,22 @@ volumes:
       defaultMode: 0664
       secretName: {{ .Values.config.certificates.certExtAgtSecretName | quote }}
 {{- range .Values.config.certificates.additionalCASecrets }}
-  - name: {{.}}-cert-volume
+  - name: {{ tpl . $}}-cert-volume
     secret:
       defaultMode: 0664
-      secretName: {{ .| quote }}
+      secretName: {{ tpl . $ | quote }}
       items:
       - key: tls.crt
-        path: {{.}}.crt
+        path: {{ tpl . $}}.crt
 {{- end }}
 {{- range .Values.config.certificates.additionalCASecrets }}
-  - name: {{.}}-cert-ext-volume
+  - name: {{ tpl . $}}-cert-ext-volume
     secret:
       defaultMode: 0664
-      secretName: {{ .| quote }}
+      secretName: {{ tpl . $ | quote }}
       items:
       - key: tls.crt
-        path: {{.}}.crt
+        path: {{ tpl . $}}.crt
 {{- end }}  
 {{- end -}}
 
@@ -637,13 +714,13 @@ volumeMounts:
     mountPath: /security/dwc-certs
 {{- end }}
 {{- range .Values.config.certificates.additionalCASecrets }}
-  - name: {{.}}-cert-volume
-    mountPath: /security/certs/additionalCAs/{{.}}
+  - name: {{ tpl . $}}-cert-volume
+    mountPath: /security/certs/additionalCAs/{{ tpl . $}}
 {{- end }}
 {{- range .Values.config.certificates.additionalCASecrets }}
-  - name: {{.}}-cert-ext-volume
-    mountPath: /security/ext_agt_depot/additionalCAs/{{.}}
-{{- end }}    
+  - name: {{ tpl . $}}-cert-ext-volume
+    mountPath: /security/ext_agt_depot/additionalCAs/{{ tpl . $}}
+{{- end }}
 {{- end -}}
 
 

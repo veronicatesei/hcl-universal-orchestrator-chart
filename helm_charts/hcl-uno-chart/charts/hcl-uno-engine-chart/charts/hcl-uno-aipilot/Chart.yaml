@@ -38,6 +38,6 @@ dependencies:
     alias: rag
     
   - name: postgresql
-    version: 16.0.5
+    version: 16.2.5
     repository: "https://charts.bitnami.com/bitnami"
     alias: pgvector
