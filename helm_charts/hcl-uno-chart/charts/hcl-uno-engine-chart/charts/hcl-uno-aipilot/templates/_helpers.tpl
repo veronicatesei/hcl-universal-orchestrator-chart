@@ -91,11 +91,29 @@ Create image name as "repository-name:tag".
 {{- $root := index . 0 -}}
 {{- $container := index . 1 -}}
 {{- if $container.image -}} 
-image: "{{ default $root.Values.image.repository $container.image.repository}}/hcl-aipilot-{{ $container.imageName }}:{{ default $root.Values.image.tag $container.image.tag }}"
+image: {{ include "pilot.registry" . }}/hcl-aipilot-{{ $container.imageName }}:{{ default $root.Values.image.tag $container.image.tag }}
 {{- else -}}
-image: "{{ $root.Values.image.repository }}/hcl-aipilot-{{ $container.imageName }}:{{ $root.Values.image.tag }}"
+image: {{ include "pilot.registry" . }}/hcl-aipilot-{{ $container.imageName }}:{{ $root.Values.image.tag }}
 {{ end }}
 {{- end }}
+
+{{- define "pilot.registry" -}}
+{{- $root := index . 0 -}}
+{{- $container := index . 1 -}}
+{{- if eq $root.Values.global.hclImageRegistry "hclcr.io/sofy" -}}
+hclcr.io/uno
+{{- else if eq $root.Values.global.hclImageRegistry "hclcr.io" -}}
+hclcr.io/uno
+{{- else if eq $root.Values.global.hclImageRegistry "gcr.io/blackjack-209019" -}}
+gcr.io/blackjack-209019/services/uno
+{{- else if $root.Values.global.hclImageRegistry -}}
+{{ print $root.Values.global.hclImageRegistry }}
+{{- else if and $container.image $container.image.repository -}}
+{{ print $container.image.repository }}
+{{- else -}}
+{{ print $root.Values.image.repository  }}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Create image pull policy.
@@ -260,4 +278,25 @@ imagePullSecrets:
   {{- end }}
     - name: sa-{{ .Release.Namespace }}
     - name: sa-uno
+{{- end -}}
+
+
+{{- define "aipilot.pgvector.pull.secret" -}}
+"sa-{{ .Release.Namespace }}"
+{{- end -}}
+
+{{- define "aipilot.pgvector.hclimagepull.secret" -}}
+"{{ .Values.global.hclImagePullSecret }}"
+{{- end -}}
+
+{{- define "aipilot.pgvector.credentials.secret.name" -}}
+{{ printf "%s-%s" $.Release.Name  "postgres-password-secret" }}
+{{- end -}}
+
+{{- define "aipilot.pgvector.cert.secret.name" -}}
+{{ printf "%s-%s" $.Release.Name  "postgres-certificates-secret" }}
+{{- end -}}
+
+{{- define "aipilot.pgvector.cert.default.ca.name" -}}
+{{ printf "%s-%s" $.Release.Name  "aipilot-selfsigned-ca" }}
 {{- end -}}

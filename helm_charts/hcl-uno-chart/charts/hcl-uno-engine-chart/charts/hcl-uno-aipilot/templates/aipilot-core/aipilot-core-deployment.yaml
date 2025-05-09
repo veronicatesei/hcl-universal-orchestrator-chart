@@ -110,6 +110,8 @@ spec:
               value: {{ .Values.channels.botframeworkAppId | default "NOVALUE" | quote }}
             - name: BOTFRAMEWORK_APP_PASSWORD
               value: {{ .Values.channels.botframeworkAppPassword | default "NOVALUE" | quote }}
+            - name: GROUPLESS_AUTHENTICATION
+              value: {{ .Values.channels.groupless | default "false" | quote }}  
             - name: PASSWORD_TRACKERSTORE
               valueFrom:
                 secretKeyRef:

@@ -24,5 +24,6 @@ data:
   
   {{- if .Values.global.enableUnoAIPilot }}
   HCL_CLOUD_ENDPOINT: {{ .Values.config.HCL_CLOUD_ENDPOINT | default (printf "https://%s-console:8443/ui/genai-proxy/uno/api/v1/ai/genai" (include "uno.fullname" .)) | quote }}
+  UNO_GATEWAY_HOST: {{ .Values.config.UNO_GATEWAY_HOST | default (printf "https://%s-gateway" (include "uno.fullname" .)) | quote }}
+  UNO_GATEWAY_PORT: {{ .Values.config.UNO_GATEWAY_PORT | default 8443 | quote }}
   {{- end }}
-  

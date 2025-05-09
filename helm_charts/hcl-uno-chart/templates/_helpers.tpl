@@ -42,7 +42,7 @@ microservice.version: "version"
 {{- end -}}
 
 {{- define "uno.chart.common.label" -}}
-uno.microservice.version: 2.1.0.0
+uno.microservice.version: 2.1.1.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -63,7 +63,7 @@ release: {{ .Release.Name | quote }}
 
 {{- define "waconsole.packagesUrl" -}}
 {{- $name := default .Release.Name -}}
-{{- printf "%s%s-%s" "https://" $name "storage:8443/ui/downloads/" -}}
+{{- printf "%s%s-%s" "https://" $name "gateway:8443/downloads/" -}}
 {{- end -}}
 
 {{- define "uno.audit.max.retention.duration" -}}

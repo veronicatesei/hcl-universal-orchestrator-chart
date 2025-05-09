@@ -123,3 +123,27 @@ imagePullSecrets:
 {{- define "postgres.password" -}}
 {{ printf "%s-%s" .Release.Name  "postgres-password-secret" }}
 {{- end -}}
+
+{{- define "rag.sofy.env.variables" -}}
+{{- if .Values.global.sofySolutionContext }}
+- name : SOFY_HOSTNAME
+  valueFrom:
+    configMapKeyRef:
+        name: {{ .Release.Name }}-domain
+        key : HOST
+{{- end }}
+{{- end -}}
+
+{{- define "rag.registry" -}}
+{{- if eq .Values.global.hclImageRegistry "hclcr.io/sofy" -}}
+hclcr.io/uno
+{{- else if eq .Values.global.hclImageRegistry "hclcr.io" -}}
+hclcr.io/uno
+{{- else if eq .Values.global.hclImageRegistry "gcr.io/blackjack-209019" -}}
+gcr.io/blackjack-209019/services/uno
+{{- else if .Values.global.hclImageRegistry -}}
+{{ print .Values.global.hclImageRegistry }}
+{{- else -}}
+{{ print .Values.container.registry }}
+{{- end -}}
+{{- end -}}

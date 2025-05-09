@@ -20,11 +20,11 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/wa
   # pluginImageName is the name of the image with tags for Automation Hub integrations.
-  pluginImageName: hcl-workload-automation-plugins:10.2.3.00.20241122
+  pluginImageName: hcl-workload-automation-plugins:10.2.4.00.20250423
   # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImages:
     - registry: hclcr.io/uno
-      name: hcl-uno-external-pod:2.1.0.0
+      name: hcl-uno-external-pod:2.1.1.0
   customLabels:
     - name: "environment"
       value: "prod"
@@ -82,6 +82,12 @@ kafka:
   securityProtocol:
   #kerberos service name
   kerberosServiceName:
+  #Oauth login call back handler class
+  oauthLoginCallbackHandlerClass:
+  #Oauth token endpoint url
+  oauthTokenEndpointUrl:
+  # topicReplicas is the number of replicas for the topic.
+  topicReplicas: 1
     
 eventmanager:
   plugins:
@@ -119,7 +125,10 @@ config:
     # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
     pullPolicy: Always
     # tag is the tag of the image. The default value is latest.
-    tag: 2.1.0.0
+    tag: 2.1.1.0
+  orchestrator:
+    # the maximum number of nested workflow in the plan. The subflow jobs exceeding this value will end in FAIL
+    maxNestingLevel: 50
   planning:
     # max number of days to generate not active instance
     notActiveWindowMax: P9DT0H
@@ -131,6 +140,10 @@ config:
     activeWindow: PT24H
     # How long is the windows of plan in the past
     daysRetentionPlan: P7DT0H
+    # How long is the windows of plan in the past for failed jobs
+    daysRetentionFailPlan: P30DT0H
+    # Frequency to remove the past failed jobs
+    frequencyFailJobCleanUp: PT1H
 
   engine:
     # justificationsEnabled specifies whether the justification feature is enabled. Supported values are true and false.
@@ -141,6 +154,10 @@ config:
     justificationTicketNumberRequired: false
     # justificationDescriptionRequired specifies whether the justification description is mandatory. Supported values are true and false.
     justificationDescriptionRequired: false
+
+  encryption:
+    # The password or key to encrypt data, such as passwords, agent database, and kafka messages.
+    key:
 
   console:
     # hostname is the hostname of the Dynamic Workload Console.
@@ -243,6 +260,14 @@ authentication:
     # "required"               : Certificates are validated and hostname verification is enabled
     # "certificate-validation" : Certificates are validated and hostname verification is disabled
     tlsVerification: "required"
+    # The path to the claim in the JWT token which contains the roles to be mapped to Quarkus security roles
+    groupClaimPath : ""
+    # The name of the claim in the JWT token whose value will be used as the principal name
+    principalClaim : ""
+    # The list of scopes that must be granted to the access token for the authentication to succeed
+    authenticationScope : ""
+    # The path to the claim in the JWT token that contains the group names for the user
+    jwtGroupClaimPath : ""
 
 # bulkhead defines the policy to be used on the gateway endpoint for avoiding bulk requests and block DDOS attacks against these contexts.
 bulkhead:
@@ -288,7 +313,7 @@ deployment:
     # maxTargetReplicas is the maximum number of target replicas to be deployed for each microservice.
     maxTargetReplicas: 3
     # traceLevel specifes the trace detail level for trace.log. Supported values are ALL,FINE,INFO.
-    traceLevel: "FINE"
+    traceLevel: "INFO"
     autoscaler:
       # cpuAverageUtilization specifies the average usage of CPU which starts the autoscaler.
       cpuAverageUtilization: 200
@@ -348,7 +373,7 @@ deployment:
 hclaipilot:  
   image:
     repository: hclcr.io/uno
-    tag: 2.1.0.0
+    tag: 2.1.1.0
   
   channels:
     slackToken: ""
@@ -357,6 +382,11 @@ hclaipilot:
     googleProjectId: ""
     botframeworkAppId: ""
     botframeworkAppPassword: ""
+
+    ### To disable group check of the OIDC provider. ###
+    # To be enabled when the OIDC provider is not setup with the same LDAP/User provider of the channels and is not possible to add user to it manually
+    # so the email of the configured channels are manually added in the ACL
+    groupless:  "false"
   
   translation:
     # Configuration for the Azure Translation API
@@ -453,7 +483,7 @@ hclaipilot:
 
     container:
       registry: hclcr.io/uno # Image name
-      tag: 2.1.0.0  # Image tag
+      tag: 2.1.1.0  # Image tag
     authorization:
       # The URL of the OpenID Connect (OIDC) server for the RAG service to authenticate the jwt token
       oidcServerURL: "https://uno-keycloak-ssl:8843"
@@ -465,10 +495,10 @@ hclaipilot:
         # The repository name for the pgvector image
         repository: pgvector
         # The tag/version of the pgvector image
-        tag: 16
+        tag: 17
         # The secret used to pull the image from the registry
-        pullSecrets: 
-          - "sa-{{ .Release.Namespace }}"
+      pullSecrets:
+        - "sa-{{ .Release.Namespace }}"
       auth:
         # The existing secret containing the PostgreSQL password Change the value if you want to use a different secret
         existingSecret: "{{ .Release.Name }}-postgres-password-secret"
@@ -476,7 +506,7 @@ hclaipilot:
         username: "aipilot"
         # The database name to be used for the rag service
         database: "vector_db"
-      
+
       tls:
         # Enable TLS for secure connections
         enabled: true
@@ -484,8 +514,6 @@ hclaipilot:
         certificatesSecret: "{{ .Release.Name }}-postgres-certificates-secret"
         # The filename Inside the secret for the TLS certificate
         certFilename: tls.crt
-         # The filename  Inside the secret for the TLS certificate key
-        certKeyFilename: tls.key
         # The filename  Inside the secret for the CA certificate
         certCAFilename: ca.crt
         # The secret name for the CA to be used to sign the certificatesSecret, Must be the same as the value of caPairSecretName in the certificates section

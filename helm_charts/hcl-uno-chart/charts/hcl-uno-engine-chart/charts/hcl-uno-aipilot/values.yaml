@@ -29,6 +29,11 @@ channels:
   botframeworkAppId: ""
   botframeworkAppPassword: ""
 
+  ### To disable group check of the OIDC provider. ###
+  # To be enabled when the OIDC provider is not setup with the same LDAP/User provider of the channels and is not possible to add user to it manually
+  # so the email of the configured channels are manually added in the ACL
+  groupless:  "false"
+
 translation:
   # Configuration for the Azure Translation API
   azure:
@@ -241,13 +246,13 @@ pgvector:
     # The repository name for the pgvector image
     repository: pgvector
     # The tag/version of the pgvector image
-    tag: 16
+    tag: 17
     # The secret used to pull the image from the registry
     pullSecrets: 
-      - sa-{{ .Release.Namespace }}
+      - '{{ include "aipilot.pgvector.pull.secret" $ }}'
   auth:
     # The existing secret containing the PostgreSQL password
-    existingSecret: "{{ .Release.Name }}-postgres-password-secret"
+    existingSecret: '{{ include "aipilot.pgvector.credentials.secret.name" $ }}'
     # The username for PostgreSQL authentication
     username: "aipilot"
     # The database name to be used
@@ -257,7 +262,7 @@ pgvector:
     # Enable TLS for secure connections
     enabled: true
     # The secret containing TLS certificates
-    certificatesSecret: "{{ .Release.Name }}-postgres-certificates-secret"
+    certificatesSecret: '{{ include "aipilot.pgvector.cert.secret.name" $ }}'
     # The filename Inside the secret for the TLS certificate
     certFilename: tls.crt
      # The filename  Inside the secret for the TLS certificate key
@@ -265,9 +270,12 @@ pgvector:
     # The filename  Inside the secret for the CA certificate
     certCAFilename: ca.crt
     # The secret name for the CA to be used to sign the certificatesSecret
-    caPairSecretName: "{{ .Release.Name }}-aipilot-selfsigned-ca"
+    caPairSecretName: '{{ include "aipilot.pgvector.cert.default.ca.name" $ }}'
     # certCommonName is the common name of the certificate used by pilot for the connection to the database
     pilotCertCommonName : "aipilot"
     # ragCertCommonName is the common name of the certificate used by rag for the connection to the database
     ragCertCommonName: "rag"
-    
+  # Adding the volume permissions for the pgvector and changing the data directory
+  volumePermissions:
+    enabled: true
+  postgresqlDataDir: /bitnami/postgresql/data-17

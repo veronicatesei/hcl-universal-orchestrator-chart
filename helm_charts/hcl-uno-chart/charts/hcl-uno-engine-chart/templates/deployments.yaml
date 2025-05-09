@@ -129,6 +129,7 @@ spec:
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
 {{- if eq $k "iaa"  }}
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.console.env.variable" $root | indent 12 }}
 {{ include "uno.oidc.enabled.variable" $root | indent 12 }}
 {{ include "uno.authentication.api.env.variable" $root | indent 12 }}
@@ -150,6 +151,7 @@ spec:
               value: https://{{ $root.Release.Name }}-core:5005
             - name: EXTERNAL_MP_JWT__HTTPS___PILOT_CORE_5005__VERIFY_PUBLICKEY_LOCATION
               value: https://{{ $root.Release.Name }}-core:5005/jwks
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{- end}}
 {{- if eq $k "iaa" }}
@@ -192,11 +194,13 @@ spec:
 {{- end }}
 {{- end }}
 {{ include "uno.apikey.warning.variable" $root | indent 12 }}
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
 
 {{- if eq $k "console"  }}
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{- end}}
 

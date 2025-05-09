@@ -28,12 +28,13 @@ spec:
 {{ include "rag.serviceAccountName" . | indent 6 }}
       containers:
         - name: "{{ .Chart.Name }}"
-          image: "{{ .Values.container.registry }}/{{ .Values.container.image }}:{{ .Values.container.tag }}"
+          image: {{ include "rag.registry" . }}/{{ .Values.container.image }}:{{ .Values.container.tag }}
           imagePullPolicy: {{ .Values.container.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: {{ include "rag.configMapName" . }}
           env:
+{{- include "rag.sofy.env.variables" . | indent 12 }}
             - name: NLTK_DATA
               value: /tmp/nltk_data
             - name: POSTGRES_PASSWORD
@@ -41,9 +42,12 @@ spec:
                 secretKeyRef:
                   name: {{ include "postgres.password" . }}
                   key: password
-            {{- if .Values.authorization.oidcServerURL }}
+            {{- if (.Values.global.sofySolutionContext) }} 
             - name: OIDC_SERVER_URL
-              value: {{ .Values.authorization.oidcServerURL }}
+              value : https://sofy-kc.$(SOFY_HOSTNAME)/auth
+            {{- else if .Values.authorization.oidcServerURL }}
+            - name: OIDC_SERVER_URL
+              value: {{ tpl .Values.authorization.oidcServerURL .}}
             {{- end }}
             {{- if .Values.sharedKeySecretName }}
             - name: SHARED_KEY
