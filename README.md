@@ -38,7 +38,18 @@ HCL Universal Orchestrator supports all the platforms supported by the runtime p
 ### Openshift support
 You can deploy HCL Universal Orchestrator on Openshift by following the instruction in this documentation and using helm charts. 
 Ensure you modify the value of the `waconsole.console.exposeServiceType` parameter from `LoadBalancer` to `Routes`.
-	
+
+For the successful deployment on OCP, you must configure the **apiHostname** parameter in the **values.yaml** file with the specific URL that is assigned to the route exposing the API gateway.
+
+By default the value for the **apiHostname** parameter is set to `gateway`. Update it as follows:
+
+        authentication:
+		#apiHostname specifies the api gateway hostname and is used only when ingress. enabled is set to false.
+		apiHostname: Gateway_URL
+
+Where _Gateway_URL_ stands for the URL assigned to the route exposing the API gateway.
+This ensures smooth operation within the OCP environment and facilitates communication with the gateway via its externally accessible address.
+
 ## Accessing the container images
 
 You can access the HCL Universal Orchestrator chart and container images from the Entitled Registry. See [Create the secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
