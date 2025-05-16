@@ -1,0 +1,214 @@
+####################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+####################################################################
+
+{{ if (.Values.global.sofySolutionContext) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-acs-script-configmap
+  labels:
+{{ include "uno.chart.common.label" . | indent 4 }}
+data:
+  script.sh: |-
+    echo "##### Starting job"
+    {{- if not .Values.disableAccessControl }}
+    counter=0
+    while [ $counter -lt 10 ]; do
+        EMISSARY_CA=$(kubectl get secret {{ .Release.Name }}-emissary-ca-cert -n {{ .Release.Namespace }} -o jsonpath='{.metadata.name}')
+        if [ -z "$EMISSARY_CA" ]; then
+            echo "Waiting for {{ .Release.Name }}-emissary-ca-cert secret to be created... Attempt $((counter+1))"
+            sleep 10
+            counter=$((counter+1))
+        else
+            echo "#### $EMISSARY_CA has been created!"
+            break
+        fi
+    done
+    if [ $counter -eq 10 ]; then
+        echo "#### Timeout: {{ .Release.Name }}-emissary-ca-cert secret was not created after 10 attempts."
+    fi
+    
+    KEYCLOAK_SERVICE=$(kubectl get svc -l "app.kubernetes.io/component=http,app.kubernetes.io/name=keycloak" -n {{ .Release.Namespace }} -o=jsonpath='{.items[*].metadata.name}')
+
+    if [ -z "$KEYCLOAK_SERVICE" ]; then
+        echo "##### KEYCLOAK_SERVICE not found with labels, trying with default value..."
+        KEYCLOAK_SERVICE=acs-kc-{{ .Release.Name }}-http
+    fi
+    
+    echo "##### KEYCLOAK_SERVICE: $KEYCLOAK_SERVICE"
+    
+    KEY_CLOACK_BASE_URL=http://${KEYCLOAK_SERVICE}:80
+    echo KEY_CLOACK_BASE_URL $KEY_CLOACK_BASE_URL
+    until $(curl -X GET -k --connect-timeout 30 --max-time 30 --output /dev/null --silent --head --fail $KEY_CLOACK_BASE_URL/auth/admin/master/console );
+    do 
+      echo waiting for keycloak service on $KEY_CLOACK_BASE_URL; 
+      sleep 10; 
+    done;
+
+    echo "##### keycloak is ready"
+    echo "##### Request for authorization $KEY_CLOACK_BASE_URL"
+    RESULT=`curl -k --data "username=$KEYCLOACK_USER&password=$KEYCLOACK_PASSWORD&grant_type=password&client_id=admin-cli" $KEY_CLOACK_BASE_URL/auth/realms/master/protocol/openid-connect/token`
+    echo "\n"
+    echo "#### Recovery of the token"
+    TOKEN=`echo $RESULT | sed 's/.*access_token":"//g' | sed 's/".*//g'`
+    echo "\n"
+    echo "#### Display token"
+    echo $TOKEN
+    echo "\n"
+    echo "\n"
+
+    if [ ! -z $WA_RESTRICTED_ADMINS_GROUP ];then
+      echo "### Starting waAdminRestrictedGroup group creation\n"
+      echo "### WA_RESTRICTED_ADMINS_GROUP: $WA_RESTRICTED_ADMINS_GROUP\n"
+      curl -k -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/groups -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"  --data '{"name": "'"$WA_RESTRICTED_ADMINS_GROUP"'", "realmRoles": ["solution-admin"]}'
+      if [[ $? -ne 0 ]];then
+          exit $?  
+      fi
+      echo "* WA_RESTRICTED_ADMINS_GROUP created\n"
+    else
+      echo "### No group found\n"
+    fi
+    if [ "x${ENABLED_WA_RESTRICTED_ADMINS}" == "xtrue" ];then
+      echo "### Retrieving USER_ID for sol-admin"
+      SOL_ADMIN_USER=`curl -k -X GET -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/users?username=sol-admin -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"  `
+      SOL_ADMIN_USER_ID=`echo $SOL_ADMIN_USER | sed 's/.*id":"//g' | sed 's/".*//g'`
+      echo "### Adding sol-admin user to GROUP: ${WA_RESTRICTED_ADMINS_GROUP}"
+      WA_RESTRICTED_GROUP=`curl -k -X GET -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/groups?search=$WA_RESTRICTED_ADMINS_GROUP -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"`
+      WA_RESTRICTED_GROUP_ID=$(echo $WA_RESTRICTED_GROUP | jq -r .[0].id)
+      curl -k -X PUT -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/users/$SOL_ADMIN_USER_ID/groups/$WA_RESTRICTED_GROUP_ID -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN" 
+      echo "### sol-admin added to $WA_RESTRICTED_GROUP"
+    fi
+    
+    echo "###Starting Adding groups attribute to the JWT Token\n"
+    echo "###getting realm:acs Client Id\n"
+    CLIENT_ID=`curl -k -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/clients?clientId=acs -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN"`
+    CLIENT_ID=$(echo $CLIENT_ID | jq -r .[0].id)
+    echo "### create groups attribute for acs client token\n"
+    curl -k -X POST -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/clients/$CLIENT_ID/protocol-mappers/models \
+    --header "Authorization: Bearer $TOKEN" \
+    --header "Content-Type: application/json" \
+    --data-raw '{
+      "config": {
+        "access.token.claim": "true",
+        "claim.name": "groups",
+        "full.path": "false",
+        "id.token.claim": "true",
+        "userinfo.token.claim": "true"
+      },
+      "name": "groups",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-group-membership-mapper"
+    }'
+    echo "### create roles attribute for acs client token\n"
+    curl -k -X POST -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/clients/$CLIENT_ID/protocol-mappers/models \
+    --header "Authorization: Bearer $TOKEN" \
+    --header "Content-Type: application/json" \
+    --data-raw '{
+      "config": {
+        "access.token.claim": "true",
+        "claim.name": "roles",
+        "id.token.claim": "true",
+        "jsonType.label": "String",
+        "multivalued": "true",
+        "userinfo.token.claim": "true"
+      },
+      "name": "roles",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-realm-role-mapper"
+    }'
+    EXIST_USER=`curl -k -X GET -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/users?username=wauser -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"`
+    USER_ID=`echo $EXIST_USER | sed 's/.*id":"//g' | sed 's/".*//g'`
+    echo "#### USER RESPONSE"
+    echo "$EXIST_USER"
+    echo "\n"
+    echo "\n"
+    if [ "$USER_ID" == "[]" ]
+    then
+        echo "#### USER NOT EXISTS \n"
+        echo "#### user creation\n"
+        curl -k -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/users -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"   --data '{"username": "wauser","firstName":"wauser","lastName":"wauser", "email":"wauser@example.com", "enabled":"true","credentials":[{"type": "password",	"value": "'${WA_PASSWORD}'","temporary": false}]}'
+        if [[ $? -ne 0 ]]
+        then
+          exit $?  
+        fi
+        echo "* created "
+    else
+        echo "#### USERS EXIST ID [$USER_ID]"
+        EXIST_USER=`curl -k -X GET -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/users?username=wauser -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"  `
+        USER_ID=`echo $EXIST_USER | sed 's/.*id":"//g' | sed 's/".*//g'`
+        CREDENTIAL_JSON='{"type": "password",	"value": "'${WA_PASSWORD}'","temporary": false}'
+        curl -k -X PUT -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/users/$USER_ID/reset-password -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"   --data "$CREDENTIAL_JSON"
+        echo "##### UPDATED USERS PASSWORD [$USER_ID]"    
+    fi
+    echo "### Retrieving USER_ID for wauser"
+    EXIST_USER=`curl -k -X GET -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/users?username=wauser -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"  `
+    USER_ID=`echo $EXIST_USER | sed 's/.*id":"//g' | sed 's/".*//g'`
+    echo "### Adding USER to GROUP"
+    GROUP=`curl -k -X GET -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/groups?search=$WA_ADMIN_GROUP -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN"`
+    GROUP_ID=$(echo $GROUP | jq -r .[0].id)
+    curl -k -X PUT -v $KEY_CLOACK_BASE_URL/auth/admin/realms/sofySolution/users/$USER_ID/groups/$GROUP_ID -H "Content-Type: application/json" -H "Authorization: bearer $TOKEN" 
+    echo "### wauser added to $WA_ADMIN_GROUP"
+    echo "##### END" 
+    {{- end }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+{{ include "uno.chart.common.label" . | indent 4 }}
+  name: {{ .Release.Name }}-acs-script-job
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": "post-install,post-upgrade,post-rollback"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 900
+  template:
+    spec:
+      containers:
+        - command:
+            - sh
+            - /opt/script/script.sh
+          image: "gcr.io/blackjack-209019/services/{{ .Values.waconsole.image.repository }}:{{ .Values.waconsole.image.tag }}"
+          name: script
+          volumeMounts:
+            - mountPath: /opt/script
+              name: {{ .Release.Name }}-acs-script-configmap
+              readOnly: false
+          env:
+          {{- if .Values.sofy.waAdminRestrictedGroup }}
+           - name: WA_RESTRICTED_ADMINS_GROUP
+             value: {{ .Values.sofy.waAdminRestrictedGroup }}
+          {{- end }}
+          {{- if .Values.sofy.enabledSofyAdminRestrictedGroup }}
+           - name: ENABLED_WA_RESTRICTED_ADMINS
+             value: {{ .Values.sofy.enabledSofyAdminRestrictedGroup | quote }}
+          {{- end }}
+           - name: WA_PASSWORD
+             valueFrom:
+               secretKeyRef:
+                 name: wa-pwd-secret
+                 key: WA_PASSWORD
+           - name: KEYCLOACK_USER
+             valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-keycloak-admin-creds
+                  key: user
+           - name: KEYCLOACK_PASSWORD
+             valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-keycloak-admin-creds
+                  key: password
+      restartPolicy: Never
+      serviceAccountName: {{ tpl .Values.sofy.serviceAccountName $ }}
+      volumes:
+        - configMap:
+            name: {{ .Release.Name }}-acs-script-configmap
+          name: {{ .Release.Name }}-acs-script-configmap
+{{- end }}
