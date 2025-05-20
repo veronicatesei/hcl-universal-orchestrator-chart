@@ -41,7 +41,8 @@ Ensure you modify the value of the `waconsole.console.exposeServiceType` paramet
 	
 ## Accessing the container images
 
-You can access the HCL Universal Orchestrator chart and container images from the Entitled Registry. See [Create the secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
+
+You do not need a license key to access the container images. Instead, use the specific credentials provided for the beta program to pull the necessary images from the HCL Container Registry. The images are as follows:
 
 Core:
 
@@ -141,23 +142,6 @@ To create the namespace, run the following command:
 
         kubectl create namespace <uno_namespace>
 	
-
-### Creating the Secret 
-
-If you already have a license, then you can proceed to obtain your entitlement key. To learn more about acquiring an HCL Universal Orchestrator license, contact HWAinfo@hcl.com. 
-
-Obtain your entitlement key and store it on your cluster by creating a [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/). Using a Kubernetes secret allows you to securely store the key on your cluster and access the registry to download the chart and product images. 
-
-1. Access the entitled registry.  Contact your HCL sales representative for the login details required to access the HCL Entitled Registry.
-2. To create a pull secret for your entitlement key that enables access to the entitled registry, run the following command:
-
-         kubectl create secret docker-registry -n <uno_namespace> sa-<uno_namespace> --docker-server=<registry_server> --docker-username=<user_name> --docker-password=<password>
-	   
-	where,
-	* <uno_namespace> represents the namespace where the product components are installed
-	* <registry_server> is `hclcr.io`
-	* <user_name> is the user name provided by your HCL representative
-	* \<password> is the entitled key copied from the entitled registry `<api_key>`
 
 
 ### Deploying the product components		
@@ -282,7 +266,21 @@ You can enable UnoAIPilot by configuring the **values.yaml** file as follows:
 		
 		global.enableUnoAIPilot: true
   
-  
+
+
+**Generative AI**
+
+You can enable generative AI features by requesting access. You will then receive a specific genAikey to insert into your values.yaml file here:
+
+    uno:
+      config:
+        genai:
+          enabled: true
+          serviceUrl: https://genai.hcluno.mywire.org
+          apiKey: <GenAIKey>
+
+
+
 **Session timeout**
 
 After a period of inactivity on the UI, users are automatically logged out. You can change the session timeout value, which is set by default to 30 minutes, by modifying the following parameter in the **values.yaml** file of the Helm chart:
