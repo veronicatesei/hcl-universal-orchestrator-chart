@@ -142,6 +142,22 @@ To create the namespace, run the following command:
 
         kubectl create namespace <uno_namespace>
 	
+### Creating the Secret 
+
+If you already have a license, then you can proceed to obtain your entitlement key. To learn more about acquiring an HCL Universal Orchestrator license, contact HWAinfo@hcl.com. 
+
+Obtain your entitlement key and store it on your cluster by creating a [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/). Using a Kubernetes secret allows you to securely store the key on your cluster and access the registry to download the chart and product images. 
+
+1. Access the entitled registry with your OIDC credentials after being accepted into the beta program.
+2. To create a pull secret for your entitlement key that enables access to the entitled registry, run the following command:
+
+         kubectl create secret docker-registry -n <uno_namespace> sa-<uno_namespace> --docker-server=<registry_server> --docker-username=<user_name> --docker-password=<password>
+	   
+	where,
+	* <uno_namespace> represents the namespace where the product components are installed
+	* <registry_server> is `hclcr.io`
+	* <user_name> is the user name provided by your HCL representative
+	* \<password> is the entitled key copied from the entitled registry `<api_key>`
 
 
 ### Deploying the product components		
