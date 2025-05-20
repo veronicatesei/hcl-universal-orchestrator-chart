@@ -42,7 +42,7 @@ Ensure you modify the value of the `waconsole.console.exposeServiceType` paramet
 ## Accessing the container images
 
 
-You do not need a license key to access the container images. Instead, use the specific credentials provided for the beta program to pull the necessary images from the HCL Container Registry. The images are as follows:
+You do not need a license key to access the container images. Instead, use the same credentials you use for HCL services through OIDC provider to pull the necessary images from the HCL Container Registry. The images are as follows:
 
 Core:
 
