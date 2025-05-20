@@ -7,7 +7,7 @@
 {{ $fullName := include "fullname" . }}
 {{ $certIssuer := include "uno.cert.issuer" . }}
 
-{{- if not .Values.config.certificates.useCustomizedCert }} 
+{{- if not (or .Values.config.certificates.useCustomizedCert .Values.config.certificates.customIssuer) }} 
 
 kind: Issuer
 {{- if .Capabilities.APIVersions.Has "cert-manager.io/v1"}}
