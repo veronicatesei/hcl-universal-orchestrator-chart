@@ -53,6 +53,8 @@ spec:
     - server auth
     - client auth
   dnsNames:
+  - {{ .Values.authentication.apiHostname  }}
+  - "gateway{{ .Values.ingress.baseDomainName }}"
 {{- $myList := include "uno.microservices.list" . | fromJsonArray -}}
 {{- range $myList}}
   - {{ . }}

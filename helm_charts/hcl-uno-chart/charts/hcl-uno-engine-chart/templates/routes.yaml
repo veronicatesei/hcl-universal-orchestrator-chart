@@ -55,6 +55,30 @@ spec:
     insecureEdgeTerminationPolicy: None
   wildcardPolicy: None
 
+---
+
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: console-route
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
+    
+spec:
+  host: 
+  to:
+    kind: Service
+    name: {{ $fullName }}-console
+    weight: 100
+  port:
+    targetPort: https
+  tls:
+    termination: {{ .Values.routes.termination | default "passthrough" }}
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None
+
 
 {{- end }}
 {{- end }}

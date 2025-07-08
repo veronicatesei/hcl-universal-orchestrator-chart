@@ -1,0 +1,136 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2024. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
+{{ $fullName := include "fullname" . }}
+{{ $root := . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rag.deploymentName" . }}
+  labels:
+    app: "{{ .Values.app.name }}"
+spec:
+  replicas: {{ .Values.app.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.app.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.app.name }}"
+    spec:
+      securityContext:
+{{- toYaml .Values.podSecurityContext | nindent 8 }}
+{{ include "rag.pull.secret" . | indent 6 }}
+{{ include "rag.serviceAccountName" . | indent 6 }}
+      containers:
+        - name: "{{ .Chart.Name }}"
+          image: {{ include "rag.registry" . }}/{{ .Values.container.image }}:{{ .Values.container.tag }}
+          imagePullPolicy: {{ .Values.container.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "rag.configMapName" . }}
+          env:
+{{- include "rag.sofy.env.variables" . | indent 12 }}
+            - name: NLTK_DATA
+              value: /tmp/nltk_data
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.password" . }}
+                  key: password
+            {{- if (.Values.global.sofySolutionContext) }} 
+            - name: OIDC_SERVER_URL
+              value : https://sofy-kc.$(SOFY_HOSTNAME)/auth
+            {{- else if .Values.authorization.oidcServerURL }}
+            - name: OIDC_SERVER_URL
+              value: {{ tpl .Values.authorization.oidcServerURL .}}
+            {{- end }}
+            {{- if .Values.sharedKeySecretName }}
+            - name: SHARED_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.sharedKeySecretName .}}
+                  key: shared-key
+            - name: SHARED_KEY_HEADER_KEY
+              value:  "X-API-Key" 
+            {{- end }}
+            {{- range $key, $value := .Values.authorization.certs }}
+            - name: {{ $key }}
+              value: /opt/authcert/{{ lower $value }}.crt
+            {{- end }}
+            {{- range $key, $value := .Values.authorization.certs }}
+            - name: {{ $key }}
+              value: /opt/authcert/{{ lower $value }}.crt
+            {{- end }}
+            {{- range $key, $value := .Values.authorization.other }}
+            - name: {{ $key }}
+              value: {{ tpl $value $root }}
+            {{- end }}
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /opt/apikey/gcp-vertexai-svc.json
+            - name: POSTGRES_HOST
+              value: {{ .Release.Name }}-{{ tpl .Values.vectordb.name . }}
+            - name: POSTGRES_URL
+              value: {{ .Values.config.POSTGRES_URL | default "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):5432" }}
+          ports:
+            - containerPort: {{ .Values.container.port }}
+          volumeMounts:
+            - name: nltk-data-dir
+              mountPath: /tmp/nltk_data
+            {{- range $key, $value := .Values.authorization.certs  }}
+            - name: {{ lower $value }}-cert-volume
+              mountPath: /opt/authcert/{{ lower $value }}.crt
+              subPath: {{ lower $value }}.crt
+              readOnly: true
+            {{- end }}
+            - name: certs-volumes
+              mountPath: /opt/certs/
+              readOnly: true
+            - name: google-credentials
+              mountPath: /opt/apikey/
+              readOnly: true
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.probe.tcpSocket.port }}
+            initialDelaySeconds: {{ .Values.probe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probe.periodSeconds }}
+            timeoutSeconds: {{ .Values.probe.timeoutSeconds }}
+            successThreshold: {{ .Values.probe.successThreshold }}
+            failureThreshold: {{ .Values.probe.failureThreshold }}
+          resources:
+            limits:
+              cpu: "{{ .Values.resources.limits.cpu }}"
+              memory: "{{ .Values.resources.limits.memory }}"
+            requests:
+              cpu: "{{ .Values.resources.requests.cpu }}"
+              memory: "{{ .Values.resources.requests.memory }}"
+      volumes:
+        - name: nltk-data-dir
+          emptyDir: {}
+        - name: certs-volumes
+          secret:
+            secretName: {{ include "rag.cert.secret.name" . | quote }}
+            defaultMode: 0644
+            items:
+              - key: tls.crt
+                path: cert.pem
+              - key: tls.key
+                path: key.pem
+              - key: ca.crt
+                path: ca-cert.pem
+        {{- range $key, $value := .Values.authorization.certs  }}
+        - name: {{ lower $value }}-cert-volume
+          secret:
+            defaultMode: 0644
+            secretName: {{ $value | quote }}
+            items:
+            - key: tls.crt
+              path: {{ lower $value }}.crt
+        {{- end }}
+        - name: google-credentials
+          secret:
+            secretName: {{ .Release.Name }}-apikey-secret

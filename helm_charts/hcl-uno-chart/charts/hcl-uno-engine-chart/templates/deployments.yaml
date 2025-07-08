@@ -11,8 +11,9 @@
 {{ $dwcInternalHost := include "uno.console.internal.host" . }}
 {{ $saName := include "uno.serviceAccount" . }}
 {{ $dwcsecretname := include "uno.dwcsecretname" . }}
-{{ $dwcissuer:= printf "%s%s%s" "https://" .Release.Name "-waconsole-h:9443" }}
-##### global.consoleCertSecretName  {{ (.Values.global.dwcconsole).certSecretName | default "NOT DEFINED"}}  $dwcsecretname {{ $dwcsecretname }}
+{{ $dwcissuer:= include "uno.dwcissuer" . }}
+
+##### global.consoleCertSecretName 1  {{ (.Values.global.dwcconsole).certSecretName | default "NOT DEFINED"}}  $dwcsecretname {{ $dwcsecretname }}
 
 {{- $root := . -}}
 {{- $myList := include "uno.microservices.list" . | fromJsonArray -}}
@@ -50,7 +51,6 @@ spec:
         prometheus.job.label: "kubernetes-pods"
         app: {{ $fullName }}-{{ $k }}
         service: {{ $fullName }}-{{ $k }}
-        release: {{ $root.Release.Name }}
 {{ include "uno.common.label" $root | indent 8 }}
       annotations:
 {{ include "uno.prometheus.annotation"  $root | indent 8 }}
@@ -126,8 +126,10 @@ spec:
 {{ include "common.custom.env.variable"  $root | indent 12 }}
 {{- if eq $k "eventmanager"  }}
 {{ include "uno.eventmanager.plugins" $root | indent 12 }}
+{{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
 {{- if eq $k "iaa"  }}
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.console.env.variable" $root | indent 12 }}
 {{ include "uno.oidc.enabled.variable" $root | indent 12 }}
 {{ include "uno.authentication.api.env.variable" $root | indent 12 }}
@@ -140,8 +142,37 @@ spec:
             - name: UNO_GROUPS_CACHE_EXPIRATION_DURATION
               value: "{{ $root.Values.config.apiKey.groupsCacheExpirationDuration }}"
 {{- end}}
+{{- if eq $k "agentmanager"  }}
+{{ include "uno.plugins.max.size" $root | indent 12 }}
+{{- end}}
+{{- if (($root.Values).global).enableUnoAIPilot }}
+{{- if eq $k "pilot-notification" }}
+            - name : UNO_PILOT_CORE_CLIENT_URL
+              value: https://{{ $root.Release.Name }}-core:5005
+            - name: EXTERNAL_MP_JWT__HTTPS___PILOT_CORE_5005__VERIFY_PUBLICKEY_LOCATION
+              value: https://{{ $root.Release.Name }}-core:5005/jwks
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
+{{ include "uno.oidc.env.variable" $root | indent 12 }}
+{{- end}}
+{{- if eq $k "iaa" }}
+            - name : UNO_AIPILOT_JWT_ISSUERS
+              value: https://pilot-core:5005
+{{- end}}
+{{- if eq $k "gateway" }}
+            - name: EXTERNAL_MP_JWT__HTTPS___PILOT_CORE_5005__VERIFY_PUBLICKEY_LOCATION
+              value: https://{{ $root.Release.Name }}-core:5005/jwks
+{{- end}}
+{{- if eq $k "console" }}
+            - name: EXTERNAL_MP_JWT__HTTPS___PILOT_CORE_5005__VERIFY_PUBLICKEY_LOCATION
+              value: https://{{ $root.Release.Name }}-core:5005/jwks
+            - name: UNO_AI_PILOT_CLIENT_URL
+              value: https://{{ $root.Release.Name }}-core:5005
+            - name: UNO_AI_PILOT_NOTIFICATION_URL
+              value: wss://{{ $fullName }}-pilot-notification:8443
+{{- end}}
+{{- end}}
 {{- if eq $k "gateway"  }}
-{{- if (($root.Values).global).enableConsole }}
+{{- if or ((($root.Values).global).enableConsole) ($dwcsecretname) }}
 ##### global.consoleCertSecretName  $dwcsecretname {{ $dwcsecretname }}
 
 {{- if $dwcsecretname }}
@@ -163,10 +194,13 @@ spec:
 {{- end }}
 {{- end }}
 {{ include "uno.apikey.warning.variable" $root | indent 12 }}
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
+{{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
 
 {{- if eq $k "console"  }}
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{- end}}
 

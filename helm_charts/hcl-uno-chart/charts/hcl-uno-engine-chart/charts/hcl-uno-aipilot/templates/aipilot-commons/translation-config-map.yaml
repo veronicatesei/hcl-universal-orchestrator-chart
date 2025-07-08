@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-aipilot-translation-config
+data:
+  AZURE_TRANSLATION_ENDPOINT: {{ .Values.translation.azure.endpoint | quote }}
+  AZURE_TRANSLATION_KEY: {{ .Values.translation.azure.subscriptionKey  | quote }}
+  AZURE_TRANSLATION_REGION: {{ .Values.translation.azure.region  | quote }}
+  {{ if .Values.translation.google.credentials }}
+  GOOGLE_APPLICATION_CREDENTIALS: /tmp/google-credentials.json
+  {{ end }}
