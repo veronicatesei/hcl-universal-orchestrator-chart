@@ -276,6 +276,33 @@ The following are some useful Helm commands:
 
 ### Configuring optional product components
 
+**Human task e-mail notifications**
+
+Human tasks are associated with queues, which act as containers for Human tasks. When a Human task is created, it references a specific queue. A queue is defined by a folder and a name, and it can have optional e-mail addresses to notify users of new tasks:
+
+- **Group e-mail**: An optional email address used for notifications when new tasks are added.
+  
+- **From e-mail**:  An optional email address that, if specified, is used as the sender address for email notifications specific to that queue.
+  
+  > **Note:** Some SMTP providers override custom **From e-mail** addresses and use the provider's authentication address instead. Consequently, the **From** address that you specify might be ignored.
+
+To enable e-mail notifications, edit the **values.yaml** file to set the `uno.mail.enabled` parameter to `true`, and then specify the required Simple Mail Transfer Protocol (SMTP) configuration parameters and credentials.
+
+ **Notification templates**
+
+  Two customizable HTML templates are used for notifications, one for task creation and one for task assignment or unassignment. By default, the two templates contain:
+
+  - Basic human task information such as task ID, task title, and the name of the queue where the human task was created.
+    
+  - A button with a direct link to the task in the HCL Universal Orchestrator UI, with which the user can open the form and complete the task.
+    
+  To customize the HTML templates, edit the following sections of the **values.yaml** file:
+
+  - `config.orchestrator.humanTaskMailTaskCreatedTemplate` to modify the template used when a task is created.
+  - `config.orchestrator.humanTaskMailTaskAssignedTemplate` to modify the template used when a task is assigned or unassigned.
+
+
+
 **UnoAIPilot**
 
 You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
