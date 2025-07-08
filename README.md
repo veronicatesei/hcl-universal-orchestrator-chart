@@ -320,7 +320,7 @@ You can enable generative AI features by requesting access. You will then receiv
         genai:
           enabled: true
           serviceUrl: https://genai.hcluno.mywire.org
-          apiKey: <GenAIKey>
+          betaKey: <GenAIKey>
 
 
 
