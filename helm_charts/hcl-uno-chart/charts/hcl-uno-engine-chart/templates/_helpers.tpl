@@ -38,6 +38,9 @@
 {{- if .Values.global.enableUnoAIPilot }}
 {{- $myList =  append $myList "pilot-notification" -}}
 {{- end -}}
+{{- if .Values.config.genai.internal }}
+{{- $myList =  append $myList "genai" -}}
+{{- end -}}
 {{ toJson $myList }}
 {{- end -}}
 
@@ -184,7 +187,7 @@ prometheus.io/path: "/q/metrics"
 {{- end -}}
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 2.1.2.0-beta1
+uno.microservice.version: 2.1.2.0-beta2
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -318,6 +321,22 @@ release: {{ .Release.Name | quote }}
 {{- if or .Values.authentication.oidc.enabled .Values.global.sofySolutionContext}}
 - name: UNO_AUTHENTICATION_OIDC_ENABLE
   value: "true"
+{{- if .Values.authentication.oidc.groupClaimPath }}
+- name: QUARKUS_OIDC_ROLES_ROLE_CLAIM_PATH
+  value: {{ .Values.authentication.oidc.groupClaimPath | quote }}
+{{- end }}
+{{- if .Values.authentication.oidc.principalClaim }}
+- name: QUARKUS_OIDC_TOKEN_PRINCIPAL_CLAIM
+  value: {{ .Values.authentication.oidc.principalClaim | quote }}
+{{- end }}
+{{- if .Values.authentication.oidc.authenticationScope }}
+- name: QUARKUS_OIDC_AUTHENTICATION_SCOPES
+  value: {{ .Values.authentication.oidc.authenticationScope | quote }}
+{{- end }}
+{{- if .Values.authentication.oidc.jwtGroupClaimPath }}
+- name: SMALLRYE_JWT_PATH_GROUPS
+  value: {{ .Values.authentication.oidc.jwtGroupClaimPath | quote }}
+{{- end }}
 {{- if .Values.authentication.oidc.useToManageApiKeys }}
 - name: UNO_AUTHENTICATION_ON_FAIL_USE_OIDC
   value: "true"
@@ -418,6 +437,18 @@ release: {{ .Release.Name | quote }}
 - name: UNO_MAX_NESTING_LEVEL
   value: {{ .Values.config.orchestrator.maxNestingLevel | quote }}
 {{- end }}
+{{- if .Values.config.orchestrator.humanTaskCancelWindowSeconds }}
+- name: UNO_HUMAN_TASK_CANCEL_TIMEOUT_SECONDS
+  value: {{ .Values.config.orchestrator.humanTaskCancelWindowSeconds | quote }}
+{{- end }}
+{{- if .Values.config.orchestrator.humanTaskMailTaskCreatedTemplate }}
+- name: UNO_HUMAN_TASK_MAIL_TEMPLATE_CREATED
+  value: {{ .Values.config.orchestrator.humanTaskMailTaskCreatedTemplate | quote }}
+{{- end }}
+{{- if .Values.config.orchestrator.humanTaskMailTaskAssignedTemplate }}
+- name: UNO_HUMAN_TASK_MAIL_TEMPLATE_ASSIGNED
+  value: {{ .Values.config.orchestrator.humanTaskMailTaskAssignedTemplate | quote}}
+{{- end }}
 {{- if .Values.global.sofySolutionContext}}
 - name: UNO_GENAI_CLIENT_ENABLED
   value: {{ .Values.config.genai.enabled | quote }}
@@ -425,8 +456,15 @@ release: {{ .Release.Name | quote }}
 - name: UNO_GENAI_CLIENT_ENABLED
   value: {{ .Values.config.genai.enabled | quote }}
 {{- end }}
+{{- if .Values.config.genai.internal }}
+- name: UNO_GENAI_INTERNAL
+  value: {{ .Values.config.genai.internal | quote }}
+- name: UNO_GENAI_CLIENT_URL
+  value: https://{{ $fullName }}-genai:8443
+{{- else }}
 - name: UNO_GENAI_CLIENT_URL
   value: {{ .Values.config.genai.serviceUrl | quote }}
+{{- end }}
 - name: UNO_GENAI_CLIENT_PROXY_HOSTNAME
   value: {{ .Values.config.genai.proxy.hostname | quote }}
 - name: UNO_GENAI_CLIENT_PROXY_PORT
@@ -444,6 +482,50 @@ release: {{ .Release.Name | quote }}
     secretKeyRef:
       name: {{ .Release.Name }}-uno-secret
       key: GENAI_API_KEY
+      optional: true
+{{- if .Values.config.endpoint.console }}
+- name: UNO_CONSOLE_ENDPOINT
+  value: {{ .Values.config.endpoint.console | quote }}
+{{- else }}
+- name: UNO_CONSOLE_ENDPOINT
+  value: {{ printf "https://%s.%s" .Values.deployment.console.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
+{{- end }}
+{{- if .Values.config.endpoint.gateway }}
+- name: UNO_GATEWAY_ENDPOINT
+  value: {{ .Values.config.endpoint.gateway | quote }}
+{{- else }}
+- name: UNO_GATEWAY_ENDPOINT
+  value: {{ printf "https://%s.%s" .Values.deployment.gateway.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
+{{- end }}
+- name: UNO_GATEWAY_PRIVATE_ENDPOINT
+  value: {{ printf "https://%s-gateway:8443" $fullName | quote }}
+- name: UNO_MAIL_ENABLED
+  value: {{ .Values.config.mail.enabled | quote }}
+- name: UNO_MAIL_SMTP_HOST
+  value: {{ .Values.config.mail.smtp.host | quote }}
+- name: UNO_MAIL_SMTP_PORT
+  value: {{ .Values.config.mail.smtp.port | quote }}
+- name: UNO_MAIL_SMTP_STARTTLS_ENABLED
+  value: {{ .Values.config.mail.smtp.startTlsEnabled | quote }}
+- name: UNO_MAIL_SMTP_SSL_CHECKSERVERIDENTITY
+  value: {{ .Values.config.mail.smtp.sslCheckServerIdentity | quote }}
+- name: UNO_MAIL_SMTP_SSL_TRUST
+  value: {{ .Values.config.mail.smtp.sslTrust | quote }}
+- name: UNO_MAIL_SMTP_CONNECTION_TIMEOUT
+  value: {{ .Values.config.mail.smtp.connectionTimeoutMs | quote }}
+- name: UNO_MAIL_FROM
+  value: {{ .Values.config.mail.from | quote }}
+- name: UNO_MAIL_USERNAME
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.config.mail.credentialsSecretName }}
+      key: USERNAME
+      optional: true
+- name: UNO_MAIL_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.config.mail.credentialsSecretName }}
+      key: PASSWORD
       optional: true
 - name: ENGINE_JUSTIFICATION_ENABLED
   value: {{ .Values.config.engine.justificationEnabled | quote }}
@@ -589,14 +671,6 @@ release: {{ .Release.Name | quote }}
   value: https://{{ $fullName }}-eventmanager:8443
 - name: UNO_NOTIFICATION_CLIENT_URL
   value: https://{{ $fullName }}-notification:8443
-- name: UNO_GATEWAY_PUBLIC_HOST
-  value: {{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}
-- name: UNO_GATEWAY_PUBLIC_PORT
-  value: "443"
-- name: UNO_GATEWAY_PRIVATE_HOST
-  value: {{ $fullName }}-gateway
-- name: UNO_GATEWAY_PRIVATE_PORT
-  value: "8443"
 - name: CONSOLE_LOGOUT_ENABLED
   value: {{ .Values.config.console.enableLogout | default "false" | quote}}
 - name: CONSOLE_SESSION_TIMEOUT_MINUTES
@@ -685,14 +759,14 @@ volumes:
       items:
       - key: tls.crt
         path: {{ tpl . $}}.crt
-{{- end }}  
+{{- end }}
 {{- end -}}
 
 {{- define "uno.secret.volumes.mounts" -}}
 {{ $fullName := include "fullname" . }}
 {{ $dwcsecretname := include "uno.dwcsecretname" . }}
 
-volumeMounts: 
+volumeMounts:
   - name: cert-volume
     mountPath: /security/certs
   - name: jwt-volume
@@ -807,5 +881,92 @@ gcr.io/blackjack-209019/services
 {{- if .Values.config.plugins.maxSize }}
 - name: QUARKUS_HTTP_LIMITS_MAX_BODY_SIZE
   value: {{ .Values.config.plugins.maxSize | quote}}
+{{- end }}
+{{- end -}}
+
+{{- define "uno.genai.env.configuration" -}}
+{{- if .Values.config.genai.agentModels.vertexAiModels }}
+- name: UNO_AIAGENT_MODELS_VERTEXAI
+  value: {{ .Values.config.genai.agentModels.vertexAiModels | quote }}
+{{- end }}
+{{- if .Values.config.genai.agentModels.openAiModels }}
+- name: UNO_AIAGENT_MODELS_OPENAI
+  value: {{ .Values.config.genai.agentModels.openAiModels | quote }}
+{{- end }}
+{{- if .Values.config.genai.agentModels.bedrockModels }}
+- name: UNO_AIAGENT_MODELS_BEDROCK
+  value: {{ .Values.config.genai.agentModels.bedrockModels | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.gcp.serviceFile }}
+- name: GOOGLE_APPLICATION_CREDENTIALS
+  value: /security/credentials/gcp-vertexai-svc.json
+{{- end }}
+{{- if .Values.config.genai.timeout }}
+- name: UNO_GENAI_ENDPOINT_TIMEOUT
+  value: {{ .Values.config.genai.timeout | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.gcp.projectId }}
+- name: UNO_GENAI_PLATFORM_VERTEX_AI_PROJECT_ID
+  value: {{ .Values.global.cloudCredentials.gcp.projectId | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.aws.accessKeyId }}
+- name: UNO_GENAI_PLATFORM_BEDROCK_ACCESSKEY
+  value: {{ .Values.global.cloudCredentials.aws.accessKeyId | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.aws.secretAccessKey }}
+- name: UNO_GENAI_PLATFORM_BEDROCK_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-cloud-credentials
+      key: AWS_SECRET_KEY
+      optional: false
+{{- end }}
+{{- if .Values.global.cloudCredentials.aws.region }}
+- name: UNO_GENAI_PLATFORM_BEDROCK_LOCATION
+  value: {{ .Values.global.cloudCredentials.aws.region | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.aws.roleArn }}
+- name: UNO_GENAI_PLATFORM_BEDROCK_ROLE
+  value: {{ .Values.global.cloudCredentials.aws.roleArn | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.azure.serviceUrl }}
+- name: UNO_GENAI_PLATFORM_AZURE_OPENAI_URL
+  value: {{ .Values.global.cloudCredentials.azure.serviceUrl | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.azure.apiKey }}
+- name: UNO_GENAI_PLATFORM_AZURE_OPENAI_API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-cloud-credentials
+      key: AZURE_AI_SERVICE_APIKEY
+      optional: false
+{{- end }}
+{{- if .Values.global.cloudCredentials.openai.baseUrl }}
+- name: UNO_GENAI_PLATFORM_OPENAI_BASE_URL
+  value: {{ .Values.global.cloudCredentials.openai.baseUrl | quote }}
+{{- end }}
+{{- if and .Values.global.cloudCredentials.openai.baseUrl .Values.global.cloudCredentials.openai.genaiUri }}
+- name: UNO_GENAI_PLATFORM_OPENAI_URL
+  value: {{ printf "%s%s" .Values.global.cloudCredentials.openai.baseUrl .Values.global.cloudCredentials.openai.genaiUri | quote}}
+{{- end }}
+{{- if .Values.global.cloudCredentials.openai.apiKey }}
+- name: UNO_GENAI_PLATFORM_OPENAI_API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-cloud-credentials
+      key: OPEN_AI_SERVICE_APIKEY
+      optional: false
+{{- end }}
+{{- if .Values.global.cloudCredentials.rag }}
+- name: UNO_GENAI_PLATFORM_RAG_URL
+  value: https://{{ .Release.Name }}-rag-service:9999
+{{- end }}
+{{- if .Values.global.cloudCredentials.rag.apiKey }}
+- name: UNO_GENAI_PLATFORM_RAG_SHARED_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-cloud-credentials
+      key: RAG_APIKEY
+      optional: false
 {{- end }}
 {{- end -}}
