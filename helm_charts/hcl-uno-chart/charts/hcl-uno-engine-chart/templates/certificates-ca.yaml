@@ -24,7 +24,8 @@ metadata:
 {{ include "uno.common.label" . | indent 4 }}
 spec:
   isCA: true
-  renewBefore: 1440h0m0s # 60d
+  renewBefore: {{ .Values.config.certificates.caRenewBefore }}
+  duration: {{ .Values.config.certificates.caDuration }}
   commonName: uno
   secretName: {{ .Values.config.certificates.caPairSecretName }}
   privateKey:

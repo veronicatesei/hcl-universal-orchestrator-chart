@@ -1,0 +1,24 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+{{ $fullName := include "aipilot.fullName" . }}
+{{- $root := . -}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $fullName }}-{{ .Values.pilotNlg.name }}"
+  labels:
+{{ include "aipilot.selectorLabels.backend" (list $root .Values.pilotNlg) | indent 4}}
+spec:
+  type: ClusterIP
+  selector: {{- include "aipilot.selectorLabels.backend" (list $root .Values.pilotNlg) | nindent 4}}
+  ports:
+    - name: port-{{ default 5001 .Values.pilotNlg.port }}
+      protocol: TCP
+      port: {{ default 5001 .Values.pilotNlg.port }}
+      targetPort: port-{{ default 5001 .Values.pilotNlg.port }}
