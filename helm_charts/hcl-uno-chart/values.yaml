@@ -29,13 +29,13 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/uno-ea
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-workload-automation-plugins:2.1.2.0-beta1
+  pluginImageName: hcl-workload-automation-plugins:2.1.2.0-beta2
   # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImages:
     - registry: hclcr.io/uno-ea
-      name: hcl-uno-external-pod:2.1.2.0-beta1
+      name: hcl-uno-external-pod:2.1.2.0-beta2
     - registry: hclcr.io/uno-ea
-      name: hcl-workload-automation-packages:2.1.2.0-beta1
+      name: hcl-workload-automation-packages:2.1.2.0-beta2
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -60,6 +60,37 @@ global:
   dbpassword:
   # Hcl additional imagePullSecret to add to service account
   hclImagePullSecret:
+  # cloudCredentials specify the service accounts to access cloud services
+  cloudCredentials:
+    gcp:
+      # gcp is the GCP service account key in JSON format. Replace the value with your GCP service account file content encoded in base64.
+      serviceFile:
+      # gcpProjectId is the GCP project ID. Replace the value with your GCP project ID.
+      projectId:
+    aws:
+      # accessKeyId is the AWS access key ID. Replace the value with your AWS access key ID.
+      accessKeyId:
+      # secretAccessKey is the AWS secret access key. Replace the value with your AWS secret access key.
+      secretAccessKey:
+      # region is the AWS region. Replace the value with your AWS region.
+      region:
+      # roleArn is the AWS role ARN. Used in case of MFA configured account
+      roleArn:
+    azure:
+      # serviceUrl is the Azure service URL of the genai service. Replace the value with your Azure service URL.
+      serviceUrl:
+      # apiKey is the Azure API key to access the GenAI service. Replace the value with your Azure API key.
+      apiKey:
+    openai:
+      # baseUrl is the base URL of the OpenAI service. Mandatory parameter.
+      baseUrl: https://api.openai.com/v1
+      # genaiUri is the URI of the OpenAI service for chat completions. Mandatory parameter.
+      genaiUri: /chat/completions
+      # apiKey is the OpenAI API key to access the GenAI service. Replace the value with your OpenAI API key.
+      apiKey:
+    rag:
+      # apiKey is the API key to access the RAG service. Replace the value with your RAG API key.
+      apiKey:
   dwcconsole:
     # Used to configure an external DWC. Set the name of secret containing the public certificate to verify the JWT token.
     certSecretName:
@@ -131,10 +162,16 @@ uno:
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 2.1.2.0-beta1
+      tag: 2.1.2.0-beta2
     orchestrator:
       # the maximum number of nested workflow in the plan. The subflow jobs exceeding this value will end in FAIL
       maxNestingLevel: 50
+      # the time windows, in seconds, that permits the user to cancel the completion of a human task
+      humanTaskCancelWindowSeconds: 20
+      # Custom template in HTML format for the email sent as notifications when a human task is created. Optional.
+      humanTaskMailTaskCreatedTemplate: #<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>New task</title></html>
+      # Custom template in HTML format for the email sent as notifications when a human task is assigned/unassigned. Optional.
+      humanTaskMailTaskAssignedTemplate: #<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>Assigned task</title></html>
     planning:
       # max number of days to generate not active instance
       notActiveWindowMax: P9DT0H
@@ -167,8 +204,8 @@ uno:
       enabled: false
       # the URL of the GenAI service.
       serviceUrl: https://genai.services.hcluno.cloud
-      # apiKey is the custom key to access the GenAI service provided by HCL Software for beta testing.
-      apiKey:
+      # betaKey is the custom key to access the GenAI service provided by HCL Software for beta testing.
+      betaKey:
       # optional proxy configuration to access the GenAI service.
       proxy:
         # The hostname of the proxy server.
@@ -179,6 +216,17 @@ uno:
         username:
         # The password to authenticate to the proxy server.
         password:
+      # the genai service is internal deployment, bring your own licence.
+      internal:
+      # timeout is the timeout for the GenAI service requests.
+      timeout:
+      chatbotModel:
+        # Model names that work with GenAI service for AI Agents from vertex-ai
+        vertexAiMdodels:
+        # Model names that work with GenAI service for AI Agents from open ai
+        openAiModels:
+        # Model names that work with GenAI service for AI Agents from bedrock
+        bedrockModels:
     engine:
       # justificationsEnabled specifies whether the justification feature is enabled. Supported values are true and false.
       justificationEnabled: false
@@ -188,6 +236,31 @@ uno:
       justificationTicketNumberRequired: false
       # justificationDescriptionRequired specifies whether the justification description is mandatory. Supported values are true and false.
       justificationDescriptionRequired: false
+    mail:
+      enabled: false
+      smtp:
+        # host is the SMTP host to send emails.
+        host: smtp.example.com
+        # port is the SMTP port to send emails.
+        port: 587
+        # startTlsEnabled specifies whether STARTTLS is enabled. Supported values are true and false.
+        startTlsEnabled: true
+        # sslCheckServerIdentity specifies whether the server identity is checked. Supported values are true and false.
+        sslCheckServerIdentity: true
+        # sslTrust specifies which servers are trusted.
+        sslTrust: #host.trusted.com
+        # connectionTimeoutMs is the timeout in milliseconds for connecting to the SMTP server.
+        connectionTimeoutMs: 30000
+      # from is the email address from which the emails are sent. Mandatory if mail is enabled.
+      from: #from@mail.com
+      # credentialsSecretName is the name of the Kubernetes secret that contains the SMTP credentials. If smtp is enabled, this is a mandatory parameter.
+      # The secret must contain the following keys: USERNAME and PASSWORD.
+      credentialsSecretName: uno-smtp-credentials
+    endpoint:
+      # endpoint where the console is exposed.
+      console: #https://console.example.com
+      # endpoint where the gateway is exposed.
+      gateway: #https://gateway.example.com
     encryption:
       # The password or key to encrypt data, such as passwords, agent database, and kafka messages.
       key:
@@ -206,6 +279,8 @@ uno:
       disableHostnameVerification: false
       # customIssuer is the name of the issuer. This parameter applies if you set useCustomizedCert to false. If not specified, a self-signed issuer is created.
       customIssuer:
+      # customIngressIssuer is the optional name of the certificate issuer that overrides internal issuer with a specific one to be used only for ingress.
+      customIngressIssuer:
       # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to true.
       caPairSecretName: ca-key-pair
       # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to true.
@@ -283,6 +358,14 @@ uno:
       # "required"               : Certificates are validated and hostname verification is enabled
       # "certificate-validation" : Certificates are validated and hostname verification is disabled
       tlsVerification: "required"
+      # The path to the claim in the JWT token which contains the roles to be mapped to Quarkus security roles
+      groupClaimPath: ""
+      # The name of the claim in the JWT token whose value will be used as the principal name
+      principalClaim: ""
+      # The list of scopes that must be granted to the access token for the authentication to succeed
+      authenticationScope: ""
+      # The path to the claim in the JWT token that contains the group names for the user
+      jwtGroupClaimPath: ""
 
   # bulkhead defines the policy to be used on the gateway endpoint for avoiding bulk requests and block DDOS attacks against these contexts.
   bulkhead:
@@ -387,7 +470,7 @@ uno:
   hclaipilot:  
     image:
       repository: hclcr.io/uno-ea
-      tag: 2.1.2.0-beta1
+      tag: 2.1.2.0-beta2
 
     # Channels Configuration 
     # The following configuration is used to enable the AIPilot for the channels. For each channel, you need to provide the required configuration.
@@ -510,7 +593,7 @@ uno:
       
       container:
         registry: hclcr.io/uno-ea # Image name
-        tag: 2.1.2.0-beta1  # Image tag
+        tag: 2.1.2.0-beta2  # Image tag
     
       authorization:
         # Is the URL of the OpenID Connect (OIDC) server.
@@ -698,7 +781,7 @@ waconsole:
     # repository is the Dynamic Workload Console image repository. Mandatory parameter.
     repository: hclcr.io/uno-ea/hcl-workload-automation-console
     # tag is the Dynamic Workload Console image tag. Mandatory parameter.
-    tag: 2.1.2.0-beta1
+    tag: 2.1.2.0-beta2
   persistence:
     dataPVC:
       # name is the prefix for the Persistent Volumes Claim name.

@@ -97,8 +97,8 @@ release: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{- define "rag.apikey" -}}
-{{- if .Values.global.cloudCredentials -}}
-{{ .Values.global.cloudCredentials.gcp | quote }}
+{{- if .Values.global.cloudCredentials.gcp.serviceFile -}}
+{{ .Values.global.cloudCredentials.gcp.serviceFile | quote }}
 {{- else -}}
 {{ .Values.config.gcp_key | b64enc | quote }}
 {{- end -}}

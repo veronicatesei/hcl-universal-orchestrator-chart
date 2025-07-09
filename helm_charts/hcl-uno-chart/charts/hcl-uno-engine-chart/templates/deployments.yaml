@@ -198,7 +198,9 @@ spec:
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
-
+{{- if eq $k "genai" }}
+{{ include "uno.genai.env.configuration" $root | indent 12 }}
+{{- end}}
 {{- if eq $k "console"  }}
 {{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
@@ -212,6 +214,10 @@ spec:
               mountPath: /config/plugins.properties
               subPath: plugins.properties
 {{- end }}
+{{- if eq $k "genai" }}
+            - name: credentials
+              mountPath: /security/credentials
+{{- end}}
 
 {{- if eq $k "console" }}
             - name: engines
@@ -261,6 +267,12 @@ spec:
             items:
             - key: plugins.properties
               path: plugins.properties
+{{- end}}
+{{- if eq $k "genai" }}
+        - name: credentials
+          secret:
+            defaultMode: 0644
+            secretName: {{ $root.Release.Name }}-cloud-credentials
 {{- end}}
 {{- if eq $k "console" }}
         - name: engines

@@ -109,6 +109,12 @@ data:
       com.hcl.wa.plugin.gcpcloudrun
       com.hcl.wa.plugin.gcpvertexai
       com.hcl.wa.plugin.wait
+      com.hcl.wa.plugin.airflow
+      com.hcl.wa.plugin.amazonbedrockagents
+      com.hcl.wa.plugin.azurequeue
+      com.hcl.wa.plugin.crewai
+      com.hcl.wa.plugin.langgraph
+      com.hcl.wa.plugin.robotiq
 ---
 
 
@@ -217,3 +223,9 @@ data:
       com.hcl.wa.plugin.gcpvertexai
       com.hcl.wa.plugin.wait
       com.hcl.wa.plugin.azurebatch
+      com.hcl.wa.plugin.airflow
+      com.hcl.wa.plugin.amazonbedrockagents
+      com.hcl.wa.plugin.azurequeue
+      com.hcl.wa.plugin.crewai
+      com.hcl.wa.plugin.langgraph
+      com.hcl.wa.plugin.robotiq
