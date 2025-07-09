@@ -19,6 +19,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: { { .Release.Name | quote } }
-      uno.microservice.version: 2.1.2.0-beta1
+      uno.microservice.version: 2.1.2.0-beta2
 
 {{- end }}

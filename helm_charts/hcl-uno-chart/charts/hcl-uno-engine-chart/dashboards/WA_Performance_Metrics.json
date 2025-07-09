@@ -24,17 +24,41 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 33,
   "links": [],
   "liveNow": false,
   "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 112,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# UnO Dashboard\n* Namespace: %NAMESPACE%\n* Helm Release: %RELEASE%",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.0.0",
+      "type": "text"
+    },
     {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 3
       },
       "id": 2,
       "panels": [],
@@ -52,6 +76,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -65,6 +90,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -102,7 +128,7 @@
         "h": 14,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 4
       },
       "id": 4,
       "options": {
@@ -121,6 +147,7 @@
           "sortDesc": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -153,6 +180,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -166,6 +194,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -217,7 +246,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 18
       },
       "id": 91,
       "options": {
@@ -235,6 +264,7 @@
           "sortDesc": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -280,6 +310,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -293,6 +324,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -348,7 +380,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 25
+        "y": 28
       },
       "id": 6,
       "options": {
@@ -366,6 +398,7 @@
           "sortDesc": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -433,6 +466,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -446,6 +480,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -484,7 +519,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 39
       },
       "id": 67,
       "options": {
@@ -502,6 +537,7 @@
           "sortDesc": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -533,6 +569,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -546,6 +583,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -584,7 +622,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 51
       },
       "id": 110,
       "options": {
@@ -602,6 +640,7 @@
           "sortDesc": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -633,6 +672,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -646,6 +686,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -684,7 +725,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 63
       },
       "id": 111,
       "options": {
@@ -702,6 +743,7 @@
           "sortDesc": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -723,264 +765,3147 @@
       "type": "timeseries"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 75
       },
-      "id": 104,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
+      "id": 113,
+      "panels": [],
+      "title": "AI Agents Stats",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              }
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
             },
-            "overrides": []
+            "inspect": false
           },
-          "gridPos": {
-            "h": 4,
-            "w": 4,
-            "x": 0,
-            "y": 2
-          },
-          "id": 107,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.5.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "round(avg(application_uno_orchestrator_license_job_count_number{namespace=~\"$Namespace\", release=~\"$Release\", period=\"month\", type=\"unique\"}>0))",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Consumed unique jobs in current month",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "__systemRef": "hideSeriesFrom",
-                "matcher": {
-                  "id": "byNames",
-                  "options": {
-                    "mode": "exclude",
-                    "names": [
-                      "unique"
-                    ],
-                    "prefix": "All except:",
-                    "readOnly": true
-                  }
-                },
-                "properties": [
-                  {
-                    "id": "custom.hideFrom",
-                    "value": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": true
-                    }
-                  }
-                ]
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Response Time"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
               }
             ]
           },
-          "gridPos": {
-            "h": 8,
-            "w": 20,
-            "x": 4,
-            "y": 2
-          },
-          "id": 105,
-          "options": {
-            "legend": {
-              "calcs": [
-                "max",
-                "lastNotNull"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Tool Duration"
             },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "round(avg (application_uno_orchestrator_license_job_count_number{period=\"month\", namespace=~\"$Namespace\", release=~\"$Release\"}>0) by (type))",
-              "legendFormat": "{{type}}",
-              "range": true,
-              "refId": "A"
-            }
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 76
+      },
+      "id": 117,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
           ],
-          "title": "Consumed jobs",
-          "type": "timeseries"
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_conversations_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Conversations",
+          "range": false,
+          "refId": "conv",
+          "useBackend": false
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 0
-                  }
-                ]
-              }
-            },
-            "overrides": []
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_errors_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Errors",
+          "range": false,
+          "refId": "errors"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "gridPos": {
-            "h": 4,
-            "w": 4,
-            "x": 0,
-            "y": 6
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_tool_errors_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Tool Errors",
+          "range": false,
+          "refId": "tool_errors"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "id": 106,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_invoke_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_conversations_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Avg Invoke",
+          "range": false,
+          "refId": "invoke",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "pluginVersion": "9.5.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "round(avg (application_uno_orchestrator_license_job_to_send_jobs{namespace=~\"$Namespace\", release=~\"$Release\"}>0))",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Jobs to send to license server",
-          "type": "stat"
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_genaicalls_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_conversations_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} GenAI Calls",
+          "range": false,
+          "refId": "genaicalls"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_tool_calls_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_conversations_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Tools",
+          "range": false,
+          "refId": "tools"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_response_time_monthly_milliseconds{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_invoke_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Avg Respnse Time",
+          "range": false,
+          "refId": "response_time"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_tool_duration_monthly_milliseconds{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_tool_calls_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Avg Tool Duration",
+          "range": false,
+          "refId": "tool_duration",
+          "useBackend": false
         }
       ],
-      "title": "WA License",
+      "title": "Agent Conversation (last month)",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "composite_key",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Time 6": true,
+              "Time 7": true,
+              "Time 8": true,
+              "Value": false,
+              "agent 2": true,
+              "agent 3": true,
+              "agent 4": true,
+              "agent 5": true,
+              "agent 6": true,
+              "agent 7": true,
+              "agent 8": true,
+              "composite_key": true,
+              "mode 2": true,
+              "mode 3": true,
+              "mode 4": true,
+              "mode 5": true,
+              "mode 6": true,
+              "mode 7": true,
+              "mode 8": true,
+              "model 2": true,
+              "model 3": true,
+              "model 4": true,
+              "model 5": true,
+              "model 6": true,
+              "model 7": true,
+              "model 8": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time 1": 1,
+              "Time 2": 13,
+              "Time 3": 17,
+              "Time 4": 21,
+              "Time 5": 25,
+              "Time 6": 29,
+              "Time 7": 33,
+              "Time 8": 37,
+              "Value #conv": 5,
+              "Value #errors": 6,
+              "Value #genaicalls": 9,
+              "Value #invoke": 8,
+              "Value #response_time": 11,
+              "Value #tool_duration": 12,
+              "Value #tool_errors": 7,
+              "Value #tools": 10,
+              "agent 1": 2,
+              "agent 2": 14,
+              "agent 3": 18,
+              "agent 4": 22,
+              "agent 5": 26,
+              "agent 6": 30,
+              "agent 7": 34,
+              "agent 8": 38,
+              "composite_key": 0,
+              "mode 1": 3,
+              "mode 2": 15,
+              "mode 3": 19,
+              "mode 4": 23,
+              "mode 5": 27,
+              "mode 6": 31,
+              "mode 7": 35,
+              "mode 8": 39,
+              "model 1": 4,
+              "model 2": 16,
+              "model 3": 20,
+              "model 4": 24,
+              "model 5": 28,
+              "model 6": 32,
+              "model 7": 36,
+              "model 8": 40
+            },
+            "renameByName": {
+              "Value #conv": "# Conversations",
+              "Value #errors": "# Errors",
+              "Value #genaicalls": "Avg GenAI Calls",
+              "Value #invoke": "Avg User Prompts",
+              "Value #response_time": "Avg Response Time",
+              "Value #tool_duration": "Avg Tool Duration",
+              "Value #tool_errors": "# Tool Errors",
+              "Value #tools": "Avg Tool Calls",
+              "agent 1": "Agent",
+              "mode 1": "Mode",
+              "model 1": "GenAI Model",
+              "model 2": ""
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Duration"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 83
+      },
+      "id": 122,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, workflow, service_name) (sum by (pod, agent, mode, workflow, service_name) (application_uno_aiagent_tool_calls_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"workflow\", \"service_name\") ",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "calls",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, workflow, service_name) (sum by (pod, agent, mode, workflow, service_name) (application_uno_aiagent_tool_errors_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"workflow\", \"service_name\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "errors"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(avg by (agent, mode, workflow, service_name) (sum by (pod, agent, mode, workflow, service_name) (application_uno_aiagent_tool_duration_monthly_milliseconds{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode, workflow, service_name) (application_uno_aiagent_tool_calls_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"workflow\", \"service_name\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "response_time"
+        }
+      ],
+      "title": "Tool Execution (last month)",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "composite_key",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Time 6": true,
+              "Time 7": true,
+              "Time 8": true,
+              "Value": false,
+              "agent 1": false,
+              "agent 2": true,
+              "agent 3": true,
+              "agent 4": true,
+              "agent 5": true,
+              "agent 6": true,
+              "agent 7": true,
+              "agent 8": true,
+              "composite_key": true,
+              "mode 2": true,
+              "mode 3": true,
+              "mode 4": true,
+              "mode 5": true,
+              "mode 6": true,
+              "mode 7": true,
+              "mode 8": true,
+              "model 2": true,
+              "model 3": true,
+              "model 4": true,
+              "model 5": true,
+              "model 6": true,
+              "model 7": true,
+              "model 8": true,
+              "service_name 2": true,
+              "service_name 3": true,
+              "workflow 2": true,
+              "workflow 3": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time 1": 1,
+              "Time 2": 9,
+              "Time 3": 12,
+              "Value #calls": 6,
+              "Value #errors": 7,
+              "Value #response_time": 8,
+              "agent 1": 4,
+              "agent 2": 10,
+              "agent 3": 13,
+              "composite_key": 0,
+              "mode 1": 5,
+              "mode 2": 11,
+              "mode 3": 14,
+              "service_name 1": 3,
+              "service_name 2": 17,
+              "service_name 3": 18,
+              "workflow 1": 2,
+              "workflow 2": 15,
+              "workflow 3": 16
+            },
+            "renameByName": {
+              "Value #calls": "# Executions",
+              "Value #conv": "# Conversations",
+              "Value #errors": "# Errors",
+              "Value #genaicalls": "Avg GenAI Calls",
+              "Value #invoke": "Avg User Prompts",
+              "Value #response_time": "Avg Duration",
+              "Value #tool_duration": "Avg Tool Execution Time",
+              "Value #tool_errors": "# Tool Errors",
+              "Value #tools": "Avg Tool Calls",
+              "agent 1": "Agent",
+              "mode 1": "Mode",
+              "model 1": "GenAI Model",
+              "model 2": "",
+              "service_name 1": "Service Name",
+              "workflow 1": "Workflow"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Response Time"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Tool Execution Time"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 90
+      },
+      "id": 119,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_conversations_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Conversations",
+          "range": false,
+          "refId": "conv",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_errors_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Errors",
+          "range": false,
+          "refId": "errors"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_tool_errors_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Tool Errors",
+          "range": false,
+          "refId": "tool_errors"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_invoke_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_conversations_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Avg Invoke",
+          "range": false,
+          "refId": "invoke",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_genaicalls_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_conversations_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} GenAI Calls",
+          "range": false,
+          "refId": "genaicalls"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_tool_calls_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_conversations_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Tools",
+          "range": false,
+          "refId": "tools"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_response_time_daily_milliseconds{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_invoke_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Avg Respnse Time",
+          "range": false,
+          "refId": "response_time"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode) (sum by (pod, agent, mode) (application_uno_aiagent_tool_duration_daily_milliseconds{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode) (application_uno_aiagent_tool_calls_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Avg Tool Duration",
+          "range": false,
+          "refId": "tool_duration",
+          "useBackend": false
+        }
+      ],
+      "title": "Agent Conversation (last 24h)",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "composite_key",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Time 6": true,
+              "Time 7": true,
+              "Time 8": true,
+              "Value": false,
+              "agent 2": true,
+              "agent 3": true,
+              "agent 4": true,
+              "agent 5": true,
+              "agent 6": true,
+              "agent 7": true,
+              "agent 8": true,
+              "composite_key": true,
+              "mode 2": true,
+              "mode 3": true,
+              "mode 4": true,
+              "mode 5": true,
+              "mode 6": true,
+              "mode 7": true,
+              "mode 8": true,
+              "model 2": true,
+              "model 3": true,
+              "model 4": true,
+              "model 5": true,
+              "model 6": true,
+              "model 7": true,
+              "model 8": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time 1": 1,
+              "Time 2": 13,
+              "Time 3": 17,
+              "Time 4": 21,
+              "Time 5": 25,
+              "Time 6": 29,
+              "Time 7": 33,
+              "Time 8": 37,
+              "Value #conv": 5,
+              "Value #errors": 6,
+              "Value #genaicalls": 9,
+              "Value #invoke": 8,
+              "Value #response_time": 11,
+              "Value #tool_duration": 12,
+              "Value #tool_errors": 7,
+              "Value #tools": 10,
+              "agent 1": 2,
+              "agent 2": 14,
+              "agent 3": 18,
+              "agent 4": 22,
+              "agent 5": 26,
+              "agent 6": 30,
+              "agent 7": 34,
+              "agent 8": 38,
+              "composite_key": 0,
+              "mode 1": 3,
+              "mode 2": 15,
+              "mode 3": 19,
+              "mode 4": 23,
+              "mode 5": 27,
+              "mode 6": 31,
+              "mode 7": 35,
+              "mode 8": 39,
+              "model 1": 4,
+              "model 2": 16,
+              "model 3": 20,
+              "model 4": 24,
+              "model 5": 28,
+              "model 6": 32,
+              "model 7": 36,
+              "model 8": 40
+            },
+            "renameByName": {
+              "Value #conv": "# Conversations",
+              "Value #errors": "# Errors",
+              "Value #genaicalls": "Avg GenAI Calls",
+              "Value #invoke": "Avg User Prompts",
+              "Value #response_time": "Avg Response Time",
+              "Value #tool_duration": "Avg Tool Execution Time",
+              "Value #tool_errors": "# Tool Errors",
+              "Value #tools": "Avg Tool Calls",
+              "agent 1": "Agent",
+              "mode 1": "Mode",
+              "model 1": "GenAI Model",
+              "model 2": ""
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Duration"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 97
+      },
+      "id": 123,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, workflow, service_name) (sum by (pod, agent, mode, workflow, service_name) (application_uno_aiagent_tool_calls_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"workflow\", \"service_name\") ",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "calls",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, workflow, service_name) (sum by (pod, agent, mode, workflow, service_name) (application_uno_aiagent_tool_errors_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"workflow\", \"service_name\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "errors"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(avg by (agent, mode, workflow, service_name) (sum by (pod, agent, mode, workflow, service_name) (application_uno_aiagent_tool_duration_daily_milliseconds{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}) / sum by (pod, agent, mode, workflow, service_name) (application_uno_aiagent_tool_calls_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"workflow\", \"service_name\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "response_time"
+        }
+      ],
+      "title": "Tool Execution (last 24h)",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "composite_key",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Time 6": true,
+              "Time 7": true,
+              "Time 8": true,
+              "Value": false,
+              "agent 1": false,
+              "agent 2": true,
+              "agent 3": true,
+              "agent 4": true,
+              "agent 5": true,
+              "agent 6": true,
+              "agent 7": true,
+              "agent 8": true,
+              "composite_key": true,
+              "mode 2": true,
+              "mode 3": true,
+              "mode 4": true,
+              "mode 5": true,
+              "mode 6": true,
+              "mode 7": true,
+              "mode 8": true,
+              "model 2": true,
+              "model 3": true,
+              "model 4": true,
+              "model 5": true,
+              "model 6": true,
+              "model 7": true,
+              "model 8": true,
+              "service_name 2": true,
+              "service_name 3": true,
+              "workflow 2": true,
+              "workflow 3": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time 1": 1,
+              "Time 2": 9,
+              "Time 3": 12,
+              "Value #calls": 6,
+              "Value #errors": 7,
+              "Value #response_time": 8,
+              "agent 1": 4,
+              "agent 2": 10,
+              "agent 3": 13,
+              "composite_key": 0,
+              "mode 1": 5,
+              "mode 2": 11,
+              "mode 3": 14,
+              "service_name 1": 3,
+              "service_name 2": 17,
+              "service_name 3": 18,
+              "workflow 1": 2,
+              "workflow 2": 15,
+              "workflow 3": 16
+            },
+            "renameByName": {
+              "Value #calls": "# Executions",
+              "Value #conv": "# Conversations",
+              "Value #errors": "# Errors",
+              "Value #genaicalls": "Avg GenAI Calls",
+              "Value #invoke": "Avg User Prompts",
+              "Value #response_time": "Avg Duration",
+              "Value #tool_duration": "Avg Tool Execution Time",
+              "Value #tool_errors": "# Tool Errors",
+              "Value #tools": "Avg Tool Calls",
+              "agent 1": "Agent",
+              "mode 1": "Mode",
+              "model 1": "GenAI Model",
+              "model 2": "",
+              "service_name 1": "Service Name",
+              "workflow 1": "Workflow"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Response Time"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Tool Execution Time"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 104
+      },
+      "id": 120,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, model) (sum by (pod, agent, mode, model) (application_uno_aiagent_units_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Daily Units",
+          "range": false,
+          "refId": "d_unit",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, model) (sum by (pod, agent, mode, model) (application_uno_aiagent_units_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} Monthly Units",
+          "range": false,
+          "refId": "m_units",
+          "useBackend": false
+        }
+      ],
+      "title": "AI Agent Cost (Cloud Service)",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "composite_key",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Time 6": true,
+              "Time 7": true,
+              "Time 8": true,
+              "Value": false,
+              "agent 2": true,
+              "agent 3": true,
+              "agent 4": true,
+              "agent 5": true,
+              "agent 6": true,
+              "agent 7": true,
+              "agent 8": true,
+              "composite_key": true,
+              "mode 2": true,
+              "mode 3": true,
+              "mode 4": true,
+              "mode 5": true,
+              "mode 6": true,
+              "mode 7": true,
+              "mode 8": true,
+              "model 2": true,
+              "model 3": true,
+              "model 4": true,
+              "model 5": true,
+              "model 6": true,
+              "model 7": true,
+              "model 8": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time 1": 1,
+              "Time 2": 13,
+              "Time 3": 17,
+              "Time 4": 21,
+              "Time 5": 25,
+              "Time 6": 29,
+              "Time 7": 33,
+              "Time 8": 37,
+              "Value #conv": 5,
+              "Value #errors": 6,
+              "Value #genaicalls": 9,
+              "Value #invoke": 8,
+              "Value #response_time": 11,
+              "Value #tool_duration": 12,
+              "Value #tool_errors": 7,
+              "Value #tools": 10,
+              "agent 1": 2,
+              "agent 2": 14,
+              "agent 3": 18,
+              "agent 4": 22,
+              "agent 5": 26,
+              "agent 6": 30,
+              "agent 7": 34,
+              "agent 8": 38,
+              "composite_key": 0,
+              "mode 1": 3,
+              "mode 2": 15,
+              "mode 3": 19,
+              "mode 4": 23,
+              "mode 5": 27,
+              "mode 6": 31,
+              "mode 7": 35,
+              "mode 8": 39,
+              "model 1": 4,
+              "model 2": 16,
+              "model 3": 20,
+              "model 4": 24,
+              "model 5": 28,
+              "model 6": 32,
+              "model 7": 36,
+              "model 8": 40
+            },
+            "renameByName": {
+              "Value #conv": "# Conversations",
+              "Value #d_unit": "Consumed GenAI Units (24h)",
+              "Value #errors": "# Errors",
+              "Value #genaicalls": "Avg GenAI Calls",
+              "Value #invoke": "# User Prompts",
+              "Value #m_units": "Consumed GenAI Units (30d)",
+              "Value #response_time": "Avg Response Time",
+              "Value #tool_duration": "Avg Tool Execution Time",
+              "Value #tool_errors": "# Tool Errors",
+              "Value #tools": "Avg Tool Calls",
+              "agent 1": "Agent",
+              "mode 1": "Mode",
+              "model 1": "GenAI Model",
+              "model 2": ""
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Response Time"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Tool Execution Time"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 111
+      },
+      "id": 121,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, model) (sum by (pod, agent, mode, model) (application_uno_aiagent_tokens_in_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "d_token_in",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, model) (sum by (pod, agent, mode, model) (application_uno_aiagent_tokens_out_daily_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "d_token_out",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, model) (sum by (pod, agent, mode, model) (application_uno_aiagent_cost_daily_dollars{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "d_cost",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, model) (sum by (pod, agent, mode, model) (application_uno_aiagent_tokens_in_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "m_token_in",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, model) (sum by (pod, agent, mode, model) (application_uno_aiagent_tokens_out_monthly_number{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "m_token_out",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (agent, mode, model) (sum by (pod, agent, mode, model) (application_uno_aiagent_cost_monthly_dollars{namespace=\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"})), \"composite_key\", \"-\", \"agent\", \"mode\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "m_cost",
+          "useBackend": false
+        }
+      ],
+      "title": "AI Agent Cost (BYOL)",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "composite_key",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Time 6": true,
+              "Time 7": true,
+              "Time 8": true,
+              "Value": false,
+              "agent 2": true,
+              "agent 3": true,
+              "agent 4": true,
+              "agent 5": true,
+              "agent 6": true,
+              "agent 7": true,
+              "agent 8": true,
+              "composite_key": true,
+              "mode 2": true,
+              "mode 3": true,
+              "mode 4": true,
+              "mode 5": true,
+              "mode 6": true,
+              "mode 7": true,
+              "mode 8": true,
+              "model 2": true,
+              "model 3": true,
+              "model 4": true,
+              "model 5": true,
+              "model 6": true,
+              "model 7": true,
+              "model 8": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time 1": 1,
+              "Time 2": 11,
+              "Time 3": 15,
+              "Time 4": 19,
+              "Time 5": 23,
+              "Time 6": 27,
+              "Value #d_cost": 7,
+              "Value #d_token_in": 5,
+              "Value #d_token_out": 6,
+              "Value #m_cost": 10,
+              "Value #m_token_in": 8,
+              "Value #m_token_out": 9,
+              "agent 1": 2,
+              "agent 2": 12,
+              "agent 3": 16,
+              "agent 4": 20,
+              "agent 5": 24,
+              "agent 6": 28,
+              "composite_key": 0,
+              "mode 1": 3,
+              "mode 2": 13,
+              "mode 3": 17,
+              "mode 4": 21,
+              "mode 5": 25,
+              "mode 6": 29,
+              "model 1": 4,
+              "model 2": 14,
+              "model 3": 18,
+              "model 4": 22,
+              "model 5": 26,
+              "model 6": 30
+            },
+            "renameByName": {
+              "Value #conv": "# Conversations",
+              "Value #d_cost": "Cost (24h)",
+              "Value #d_token_in": "Token In (24h)",
+              "Value #d_token_out": "Token Out (24h)",
+              "Value #d_unit": "Consumed GenAI Units (24h)",
+              "Value #errors": "# Errors",
+              "Value #genaicalls": "Avg GenAI Calls",
+              "Value #invoke": "Avg User Prompts",
+              "Value #m_cost": "Cost (30d)",
+              "Value #m_token_in": "Token In (30d)",
+              "Value #m_token_out": "Token Out (30d)",
+              "Value #m_units": "Consumed GenAI Units (30d)",
+              "Value #response_time": "Avg Response Time",
+              "Value #tool_duration": "Avg Tool Execution Time",
+              "Value #tool_errors": "# Tool Errors",
+              "Value #tools": "Avg Tool Calls",
+              "agent 1": "Agent",
+              "mode 1": "Mode",
+              "model 1": "GenAI Model",
+              "model 2": ""
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 118
+      },
+      "id": 118,
+      "panels": [],
+      "title": "AI Agent Activity",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 119
+      },
+      "id": 125,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (agent, mode) (\n  irate(application_uno_aiagent_invoke_seconds_count{namespace=~\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}[$__rate_interval])\n) * 60",
+          "hide": false,
+          "legendFormat": "Agent: {{agent}} - {{mode}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (workflow, service_name, agent, mode) (\n  irate(application_uno_aiagent_tool_seconds_count{namespace=~\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}[$__rate_interval])\n) * 60\n",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Tool: {{workflow}} - {{service_name}} - {{agent}} - {{mode}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "AI Agent / Tool Calls per minute",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 131
+      },
+      "id": 126,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (agent, mode) (\n  irate(application_uno_aiagent_invoke_seconds_count{namespace=~\"$Namespace\", release=~\"$Release\", pod=~\"$pod\", status=\"ERROR\"}[$__rate_interval])\n) * 60",
+          "hide": false,
+          "legendFormat": "Agent: {{agent}} - {{mode}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (workflow, service_name) (\n  irate(application_uno_aiagent_tool_seconds_count{namespace=~\"$Namespace\", release=~\"$Release\", pod=~\"$pod\", status=\"FAILED\"}[$__rate_interval])\n) * 60\n",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Tool: {{workflow}} - {{service_name}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "AI Agent / Tool Errors",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 143
+      },
+      "id": 127,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (agent, mode, model) (\n  rate(application_uno_aiagent_invoke_seconds_sum{namespace=~\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}[$__rate_interval])\n) / sum by (agent, mode, model) (\n  rate(application_uno_aiagent_invoke_seconds_count{namespace=~\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}[$__rate_interval])\n)",
+          "hide": false,
+          "legendFormat": "Agent: {{agent}} - {{mode}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "AI Agent Response time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 155
+      },
+      "id": 128,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (agent, mode, workflow, service_name) (\n  rate(application_uno_aiagent_tool_seconds_sum{namespace=~\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}[$__rate_interval])\n) / sum by (agent, mode, workflow, service_name) (\n  rate(application_uno_aiagent_tool_seconds_count{namespace=~\"$Namespace\", release=~\"$Release\", pod=~\"$pod\"}[$__rate_interval])\n)",
+          "hide": false,
+          "legendFormat": "Tool: {{workflow}} - {{service_name}} - {{agent}} - {{mode}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Tool Duration",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 167
+      },
+      "id": 104,
+      "panels": [],
+      "title": "UnO License",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 168
+      },
+      "id": 107,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "round(avg(application_uno_orchestrator_license_job_count_number{namespace=~\"$Namespace\", release=~\"$Release\", period=\"month\", type=\"unique\"}>0))",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Consumed unique jobs in current month",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "unique"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 20,
+        "x": 4,
+        "y": 168
+      },
+      "id": 124,
+      "options": {
+        "legend": {
+          "calcs": [
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "round(avg (application_uno_orchestrator_license_job_count_number{period=\"month\", namespace=~\"$Namespace\", release=~\"$Release\"}>0) by (type))",
+          "legendFormat": "{{type}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Consumed jobs",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 172
+      },
+      "id": 106,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "round(avg (application_uno_orchestrator_license_job_to_send_jobs{namespace=~\"$Namespace\", release=~\"$Release\"}>0))",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Jobs to send to license server",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 176
+      },
+      "id": 114,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "round(avg(application_uno_aiagent_license_units_number{namespace=~\"$Namespace\", release=~\"$Release\", period=\"month\", type=\"total\"}>0))",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Consumed AI Execution Units in current month",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 20,
+        "x": 4,
+        "y": 176
+      },
+      "id": 116,
+      "options": {
+        "legend": {
+          "calcs": [
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "round(avg (application_uno_aiagent_license_units_number{period=\"month\", namespace=~\"$Namespace\", release=~\"$Release\"}>0) by (type))",
+          "legendFormat": "{{type}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Consumed AI Execution Units",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 180
+      },
+      "id": 115,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "round(avg (application_uno_aiagent_license_units_to_send{namespace=~\"$Namespace\", release=~\"$Release\"}>0))",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "AI Execution Units to send to license server",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 184
+      },
+      "id": 129,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "round(\n  avg (\n    sum by (pod) (application_uno_aiagent_units_monthly_number{namespace=~\"$Namespace\", release=~\"$Release\"})\n  )\n)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "GenAI Units by Agents in last 30 days",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 20,
+        "x": 4,
+        "y": 184
+      },
+      "id": 131,
+      "options": {
+        "legend": {
+          "calcs": [
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "round(\n  avg (\n    sum by (pod) (application_uno_aiagent_units_monthly_number{namespace=~\"$Namespace\", release=~\"$Release\"})\n  ) +\n  sum (\n    increase(application_uno_genai_proxy_units_number_total{namespace=~\"$Namespace\", release=~\"$Release\"}[30d])\n  )\n)",
+          "legendFormat": "{{type}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Consumed GenAI Units (estimated)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 188
+      },
+      "id": 130,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "round(\n  sum (\n    increase(application_uno_genai_proxy_units_number_total{namespace=~\"$Namespace\", release=~\"$Release\"}[30d])\n  )\n)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "GenAI Units by Console in last 30 days (estimated)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 192
+      },
+      "id": 132,
+      "panels": [],
+      "title": "GenAI Cost (BYOL)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 193
+      },
+      "id": 134,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max (sum by (pod) (application_uno_genai_cost_daily_dollars{namespace=\"$Namespace\", release=~\"$Release\"}) or vector(0))",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "Requests",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Cost last 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 20,
+        "x": 4,
+        "y": 193
+      },
+      "id": 136,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Cost ($)"
+          }
+        ]
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (scenario, platform, model) (sum by (pod, scenario, platform, model) (application_uno_genai_cost_monthly_dollars{namespace=\"$Namespace\", release=~\"$Release\"})), \"composite_key\", \"-\", \"scenario\", \"platform\", \"model\")",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "{{composite_key}} (Cost)",
+          "range": false,
+          "refId": "Cost"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (scenario, platform, model) (sum by (pod, scenario, platform, model) (application_uno_genai_stats_monthly_number{namespace=\"$Namespace\", release=~\"$Release\"})), \"composite_key\", \"-\", \"scenario\", \"platform\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} (Count)",
+          "range": false,
+          "refId": "Count",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (scenario, platform, model) (sum by (pod, scenario, platform, model) (application_uno_genai_tokens_in_monthly_number{namespace=\"$Namespace\", release=~\"$Release\"})), \"composite_key\", \"-\", \"scenario\", \"platform\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} (Count)",
+          "range": false,
+          "refId": "InputTokens",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "label_join(max by (scenario, platform, model) (sum by (pod, scenario, platform, model) (application_uno_genai_tokens_out_monthly_number{namespace=\"$Namespace\", release=~\"$Release\"})), \"composite_key\", \"-\", \"scenario\", \"platform\", \"model\")",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "{{composite_key}} (Count)",
+          "range": false,
+          "refId": "OutputTokens",
+          "useBackend": false
+        }
+      ],
+      "title": "Monthly Scenario Stats",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "composite_key",
+            "mode": "inner"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "avgCost",
+            "binary": {
+              "left": "Value #Cost",
+              "operator": "/",
+              "right": "Value #Count"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Value #ConsumedUnits": false,
+              "composite_key": true,
+              "deploymentName 1": true,
+              "deploymentName 2": true,
+              "model 2": true,
+              "model 3": true,
+              "model 4": true,
+              "model 5": true,
+              "organizationName 1": true,
+              "organizationName 2": true,
+              "platform 1": false,
+              "platform 2": true,
+              "platform 3": true,
+              "platform 4": true,
+              "platform 5": true,
+              "scenario 2": true,
+              "scenario 3": true,
+              "scenario 4": true,
+              "scenario 5": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Avg Cost": 10,
+              "Time 1": 0,
+              "Time 2": 1,
+              "Value #Cost": 6,
+              "Value #Count": 9,
+              "composite_key": 2,
+              "model 1": 5,
+              "model 2": 11,
+              "platform 1": 4,
+              "platform 2": 7,
+              "scenario 1": 3,
+              "scenario 2": 8
+            },
+            "renameByName": {
+              "Avg Cost": "Avg Cost ($)",
+              "Value #A": "Requests",
+              "Value #B": "Cost ($)",
+              "Value #ConsumedUnits": "Consumed Units",
+              "Value #Cost": "Cost ($)",
+              "Value #Cost / Value #Count": "Avg Cost",
+              "Value #Count": "Count",
+              "Value #InputTokens": "Input Tokens",
+              "Value #OutputTokens": "Output Tokens",
+              "avgCost": "Avg Cost ($)",
+              "avgCostPerUnit": "Avg Cost per Unit ($)",
+              "composite_key": "",
+              "deploymentId": "Deployment ID",
+              "deploymentName 1": "Deployment",
+              "organizationName 1": "Organization"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 197
+      },
+      "id": 135,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max (sum by (pod) (application_uno_genai_cost_monthly_dollars{namespace=\"$Namespace\", release=~\"$Release\"}) or vector(0))",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "Requests",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Cost last 30 days",
+      "type": "stat"
     },
     {
       "collapsed": true,
@@ -988,7 +3913,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 201
       },
       "id": 81,
       "panels": [
@@ -1003,6 +3928,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -1016,6 +3942,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -1054,7 +3981,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 62
+            "y": 202
           },
           "id": 83,
           "options": {
@@ -1072,6 +3999,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -1103,6 +4031,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -1116,6 +4045,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -1154,7 +4084,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 73
+            "y": 213
           },
           "id": 109,
           "options": {
@@ -1172,6 +4102,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -1203,6 +4134,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -1216,6 +4148,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -1253,7 +4186,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 84
+            "y": 224
           },
           "id": 78,
           "options": {
@@ -1269,6 +4202,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -1301,6 +4235,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -1314,6 +4249,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -1352,7 +4288,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 94
+            "y": 234
           },
           "id": 103,
           "options": {
@@ -1370,6 +4306,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -1402,6 +4339,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -1415,6 +4353,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -1453,7 +4392,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 105
+            "y": 245
           },
           "id": 82,
           "options": {
@@ -1469,6 +4408,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -1501,6 +4441,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -1514,6 +4455,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -1552,7 +4494,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 116
+            "y": 256
           },
           "id": 88,
           "options": {
@@ -1570,6 +4512,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -1601,6 +4544,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -1614,6 +4558,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -1652,7 +4597,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 127
+            "y": 267
           },
           "id": 85,
           "options": {
@@ -1670,6 +4615,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -1700,318 +4646,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 74
-      },
-      "id": 92,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "reqps"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 24,
-            "x": 0,
-            "y": 127
-          },
-          "id": 93,
-          "options": {
-            "legend": {
-              "calcs": [
-                "min",
-                "mean",
-                "max",
-                "last"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true,
-              "sortBy": "Max",
-              "sortDesc": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "sum by(pod) (kafka_consumer_request_rate)",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "kafka_consumer_request_rate",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "ms"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 24,
-            "x": 0,
-            "y": 138
-          },
-          "id": 101,
-          "options": {
-            "legend": {
-              "calcs": [
-                "min",
-                "mean",
-                "max",
-                "last"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true,
-              "sortBy": "Last",
-              "sortDesc": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "avg by (pod) (kafka_consumer_fetch_manager_fetch_latency_avg)",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "kafka_consumer_fetch_manager_fetch_latency_avg",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "reqps"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 11,
-            "w": 24,
-            "x": 0,
-            "y": 149
-          },
-          "id": 94,
-          "options": {
-            "legend": {
-              "calcs": [
-                "min",
-                "mean",
-                "max",
-                "last"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true,
-              "sortBy": "Mean",
-              "sortDesc": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "sum by(pod) (kafka_producer_request_rate)",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "kafka_producer_request_rate",
-          "type": "timeseries"
-        }
-      ],
-      "title": "Kafka",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 75
+        "y": 202
       },
       "id": 9,
       "panels": [
@@ -2026,6 +4661,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -2039,6 +4675,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2060,7 +4697,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2076,7 +4714,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 161
+            "y": 279
           },
           "id": 108,
           "options": {
@@ -2094,6 +4732,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -2126,6 +4765,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -2139,6 +4779,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2160,7 +4801,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2175,7 +4817,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 171
+            "y": 289
           },
           "id": 15,
           "options": {
@@ -2193,6 +4835,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -2225,6 +4868,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -2238,6 +4882,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2259,7 +4904,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2275,7 +4921,7 @@
             "h": 16,
             "w": 24,
             "x": 0,
-            "y": 178
+            "y": 296
           },
           "id": 76,
           "options": {
@@ -2293,6 +4939,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -2328,6 +4975,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -2341,6 +4989,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2362,7 +5011,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2378,7 +5028,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 194
+            "y": 312
           },
           "id": 17,
           "options": {
@@ -2396,6 +5046,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -2454,6 +5105,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -2467,6 +5119,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2488,7 +5141,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2504,7 +5158,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 207
+            "y": 325
           },
           "id": 19,
           "options": {
@@ -2522,6 +5176,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -2567,6 +5222,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -2580,6 +5236,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2601,7 +5258,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2617,7 +5275,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 218
+            "y": 336
           },
           "id": 74,
           "options": {
@@ -2635,6 +5293,7 @@
               "sortDesc": false
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -2680,6 +5339,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -2693,6 +5353,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2714,7 +5375,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2729,7 +5391,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 228
+            "y": 346
           },
           "id": 39,
           "options": {
@@ -2747,6 +5409,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -2778,6 +5441,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -2791,6 +5455,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2812,7 +5477,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2828,7 +5494,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 239
+            "y": 357
           },
           "id": 21,
           "options": {
@@ -2844,6 +5510,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -2889,6 +5556,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -2902,6 +5570,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2923,7 +5592,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2938,7 +5608,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 252
+            "y": 370
           },
           "id": 11,
           "options": {
@@ -2956,6 +5626,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -2999,6 +5670,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -3012,6 +5684,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -3034,7 +5707,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3050,7 +5724,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 263
+            "y": 381
           },
           "id": 102,
           "options": {
@@ -3068,6 +5742,7 @@
               "sortDesc": false
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -3098,7 +5773,330 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 76
+        "y": 203
+      },
+      "id": 92,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 24,
+            "x": 0,
+            "y": 280
+          },
+          "id": 93,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "mean",
+                "max",
+                "last"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true,
+              "sortBy": "Max",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "builder",
+              "expr": "sum by(pod) (kafka_consumer_request_rate)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "kafka_consumer_request_rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 24,
+            "x": 0,
+            "y": 291
+          },
+          "id": 101,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "mean",
+                "max",
+                "last"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true,
+              "sortBy": "Last",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "avg by (pod) (kafka_consumer_fetch_manager_fetch_latency_avg)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "kafka_consumer_fetch_manager_fetch_latency_avg",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 24,
+            "x": 0,
+            "y": 302
+          },
+          "id": 94,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "mean",
+                "max",
+                "last"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "builder",
+              "expr": "sum by(pod) (kafka_producer_request_rate)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "kafka_producer_request_rate",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Kafka",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 204
       },
       "id": 73,
       "panels": [
@@ -3114,6 +6112,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -3127,6 +6126,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -3164,7 +6164,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 65
+            "y": 427
           },
           "id": 63,
           "options": {
@@ -3180,6 +6180,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -3211,6 +6212,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -3224,6 +6226,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -3261,7 +6264,7 @@
             "h": 14,
             "w": 24,
             "x": 0,
-            "y": 76
+            "y": 438
           },
           "id": 71,
           "options": {
@@ -3279,6 +6282,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -3309,7 +6313,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 77
+        "y": 205
       },
       "id": 25,
       "panels": [
@@ -3324,6 +6328,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -3337,6 +6342,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -3359,7 +6365,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3375,7 +6382,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 276
+            "y": 453
           },
           "id": 62,
           "options": {
@@ -3393,6 +6400,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -3436,7 +6444,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3465,7 +6474,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 285
+            "y": 462
           },
           "id": 80,
           "options": {
@@ -3487,7 +6496,7 @@
               }
             ]
           },
-          "pluginVersion": "9.5.1",
+          "pluginVersion": "11.0.0",
           "targets": [
             {
               "datasource": {
@@ -3558,6 +6567,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -3571,6 +6581,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -3594,7 +6605,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3610,7 +6622,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 296
+            "y": 473
           },
           "id": 27,
           "options": {
@@ -3628,6 +6640,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -3659,6 +6672,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -3672,6 +6686,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -3694,7 +6709,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3710,7 +6726,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 305
+            "y": 482
           },
           "id": 41,
           "options": {
@@ -3728,6 +6744,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -3759,6 +6776,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -3772,6 +6790,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -3793,7 +6812,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3808,7 +6828,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 313
+            "y": 490
           },
           "id": 69,
           "options": {
@@ -3826,6 +6846,7 @@
               "sortDesc": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -3856,7 +6877,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 78
+        "y": 206
       },
       "id": 45,
       "panels": [
@@ -3871,6 +6892,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -3884,6 +6906,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -3905,7 +6928,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3921,7 +6945,7 @@
             "h": 11,
             "w": 24,
             "x": 0,
-            "y": 352
+            "y": 504
           },
           "id": 47,
           "options": {
@@ -3937,6 +6961,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -3980,6 +7005,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -3993,6 +7019,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -4014,7 +7041,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4030,7 +7058,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 363
+            "y": 515
           },
           "id": 50,
           "options": {
@@ -4046,6 +7074,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -4077,6 +7106,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -4090,6 +7120,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -4111,7 +7142,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4127,7 +7159,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 371
+            "y": 523
           },
           "id": 52,
           "options": {
@@ -4143,6 +7175,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -4174,6 +7207,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -4187,6 +7221,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -4210,7 +7245,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4226,7 +7262,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 380
+            "y": 532
           },
           "id": 49,
           "options": {
@@ -4242,6 +7278,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -4273,6 +7310,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -4286,6 +7324,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -4307,7 +7346,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4323,7 +7363,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 390
+            "y": 542
           },
           "id": 51,
           "options": {
@@ -4339,6 +7379,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -4370,6 +7411,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -4383,6 +7425,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -4404,7 +7447,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4420,7 +7464,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 399
+            "y": 551
           },
           "id": 54,
           "options": {
@@ -4436,6 +7480,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -4478,7 +7523,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 79
+        "y": 207
       },
       "id": 56,
       "panels": [
@@ -4493,6 +7538,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -4506,6 +7552,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -4527,7 +7574,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4543,7 +7591,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 132
+            "y": 505
           },
           "id": 58,
           "options": {
@@ -4554,6 +7602,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -4585,6 +7634,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -4598,6 +7648,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -4619,7 +7670,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4635,7 +7687,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 141
+            "y": 514
           },
           "id": 59,
           "options": {
@@ -4646,6 +7698,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -4677,6 +7730,7 @@
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -4690,6 +7744,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -4711,7 +7766,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4727,7 +7783,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 149
+            "y": 522
           },
           "id": 61,
           "options": {
@@ -4738,6 +7794,7 @@
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -4789,72 +7846,26 @@
   ],
   "refresh": "10s",
   "revision": 1,
-  "schemaVersion": 38,
-  "style": "dark",
-  "tags": [],
+  "schemaVersion": 39,
+  "tags": [
+    "hcl-uno"
+  ],
   "templating": {
     "list": [
       {
-        "allValue": "",
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(application_uno_message_process_milliseconds_sum{}, namespace)",
-        "hide": 0,
-        "includeAll": true,
-        "multi": true,
+        "hide": 2,
         "name": "Namespace",
-        "options": [],
-        "query": {
-          "query": "label_values(application_uno_message_process_milliseconds_sum{}, namespace)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
+        "query": "%NAMESPACE%",
         "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
+        "type": "constant"
       },
       {
-        "allValue": "",
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(application_uno_message_process_milliseconds_sum{ namespace=~\".*\"}, release)",
-        "hide": 0,
-        "includeAll": true,
-        "multi": true,
+        "hide": 2,
+        "label": "",
         "name": "Release",
-        "options": [],
-        "query": {
-          "query": "label_values(application_uno_message_process_milliseconds_sum{ namespace=~\".*\"}, release)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
+        "query": "%RELEASE%",
         "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
+        "type": "constant"
       },
       {
         "current": {
@@ -4902,7 +7913,7 @@
           "query": "label_values(container_cpu_usage_seconds_total{pod=~\"[[Release]]-.*\", namespace=~\"$Namespace\"}, pod)",
           "refId": "StandardVariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
@@ -4916,6 +7927,6 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "UnO Dashboard Dev",
+  "title": "UnO Dashboard - %NAMESPACE% - %RELEASE%",
   "weekStart": ""
 }
