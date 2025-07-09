@@ -36,16 +36,7 @@ rules:
   - "get"
   - "watch"
   - "list"
-{{- if .Values.global.sofySolutionContext }}
-- apiGroups:
-  - ""
-  resources:
-    - "services"
-  verbs:
-    - "get"
-    - "list"
-{{- end }}
-{{- if .Capabilities.APIVersions.Has "oidc.security.ibm.com/v1" }}
+{{- if .Capabilities.APIVersions.Has "oidc.security.ibm.com/v1" }} 
 - apiGroups:
   - 'oidc.security.ibm.com'
   resources:

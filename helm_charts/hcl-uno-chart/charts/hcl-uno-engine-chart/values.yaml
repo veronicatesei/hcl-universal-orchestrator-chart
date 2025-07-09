@@ -5,6 +5,11 @@
 # * Trademark of HCL Technologies Limited
 ######################################################################
 
+# Url of flexera license server
+hclFlexnetURL:
+# Id of flexera license instance
+hclFlexnetID:
+
 global:
 # enableConsole enables and disables the Dynamic Workload Console deployment. Supported values are true and false.
 # enableConsole: false
@@ -18,13 +23,15 @@ global:
   # configPlugins is the ConfigMap containing list of plugin to be installed.
   configPlugins: 
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
-  pluginImageRepository: hclcr.io/uno-ea
+  pluginImageRepository: hclcr.io/wa
   # pluginImageName is the name of the image with tags for Automation Hub integrations.
-  pluginImageName: hcl-workload-automation-plugins:2.1.2.0-beta2
+  pluginImageName: hcl-workload-automation-plugins:10.2.2.00.20240424
   # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImages:
-    - registry: hclcr.io/uno-ea
-      name: hcl-uno-external-pod:2.1.2.0-beta2
+    - registry: hclcr.io/uno
+      name: hcl-uno-external-pod:1.1.2.0
+  # enableUI enables and disables the UI. Supported values are true and false.
+  enableUI: false
   customLabels:
     - name: "environment"
       value: "prod"
@@ -34,45 +41,8 @@ global:
   #- name: "MY_ENVKEY"
   #  value: "MY_EN_VALUE"
   #enableTestPrereq: true
-  enableUnoAIPilot: false
   # Hcl additional imagePullSecret to add to service account
   hclImagePullSecret:
-  # cloudCredentials specify the service accounts to access cloud services
-  cloudCredentials:
-    gcp:
-      # gcp is the GCP service account key in JSON format. Replace the value with your GCP service account file content encoded in base64.
-      serviceFile:
-      # gcpProjectId is the GCP project ID. Replace the value with your GCP project ID.
-      projectId:
-    aws:
-      # accessKeyId is the AWS access key ID. Replace the value with your AWS access key ID.
-      accessKeyId:
-      # secretAccessKey is the AWS secret access key. Replace the value with your AWS secret access key.
-      secretAccessKey:
-      # region is the AWS region. Replace the value with your AWS region.
-      region:
-      # roleArn is the AWS role ARN. Used in case of MFA configured account
-      roleArn:
-    azure:
-      # serviceUrl is the Azure service URL of the genai service. Replace the value with your Azure service URL.
-      serviceUrl:
-      # apiKey is the Azure API key to access the GenAI service. Replace the value with your Azure API key.
-      apiKey:
-    openai:
-      # baseUrl is the base URL of the OpenAI service. Mandatory parameter.
-      baseUrl: https://api.openai.com/v1
-      # genaiUri is the URI of the OpenAI service for chat completions. Mandatory parameter.
-      genaiUri: /chat/completions
-      # apiKey is the OpenAI API key to access the GenAI service. Replace the value with your OpenAI API key.
-      apiKey:
-    rag:
-      # apiKey is the API key to access the RAG service. Replace the value with your RAG API key.
-      apiKey:
-  dwcconsole:
-    # Used to configure an external DWC. Set the name of secret containing the public certificate to verify the JWT token.
-    certSecretName:
-    # Used to configure an external DWC. Set the name of jwt token issuer
-    dwcissuer:
 # nameOverride changes the resources names. By default, the release name is used.
 nameOverride: ""
 
@@ -95,8 +65,6 @@ database:
 kafka:
   # url is the URL of the event streaming platform. Mandatory parameter.
   url: hcl-uno-kafka-0.kafka-headless.kafka.svc.cluster.local:9092
-  # prefix of topic name
-  prefix:
   # username is the name of the kafka user. Mandatory parameter.
   username: 
   # password is the password of the kafka user. Mandatory parameter.
@@ -113,12 +81,6 @@ kafka:
   securityProtocol:
   #kerberos service name
   kerberosServiceName:
-  #Oauth login call back handler class
-  oauthLoginCallbackHandlerClass:
-  #Oauth token endpoint url
-  oauthTokenEndpointUrl:
-  # topicReplicas is the number of replicas for the topic.
-  topicReplicas: 1
     
 eventmanager:
   plugins:
@@ -127,60 +89,18 @@ eventmanager:
 
 config:
   license:
-    # Url of MHS license server
-    licenseServerUrl: https://api.hcltechsw.com
-    proxy:
-      # optional proxy configuration to access the GenAI service.
-      hostname:
-      port:
-      username:
-      password:
-
-  genai:
-    # Enables the AI Pilot generative AI features. Supported values are true and false.
-    # Enabling this feature you agree that AI Pilot prompts are sent to HCL Software and stored for
-    # analytics and to improve the product in the future.
-    # All information will be handled according to HCL Software privacy policy.
-    enabled: false
-    # the URL of the GenAI service.
-    serviceUrl: https://genai.services.hcluno.cloud
-    # betaKey is the custom key to access the GenAI service provided by HCL Software for beta testing.
-    betaKey:
-    # the genai service is internal deployment, bring your own licence.
-    internal:
-    # timeout is the timeout for the GenAI service requests.
-    timeout:
-    agentModels:
-      # Model names that work with GenAI service for AI Agents from vertex-ai
-      vertexAiModels:
-      # Model names that work with GenAI service for AI Agents from open ai
-      openAiModels:
-      # Model names that work with GenAI service for AI Agents from bedrock
-      bedrockModels:
-
-    proxy:
-      # optional proxy configuration to access the GenAI service on cloud.
-      hostname:
-      port:
-      username:
-      password:
+    # Url of flexera license server
+    licenseServerUrl: 
+    # Id of flexera license instance
+    licenseServerId:
 
   registry:
     # name is the name of your registry.
-    name:  hclcr.io/uno-ea
+    name:  hclcr.io/uno
     # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
     pullPolicy: Always
     # tag is the tag of the image. The default value is latest.
-    tag: 2.1.2.0-beta2
-  orchestrator:
-    # the maximum number of nested workflow in the plan. The subflow jobs exceeding this value will end in FAIL
-    maxNestingLevel: 50
-    # the time windows, in seconds, that permits the user to cancel the completion of a human task
-    humanTaskCancelWindowSeconds: 20
-    # Custom template in HTML format for the email sent as notifications when a human task is created. Optional.
-    humanTaskMailTaskCreatedTemplate: #<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>New task</title></html>
-    # Custom template in HTML format for the email sent as notifications when a human task is assigned/unassigned. Optional.
-    humanTaskMailTaskAssignedTemplate: #<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>Assigned task</title></html>
+    tag: 1.1.2.0
   planning:
     # max number of days to generate not active instance
     notActiveWindowMax: P9DT0H
@@ -192,85 +112,26 @@ config:
     activeWindow: PT24H
     # How long is the windows of plan in the past
     daysRetentionPlan: P7DT0H
-    # How long is the windows of plan in the past for failed jobs
-    daysRetentionFailPlan: P30DT0H
-    # Frequency to remove the past failed jobs
-    frequencyFailJobCleanUp: PT1H
-
-  engine:
-    # justificationsEnabled specifies whether the justification feature is enabled. Supported values are true and false.
-    justificationEnabled: false
-    # justificationCategoryRequired specifies whether the justification category is mandatory. Supported values are true and false.
-    justificationCategoryRequired: false
-    # justificationTicketNumberRequired specifies whether the justification ticket number is mandatory. Supported values are true and false.
-    justificationTicketNumberRequired: false
-    # justificationDescriptionRequired specifies whether the justification description is mandatory. Supported values are true and false.
-    justificationDescriptionRequired: false
-
-  mail:
-    enabled: false
-    smtp:
-      # host is the SMTP host to send emails.
-      host: smtp.example.com
-      # port is the SMTP port to send emails.
-      port: 587
-      # startTlsEnabled specifies whether STARTTLS is enabled. Supported values are true and false.
-      startTlsEnabled: true
-      # sslCheckServerIdentity specifies whether the server identity is checked. Supported values are true and false.
-      sslCheckServerIdentity: true
-      # sslTrust specifies which servers are trusted.
-      sslTrust: #host.trusted.com
-      # connectionTimeoutMs is the timeout in milliseconds for connecting to the SMTP server.
-      connectionTimeoutMs: 30000
-    # from is the email address from which the emails are sent. Mandatory if mail is enabled.
-    from: #from@mail.com
-    # credentialsSecretName is the name of the Kubernetes secret that contains the SMTP credentials. If smtp is enabled, this is a mandatory parameter.
-    # The secret must contain the following keys: USERNAME and PASSWORD.
-    credentialsSecretName: uno-smtp-credentials
-
-  endpoint:
-    # endpoint where the console is exposed.
-    console: #https://console.example.com
-    # endpoint where the gateway is exposed.
-    gateway: #https://gateway.example.com
-
-  encryption:
-    # The password or key to encrypt data, such as passwords, agent database, and kafka messages.
-    key:
-
   console:
     # hostname is the hostname of the Dynamic Workload Console.
     hostname:
     # port is the port of the Dynamic Workload Console.
     port:
-    # enableLogout specifies whether the new Console logout is enabled. Supported values are true and false.
-    enableLogout: false
-    # defines the minutes after which the user is considered inactive and gets logged out from the UI. Supported values are integers.
-    sessionTimeoutMinutes: 30
+
   certificates:
     # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below. 
     useCustomizedCert: false
-    #Ignore SSL hostname verfication. if the certificates of microservices are not generated with the corrent hostname enable this option
-    disableHostnameVerification: false
-    # customIssuer is the name of the issuer. This parameter applies if you set useCustomizedCert to false. If not specified, a self-signed issuer is created.
-    customIssuer:
-    # customIngressIssuer is the optional name of the certificate issuer that overrides internal issuer with a specific one to be used only for ingress.
-    customIngressIssuer:
-    # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to false.
+    # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to true.
     caPairSecretName: ca-key-pair
-    # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
+    # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to true.
     certSecretName: uno-certificate
     # certExtAgtSecretName is the name of the secret of the external agent. This parameter applies if you set useCustomizedCert to true.
     certExtAgtSecretName: uno-certificate-ext-agt
-    # caDuration is the duration of the ca certificates before they are set to expire. This parameter applies if you set useCustomizedCert to false.
-    caDuration: 26298h
-    # caRenewBefore is the time before the ca certificate expires when the certificate manager service begins attempts to renew the certificate. This parameter applies if you set useCustomizedCert to false.
-    caRenewBefore: 22332h
-    # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to false.
+    # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to true.
     duration: 2160h
-    # renewBefore is the time before the certificate expires when the certificate manager service begins attempts to renew the certificate. This parameter applies if you set useCustomizedCert to false.
+    # renewBefore is the time before the certificate expires when the certificate manager service begins attempts to renew the certificate. This parameter applies if you set useCustomizedCert to true.
     renewBefore: 360h
-    # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to false.
+    # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to true.
     organization: hcl
     # additionalCASecrets contains secret names for additional CAs, for example to trust MongoDb, Kafka, OIDC certificates.
     additionalCASecrets: 
@@ -303,15 +164,8 @@ config:
     otelEndpoint: "http://simplest-collector.default:4317/api/traces"
     # traceAll specifies whether all events are traced. Supported value are true and false. If you set it to true, also internal calls are traced.
     traceAll: false
-    
-  
-  plugins:
-    #If the size of the plug-in that needs to be installed exceeds 10 MB, specify a value higher than the plug-in size.
-    maxSize:
 
 authentication:
-  # adminName is the name of the admin user. The default security policy will be created or updated for that user.
-  adminName: "wauser"
   #apiHostname specifies the API gateway hostname and is used only when ingress.enabled is set to false.
   apiHostname: "gateway"
   oidc:
@@ -339,14 +193,6 @@ authentication:
     # "required"               : Certificates are validated and hostname verification is enabled
     # "certificate-validation" : Certificates are validated and hostname verification is disabled
     tlsVerification: "required"
-    # The path to the claim in the JWT token which contains the roles to be mapped to Quarkus security roles
-    groupClaimPath : ""
-    # The name of the claim in the JWT token whose value will be used as the principal name
-    principalClaim : ""
-    # The list of scopes that must be granted to the access token for the authentication to succeed
-    authenticationScope : ""
-    # The path to the claim in the JWT token that contains the group names for the user
-    jwtGroupClaimPath : ""
 
 # bulkhead defines the policy to be used on the gateway endpoint for avoiding bulk requests and block DDOS attacks against these contexts.
 bulkhead:
@@ -368,7 +214,7 @@ ingress:
   ingressClassName: nginx
   # baseDomainName is the name of the base domain for using the ingress controller. This parameter applies if you set enabled to true.
   baseDomainName: ".k8s.uat.uno"
-  annotations:
+  annotations: 
     # For more information, see the ingress controller documentation.
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
@@ -392,7 +238,7 @@ deployment:
     # maxTargetReplicas is the maximum number of target replicas to be deployed for each microservice.
     maxTargetReplicas: 3
     # traceLevel specifes the trace detail level for trace.log. Supported values are ALL,FINE,INFO.
-    traceLevel: "INFO"
+    traceLevel: "FINE"
     autoscaler:
       # cpuAverageUtilization specifies the average usage of CPU which starts the autoscaler.
       cpuAverageUtilization: 200
@@ -411,6 +257,13 @@ deployment:
   console:
     # ingressPrefix is the prefix of the name of the endpoint of the console microservice.
     ingressPrefix: "console"
+    resources:
+      limits:
+        cpu: "2"
+        memory: "384Mi"
+      requests:
+        cpu: "0.3"
+        memory: "192Mi"
     #minTargetReplicas: 1
   agentmanager:
     # ingressPrefix is the prefix of the name of the endpoint of the agentmanager microservice.
@@ -446,161 +299,3 @@ deployment:
     #minTargetReplicas: 1
   timer: 
     #minTargetReplicas: 1
-  notification:
-    #minTargetReplicas: 1
-
-hclaipilot:  
-  image:
-    repository: hclcr.io/uno-ea
-    tag: 2.1.2.0-beta2
-  
-  channels:
-    slackToken: ""
-    slackSigningSecret: ""
-    slackChannel: ""
-    googleProjectId: ""
-    botframeworkAppId: ""
-    botframeworkAppPassword: ""
-
-    ### To disable group check of the OIDC provider. ###
-    # To be enabled when the OIDC provider is not setup with the same LDAP/User provider of the channels and is not possible to add user to it manually
-    # so the email of the configured channels are manually added in the ACL
-    groupless:  "false"
-  
-  translation:
-    # Configuration for the Azure Translation API
-    azure:
-      # The Subscription Key for the Azure Translation API
-      subscriptionKey: ""
-      # The Region for the Azure Translation API
-      region: ""
-      # The Translation API Endpoint
-      endpoint: ""
-  
-    # Configuration for the Google Translation API
-    google:
-      # The Credentials json file for the Google Translation API encoded in base64
-      credentials: ""
-
-  certificates:
-    # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below. 
-    useCustomizedCert: false
-    # customIssuer is the name of the issuer. This parameter applies if you set useCustomizedCert to false. If not specified, a self-signed issuer is created.
-    customIssuer:
-    # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to false.
-    caPairSecretName: ca-key-pair
-    # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
-    certSecretName: uno-aipilot-certificate
-    # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to false.
-    duration: 2160h
-    # renewBefore is the time before the certificate expires when the certificate manager service begins attempts to renew the certificate. This parameter applies if you set useCustomizedCert to false.
-    renewBefore: 360h
-    # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to false.
-    organization: hcl
-
-  pilotCore:
-    # replicaCount is the number of replicas for the pilot core service.
-    replicaCount: 1
-    resources:
-      limits:
-        cpu: "1"
-        memory: 2500Mi
-      requests:
-        cpu: "0.5"
-        memory: 2000Mi
-
-  pilotNlg:
-    # replicaCount is the number of replicas for the pilot nlg service.
-    replicaCount: 1
-    resources:
-      limits:
-        cpu: "0.3"
-        memory: 500Mi
-      requests:
-        cpu: "0.1"
-        memory: 300Mi
-  
-  pilotActions:
-    # replicaCount is the number of replicas for the pilot actions service.
-    replicaCount: 1
-    resources:
-      limits:
-        cpu: "0.3"
-        memory: 300Mi
-      requests:
-        cpu: "0.1"
-        memory: 200Mi
-  
-  rag:
-    certificates:
-      # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below. 
-      useCustomizedCert: false
-      # customIssuer is the name of the issuer. This parameter applies if you set useCustomizedCert to false. If not specified, a self-signed issuer is created.
-      customIssuer:
-      # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to false.
-      caPairSecretName: ca-key-pair
-      # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
-      certSecretName: uno-aipilot-rag-certificate
-      # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to false.
-      duration: 2160h
-      # renewBefore is the time before the certificate expires when the certificate manager service begins attempts to renew the certificate. This parameter applies if you set useCustomizedCert to false.
-      renewBefore: 360h
-      # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to false.
-      organization: hcl
-    
-    hpa:
-      minReplicas: 1  # Minimum number of replicas
-      maxReplicas: 2  # Maximum number of replicas
-
-    resources:
-      limits:
-        cpu: "0.8"  # CPU limit
-        memory: "1024Mi"  # Memory limit
-      requests:
-        cpu: "0.2"  # CPU request
-        memory: "256Mi"  # Memory request
-
-    container:
-      registry: hclcr.io/uno-ea # Image name
-      tag: 2.1.2.0-beta2  # Image tag
-    authorization:
-      # The URL of the OpenID Connect (OIDC) server for the RAG service to authenticate the jwt token
-      oidcServerURL: "https://uno-keycloak-ssl:8843"
-  pgvector:
-      # Image Configuration
-      image:
-        # The registry where the pgvector image is hosted
-        registry: hclcr.io/uno-ea
-        # The repository name for the pgvector image
-        repository: pgvector
-        # The tag/version of the pgvector image
-        tag: 17
-        # The secret used to pull the image from the registry
-      pullSecrets:
-        - "sa-{{ .Release.Namespace }}"
-      auth:
-        # The existing secret containing the PostgreSQL password Change the value if you want to use a different secret
-        existingSecret: "{{ .Release.Name }}-postgres-password-secret"
-        # The username for PostgreSQL authentication
-        username: "aipilot"
-        # The database name to be used for the rag service
-        database: "vector_db"
-
-      tls:
-        # Enable TLS for secure connections
-        enabled: true
-        # The secret containing TLS certificates, Change the value if you want to use custom certificates
-        certificatesSecret: "{{ .Release.Name }}-postgres-certificates-secret"
-        # The filename Inside the secret for the TLS certificate
-        certFilename: tls.crt
-        # The filename  Inside the secret for the CA certificate
-        certCAFilename: ca.crt
-        # The secret name for the CA to be used to sign the certificatesSecret, Must be the same as the value of caPairSecretName in the certificates section
-        # Change if you want to use a custom CA to sign the certificates
-        caPairSecretName: ca-key-pair
-        # must be equal  to the common name(CN) of the certificate used by pilot for the connection to the database
-        pilotCertCommonName : "aipilot"
-        # must be equal of the common name(CN) of the certificate used by rag for the connection to the database
-        ragCertCommonName: "rag"
-      
-    

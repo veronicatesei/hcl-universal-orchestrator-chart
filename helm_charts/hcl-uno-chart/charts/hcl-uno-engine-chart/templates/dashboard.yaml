@@ -9,10 +9,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "{{ .Release.Name }}-grafana-common-dashboard"
+  name: hcl-uno-grafana-common-dashboard
   labels:
-    grafana_dashboard: "1"
-{{ $uniqueId := printf "%s-%s" .Release.Namespace  .Release.Name }}
+     grafana_dashboard: "1"
+spec:
 data:
-  k8s-{{ $uniqueId }}-dashboard.json: |-
-{{ .Files.Get "dashboards/WA_Performance_Metrics.json" | replace "%RELEASE%" .Release.Name | replace "%NAMESPACE%" .Release.Namespace | indent 4 }}
+  k8s-{{ .Release.Name }}-dashboard.json: |-
+{{ .Files.Get "dashboards/WA_Performance_Metrics.json" | indent 5 }}
