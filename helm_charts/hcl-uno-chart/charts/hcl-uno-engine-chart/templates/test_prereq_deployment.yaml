@@ -42,10 +42,10 @@ spec:
           resources:
             limits:
               cpu: '0.5'
-              memory: 256Mi
+              memory: 512Mi
             requests:
-              cpu: 300m
-              memory: 256Mi
+              cpu: 200m
+              memory: 512Mi
           ports:
             - name: https
               containerPort: 8443
