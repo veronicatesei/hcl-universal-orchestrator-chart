@@ -203,7 +203,7 @@ uno:
       # All information will be handled according to HCL Software privacy policy.
       enabled: false
       # the URL of the GenAI service.
-      serviceUrl: https://genai.services.hcluno.cloud
+      serviceUrl: https://genai-beta.hcluno.mywire.org/api
       # betaKey is the custom key to access the GenAI service provided by HCL Software for beta testing.
       betaKey:
       # optional proxy configuration to access the GenAI service.
