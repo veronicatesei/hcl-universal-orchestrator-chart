@@ -79,6 +79,12 @@ UnO AI Pilot:
  - hcl-aipilot-nlg
  - pgvector
 
+UnO Agentic AI Builder:
+
+ - hcl-agentic-ams
+ - hcl-agentic-runner
+ - hcl-agentic-cm
+
 ## Prerequisites
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
 
@@ -132,6 +138,7 @@ The following are prerequisites specific to each supported cloud provider:
 |**AIPilot-nlg**| CPU: 0.3, Memory: 0.5GB | CPU: 0.1, Memory: 0.3GB
 |**AIPilot-rag**| CPU: 0.8, Memory: 1Gi | CPU: 0.2 , Memory: 0.2Gi
 |**PgVector**| CPU: 0.15 Memory: 0.192GB Ephemeral-storage : 2Gi |  CPU: 0.1 Memory: 0.1Gi Ephemeral-storage: 50Mi
+|**AgenticAIBuilder-core** | CPU : 1, Memory: 2.5GiB | CPU 300m, Memory: 500Mi
 
 No disk space is required for the microservices, however, at least 100 GB are recommended for Kafka and 100 GB for MongoDB. Requirements vary depending on your workload.
 
