@@ -96,8 +96,15 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 for AWS deployment.
  - Enablement of an OIDC provider.
 
-**Strongly recommended**
+**For Agentic AI Builder**
+ - Valkey (Redis-compatible): Used as the in-memory data store. Acts as a drop-in replacement for Redis.
+ - PostgreSQL: Serves as the primary relational database for storing application data.
+ - APISIX Gateway: Functions as the API gateway to route traffic to services. Includes the following:
+     - etcd: Backend key-value store for APISIX configuration.
+     - Ingress Controller: Manages ingress traffic rules.
+     - APISIX Dashboard: Web interface for managing gateway configurations.
 
+ **Strongly recommended**
  - Jetstack cert-manager
 
   We strongly recommend the use of a cert-manager as it automatically generates and updates the required certificates. You can choose not to use it, in which case you need to:
@@ -139,6 +146,9 @@ The following are prerequisites specific to each supported cloud provider:
 |**AIPilot-rag**| CPU: 0.8, Memory: 1Gi | CPU: 0.2 , Memory: 0.2Gi
 |**PgVector**| CPU: 0.15 Memory: 0.192GB Ephemeral-storage : 2Gi |  CPU: 0.1 Memory: 0.1Gi Ephemeral-storage: 50Mi
 |**AgenticAIBuilder-core** | CPU : 1, Memory: 2.5GiB | CPU 300m, Memory: 500Mi
+|**agentic-ams** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
+|**agentic-runner** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
+|**agentic-cm** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
 
 No disk space is required for the microservices, however, at least 100 GB are recommended for Kafka and 100 GB for MongoDB. Requirements vary depending on your workload.
 
