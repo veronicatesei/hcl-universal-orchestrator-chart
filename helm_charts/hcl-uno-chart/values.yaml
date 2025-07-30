@@ -18,6 +18,8 @@ global:
   enableConsole: false
   # enableUnoAIPilot  enables and disables the aipilot deployment. Supported values are true and false.
   enableUnoAIPilot: false
+  # enable Agentic AI Builder enables and disables the Agentic AI Builder deployment. Supported values are true and false.
+  enableAgenticAIBuilder: false
   # debug enables and disables the debugging mode. Supported values are true and false.
   debug: false
   # language specifies the language to be used.
@@ -159,6 +161,9 @@ uno:
       enableLogout: false
       # defines the minutes after which the user is considered inactive and gets logged out from the UI. Supported values are integers.
       sessionTimeoutMinutes: 30
+    agenticAIServices:
+      # Enables the Agentic Builder features. Supported values are true and false.
+      enabled: false
     genai:
       # Enables the AI Pilot generative AI features. Supported values are true and false.
       # Enabling this feature you agree that AI Pilot prompts are sent to HCL Software and stored for
@@ -250,6 +255,69 @@ uno:
       otelEndpoint: http://simplest-collector.default:4317/api/traces
       # traceAll specifies whether all events are traced. Supported value are true and false. If you set it to true, also internal calls are traced.
       traceAll: false
+      serviceAccount:
+      # serviceAccount is the name of the service account used by the Agentic AI Builder microservices.
+      # By default will be used the global serviceAccountName.
+      name: ""
+
+    credentialManager:
+      # Name of the core service
+      name: cm
+      #Image name
+      imageName: hcl-agentic-cm
+      # The port on which the core service will be exposed
+      port: 8000
+      # The number of replicas for the core service
+      replicaCount: 1
+      # Resource Configuration
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
+
+    ams:
+      name: ams
+      #Image name
+      imageName: hcl-agentic-ams
+      # The port on which the core service will be exposed
+      port: 8080
+      # The number of replicas for the core service
+      replicaCount: 1
+      # Resource Configuration
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
+
+    runner:
+      name: runner
+      #Image name
+      imageName: hcl-agentic-runner
+      # The port on which the core service will be exposed
+      port: 8080
+      # The number of replicas for the core service
+      replicaCount: 2
+      hpa:
+        enabled: false
+        minReplicas: 1
+        maxReplicas: 10
+      # Resource Configuration
+      config:
+        unoMCPBaseURL : ""
+        maxAgents: 5
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
 
   authentication:
     # adminName is the name of the admin user. The default security policy will be created or updated for that user.
@@ -390,6 +458,84 @@ uno:
       #minTargetReplicas: 1
     notification:
       #minTargetReplicas: 1
+    agenticAIBuilder:
+      telemetry:
+       enableTelemetry: "false"
+       inferenceEndpoint : ""
+       telemetryBaseUrl : ""
+       telemetryServiceName: ""
+       telemetryExportIntervalMillis: "60000"
+    
+    common:
+      # By default the values are configured to work with the default Apisix deployed by the of bitnami/apisix.
+      apisix:
+        # existingSecret is the name of the Kubernetes secret that contains the API keys for APISIX.
+        existingSecret: "apisix-api-keys"
+        # existingSecretAdminTokenKey is the key in the Kubernetes secret that contains the admin API key for APISIX.
+        existingSecretAdminTokenKey : "admin-key"
+        # existingSecretViewerTokenKey is the key in the Kubernetes secret that contains the viewer API key for APISIX.
+        existingSecretViewerTokenKey : "viewer-key"
+        # apiTokenAdmin is the admin API token for APISIX. If you set existingSecret, this parameter is ignored.
+        apiTokenAdmin: ""
+        # The hostname of the APISIX control plane.
+        serviceName: "apisix-control-plane"
+        # The admin port of the APISIX control plane.
+        adminPort: "9180"
+        # The certificate of the APISIX control plane.
+        certificateSecret: "apisix-control-plane-tls"
+        # The ingressClassName of your APISIX ingress controller. By default, it is set to default value of the official and bitnami chart of apisix
+        ingressClassName: "apisix"
+        #  The https port of the APISIX gateway to access routes.
+        httpsGatewayPort: "443"
+        # extraTLSHosts is a list of additional hosts for which the TLS certificate is valid.
+        # If you expose the Gateway through an ingress controller, you must add the hostname of the ingress controller to this list.
+        extraTLSHosts:
+
+      # By default the values are configured to work with the default Valkey deployed by the bitnami/valkey chart.
+      valkey:
+        # valkeyPasswordSecret is the name of the Kubernetes secret that contains the Valkey password.
+        valkeyPasswordSecret : "valkey-password-secret"
+        # valkeyPasswordSecretKey is the key in the Kubernetes secret that contains the Valkey password.
+        valkeyPasswordSecretKey: "password"
+        # valkeyPassword is the Valkey password. If you set valkeyPasswordSecret, this parameter is ignored.
+        valkeyPassword : ""
+        # valkeyHost is the hostname of the Valkey service.
+        valkeyHost: "valkey-primary"
+        # valkeyPort is the port of the Valkey service.
+        valkeyPort: "6379"
+        # valkeyDb is the database number of the Valkey service.
+        valkeyDb: "0"
+
+      # By default the values are configured to work with the default pgvector deployed by UNOAIPilot.
+      # If you want to use a different PostgreSQL service, you can override the values below
+      # to point to your PostgreSQL service.
+      postgres: 
+        # postgresUser is the name of the PostgreSQL user used by the agentic ai builder microservices.
+        postgresUser: agenticbuilder
+        # postgresPort is the port of the PostgreSQL service.
+        postgresPort : "5432"
+        # postgresPasswordSecret is the name of the Kubernetes secret that contains the PostgreSQL password.
+        postgresPassword: "{{ .Release.Name }}-postgres-password-secret"
+        # postgresDB is the name of the PostgreSQL database used by the agentic ai builder microservices.
+        postgresDB: "agenticbuilder"
+        # postgresService is the name of the PostgreSQL service.
+        postgresService: "{{ .Release.Name }}-pgvector"
+        # postgresCertificateSecret is the name of the Kubernetes secret that contains the PostgreSQL certificate.
+        postgresCertificateSecret: "{{ .Release.Name }}-postgres-certificates-secret"
+      
+        # Only to let the init container create the database "$postgresDB" and the "$postgresUser" if it does not exist
+        adminUser: "postgres"
+        initDatabases: true
+    
+    authorization:
+        # The authorization configuration for the Agentic AI Builder microservices. to authenticate with the UNO instance
+        # Do not change the values below unless you know what you are doing.
+        certs:
+          HCL_AUTHORIZATION_HTTPS___WAJWT_API: "{{  .unofullname }}-jwt-key"
+          HCL_AUTHORIZATION_HTTPS___WAJWT_APIGATEWAY:  "{{  .unofullname }}-jwt-key"
+          HCL_AUTHORIZATION_HTTPS___WAJWT_MCP:  "{{  .unofullname }}-jwt-key"
+        # oidcServerURL is the URL of the OpenID Connect (OIDC) server. Mandatory parameter.
+        oidcServerURL: "https://${product.short.name}-keycloak-ssl:8843"
   hclaipilot:  
     image:
       repository: hclcr.io/uno
@@ -474,6 +620,8 @@ uno:
       customIssuer:
       # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to false.
       caPairSecretName: ca-key-pair
+      # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
+      certSecretName : "${product.short.name}-agentic-ai-builder-certificate"
       # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
       certSecretName: uno-aipilot-certificate
       # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to false.
