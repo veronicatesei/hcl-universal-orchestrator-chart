@@ -395,7 +395,7 @@ uno:
       #minTargetReplicas: 1
     notification:
       #minTargetReplicas: 1
-agenticAIBuilder:
+ agenticAIBuilder:
     telemetry:
       enableTelemetry: "false"
       inferenceEndpoint : ""
