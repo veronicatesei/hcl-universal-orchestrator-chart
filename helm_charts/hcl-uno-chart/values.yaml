@@ -35,7 +35,7 @@ global:
   # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImages:
     - registry: hclcr.io/uno
-      name: hcl-uno-external-pod:2.1.1.0
+      name: hcl-uno-external-pod:2.1.2.0
     - registry: hclcr.io/wa
       name: hcl-workload-automation-packages:10.2.4.00.20250423
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
@@ -62,6 +62,35 @@ global:
   dbpassword:
   # Hcl additional imagePullSecret to add to service account
   hclImagePullSecret:
+  # cloudCredentials specify the service accounts to access cloud services
+  # This is only used in case internal genai service
+  cloudCredentials:
+    gcp:
+      # gcp is the GCP service account key in JSON format. Replace the value with your GCP service account file content encoded in base64.
+      serviceFile:
+      # gcpProjectId is the GCP project ID. Replace the value with your GCP project ID.
+      projectId:
+    aws:
+      # accessKeyId is the AWS access key ID. Replace the value with your AWS access key ID.
+      accessKeyId:
+      # secretAccessKey is the AWS secret access key. Replace the value with your AWS secret access key.
+      secretAccessKey:
+      # region is the AWS region. Replace the value with your AWS region.
+      region:
+      # roleArn is the AWS role ARN. Used in case of MFA configured account
+      roleArn:
+    azure:
+      # serviceUrl is the Azure service URL of the genai service. Replace the value with your Azure service URL.
+      serviceUrl:
+      # apiKey is the Azure API key to access the GenAI service. Replace the value with your Azure API key.
+      apiKey:
+    openai:
+      # baseUrl is the base URL of the OpenAI service. Mandatory parameter.
+      baseUrl: https://api.openai.com/v1
+      # genaiUri is the URI of the OpenAI service for chat completions. Mandatory parameter.
+      genaiUri: /chat/completions
+      # apiKey is the OpenAI API key to access the GenAI service. Replace the value with your OpenAI API key.
+      apiKey:
   dwcconsole:
     # Used to configure an external DWC. Set the name of secret containing the public certificate to verify the JWT token.
     certSecretName:
@@ -133,10 +162,16 @@ uno:
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 2.1.1.0
+      tag: 2.1.2.0
     orchestrator:
       # the maximum number of nested workflow in the plan. The subflow jobs exceeding this value will end in FAIL
       maxNestingLevel: 50
+      # the time windows, in seconds, that permits the user to cancel the completion of a human task
+      humanTaskCancelWindowSeconds: 20
+      # Custom template in HTML format for the email sent as notifications when a human task is created. Optional.
+      humanTaskMailTaskCreatedTemplate: #<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>New task</title></html>
+      # Custom template in HTML format for the email sent as notifications when a human task is assigned/unassigned. Optional.
+      humanTaskMailTaskAssignedTemplate: #<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>Assigned task</title></html>
     planning:
       # max number of days to generate not active instance
       notActiveWindowMax: P9DT0H
@@ -161,17 +196,17 @@ uno:
       enableLogout: false
       # defines the minutes after which the user is considered inactive and gets logged out from the UI. Supported values are integers.
       sessionTimeoutMinutes: 30
-    agenticAIServices:
-      # Enables the Agentic Builder features. Supported values are true and false.
-      enabled: false
     genai:
       # Enables the AI Pilot generative AI features. Supported values are true and false.
-      # Enabling this feature you agree that AI Pilot prompts are sent to HCL Software and stored for
+      # By enabling this feature with internal as false, you agree that AI Agent and AI Pilot prompts will be sent to HCL Software.
       # analytics and to improve the product in the future.
+      # We can collect statistical data for analytics and licensing purposes, but we won't retain the prompt content.
       # All information will be handled according to HCL Software privacy policy.
       enabled: false
       # the URL of the GenAI service.
       serviceUrl: https://genai.services.hcluno.cloud
+      # betaKey is the custom key to access the GenAI service provided by HCL Software for beta testing.
+      betaKey:
       # optional proxy configuration to access the GenAI service.
       proxy:
         # The hostname of the proxy server.
@@ -182,6 +217,27 @@ uno:
         username:
         # The password to authenticate to the proxy server.
         password:
+        # max number of user prompts to be sent to LLM for context.
+      maxUserPrompts:
+      # max number of actions triggered in a conversation.
+      maxActionPerConversation:
+      # max number of conversation that can happen without a user prompt.
+      maxUnattendedActions:
+      # Enables the GenAI service to be deployed in the same cluster in order to your own accounts for LLM services. Supported values are true and false.
+      internal: false
+      # Below information are only used if the genai service is internal deployment.
+      # Gemini model used for AI Pilot. This is also the default model used for AI Agents. It must be a Gemini model.
+      defaultVertexAiModel: gemini-2.0-flash
+      # timeout is the timeout for the GenAI service requests.
+      timeout:
+      # These models may take upto 5 minutes to reflect in the other services.
+      agentModels:
+        # Model names that work with GenAI service for AI Agents from vertex-ai
+        vertexAiModels:
+        # Model names that work with GenAI service for AI Agents from open ai
+        openAiModels:
+        # Model names that work with GenAI service for AI Agents from bedrock
+        bedrockModels:
     engine:
       # justificationsEnabled specifies whether the justification feature is enabled. Supported values are true and false.
       justificationEnabled: false
@@ -191,6 +247,32 @@ uno:
       justificationTicketNumberRequired: false
       # justificationDescriptionRequired specifies whether the justification description is mandatory. Supported values are true and false.
       justificationDescriptionRequired: false
+      mail:
+      enabled: false
+      smtp:
+        # host is the SMTP host to send emails.
+        host: smtp.example.com
+        # port is the SMTP port to send emails.
+        port: 587
+        # startTlsEnabled specifies whether STARTTLS is enabled. Supported values are true and false.
+        startTlsEnabled: true
+        # sslCheckServerIdentity specifies whether the server identity is checked. Supported values are true and false.
+        sslCheckServerIdentity: true
+        # sslTrust specifies which servers are trusted.
+        sslTrust: #host.trusted.com
+        # connectionTimeoutMs is the timeout in milliseconds for connecting to the SMTP server.
+        connectionTimeoutMs: 30000
+      # from is the email address from which the emails are sent. Mandatory if mail is enabled.
+      # optionally, specify the name of the sender in the format "Sender name example<from@mail.com>"
+      from: #from@mail.com
+      # credentialsSecretName is the name of the Kubernetes secret that contains the SMTP credentials. If smtp is enabled, this is a mandatory parameter.
+      # The secret must contain the following keys: USERNAME and PASSWORD.
+      credentialsSecretName: uno-smtp-credentials
+    endpoint:
+      # endpoint where the console is exposed.
+      console: #https://console.example.com
+      # endpoint where the gateway is exposed.
+      gateway: #https://gateway.example.com
     encryption:
       # The password or key to encrypt data, such as passwords, agent database, and kafka messages.
       key:
@@ -209,6 +291,8 @@ uno:
       disableHostnameVerification: false
       # customIssuer is the name of the issuer. This parameter applies if you set useCustomizedCert to false. If not specified, a self-signed issuer is created.
       customIssuer:
+      # customIngressIssuer is the optional name of the certificate issuer that overrides internal issuer with a specific one to be used only for ingress.
+      customIngressIssuer:
       # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to true.
       caPairSecretName: ca-key-pair
       # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to true.
@@ -340,6 +424,8 @@ uno:
       minTargetReplicas: 1
       # maxTargetReplicas is the maximum number of target replicas to be deployed for each microservice.
       maxTargetReplicas: 3
+      # traceLevel specifes the trace detail level for trace.log. Supported values are ALL,FINE,INFO.
+      traceLevel: "INFO"
       autoscaler:
         # cpuAverageUtilization specifies the average usage of CPU which starts the autoscaler.
         cpuAverageUtilization: 200
@@ -653,8 +739,6 @@ uno:
       # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to false.
       caPairSecretName: ca-key-pair
       # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
-      certSecretName : "${product.short.name}-agentic-ai-builder-certificate"
-      # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
       certSecretName: uno-aipilot-certificate
       # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to false.
       duration: 2160h
@@ -696,7 +780,7 @@ uno:
       
       container:
         registry: hclcr.io/uno # Image name
-        tag: 2.1.1.0  # Image tag
+        tag: 2.1.2.0  # Image tag
     
       authorization:
         # Is the URL of the OpenID Connect (OIDC) server.
