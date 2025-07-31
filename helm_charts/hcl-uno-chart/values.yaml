@@ -255,69 +255,6 @@ uno:
       otelEndpoint: http://simplest-collector.default:4317/api/traces
       # traceAll specifies whether all events are traced. Supported value are true and false. If you set it to true, also internal calls are traced.
       traceAll: false
-      serviceAccount:
-      # serviceAccount is the name of the service account used by the Agentic AI Builder microservices.
-      # By default will be used the global serviceAccountName.
-      name: ""
-
-    credentialManager:
-      # Name of the core service
-      name: cm
-      #Image name
-      imageName: hcl-agentic-cm
-      # The port on which the core service will be exposed
-      port: 8000
-      # The number of replicas for the core service
-      replicaCount: 1
-      # Resource Configuration
-      resources:
-        limits:
-          cpu: 1000m
-          memory: 2500Mi
-        requests:
-          cpu: 300m
-          memory: 500Mi
-
-    ams:
-      name: ams
-      #Image name
-      imageName: hcl-agentic-ams
-      # The port on which the core service will be exposed
-      port: 8080
-      # The number of replicas for the core service
-      replicaCount: 1
-      # Resource Configuration
-      resources:
-        limits:
-          cpu: 1000m
-          memory: 2500Mi
-        requests:
-          cpu: 300m
-          memory: 500Mi
-
-    runner:
-      name: runner
-      #Image name
-      imageName: hcl-agentic-runner
-      # The port on which the core service will be exposed
-      port: 8080
-      # The number of replicas for the core service
-      replicaCount: 2
-      hpa:
-        enabled: false
-        minReplicas: 1
-        maxReplicas: 10
-      # Resource Configuration
-      config:
-        unoMCPBaseURL : ""
-        maxAgents: 5
-      resources:
-        limits:
-          cpu: 1000m
-          memory: 2500Mi
-        requests:
-          cpu: 300m
-          memory: 500Mi
 
   authentication:
     # adminName is the name of the admin user. The default security policy will be created or updated for that user.
@@ -458,7 +395,7 @@ uno:
       #minTargetReplicas: 1
     notification:
       #minTargetReplicas: 1
-    agenticAIBuilder:
+agenticAIBuilder:
     telemetry:
       enableTelemetry: "false"
       inferenceEndpoint : ""
