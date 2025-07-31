@@ -284,6 +284,10 @@ To enable e-mail notifications, edit the **values.yaml** file to set the `uno.ma
 
 For more information about email notifications and notification templates, see [Human tasks](https://help.hcl-software.com/UnO/v2.1.2/Focused_Scenarios/Task/c_human_task.html).
 
+**AI Agents**
+
+You can create an AI agent using three different agent types: External MCP, Basic, and Agentic AI Builder. For more information, see [Managing agent types in the AI Agent] (https://help.hcl-software.com/UnO/v2.1.2/Orchestrating/to_manage_agent_types.html).
+
 **UnoAIPilot**
 
 You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
