@@ -29,13 +29,13 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/uno-ea
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-workload-automation-plugins:2.1.2.0-beta2
+  pluginImageName: hcl-workload-automation-plugins:2.1.2.0-beta3
   # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImages:
     - registry: hclcr.io/uno-ea
-      name: hcl-uno-external-pod:2.1.2.0-beta2
+      name: hcl-uno-external-pod:2.1.2.0-beta3
     - registry: hclcr.io/uno-ea
-      name: hcl-workload-automation-packages:2.1.2.0-beta2
+      name: hcl-workload-automation-packages:2.1.2.0-beta3
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -162,7 +162,7 @@ uno:
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 2.1.2.0-beta2
+      tag: 2.1.2.0-beta3
     orchestrator:
       # the maximum number of nested workflow in the plan. The subflow jobs exceeding this value will end in FAIL
       maxNestingLevel: 50
@@ -470,7 +470,7 @@ uno:
   hclaipilot:  
     image:
       repository: hclcr.io/uno-ea
-      tag: 2.1.2.0-beta2
+      tag: 2.1.2.0-beta3
 
     # Channels Configuration 
     # The following configuration is used to enable the AIPilot for the channels. For each channel, you need to provide the required configuration.
@@ -593,7 +593,7 @@ uno:
       
       container:
         registry: hclcr.io/uno-ea # Image name
-        tag: 2.1.2.0-beta2  # Image tag
+        tag: 2.1.2.0-beta3  # Image tag
     
       authorization:
         # Is the URL of the OpenID Connect (OIDC) server.
@@ -781,7 +781,7 @@ waconsole:
     # repository is the Dynamic Workload Console image repository. Mandatory parameter.
     repository: hclcr.io/uno-ea/hcl-workload-automation-console
     # tag is the Dynamic Workload Console image tag. Mandatory parameter.
-    tag: 2.1.2.0-beta2
+    tag: 2.1.2.0-beta3
   persistence:
     dataPVC:
       # name is the prefix for the Persistent Volumes Claim name.
