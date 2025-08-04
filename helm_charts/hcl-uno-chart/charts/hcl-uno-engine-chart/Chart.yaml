@@ -36,3 +36,9 @@ dependencies:
     version: 0.1.0
     repository: "file://charts/hcl-uno-aipilot"
     condition: global.enableUnoAIPilot
+  
+  - name: agentic-ai-builder
+    version: 1.0.0
+    alias: agenticAIBuilder
+    repository: "file://charts/hcl-uno-agentic-ai-builder"
+    condition: global.enableAgenticAIBuilder

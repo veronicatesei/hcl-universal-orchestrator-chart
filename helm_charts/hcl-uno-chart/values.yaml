@@ -18,6 +18,8 @@ global:
   enableConsole: false
   # enableUnoAIPilot  enables and disables the aipilot deployment. Supported values are true and false.
   enableUnoAIPilot: false
+  # enable Agentic AI Builder enables and disables the Agentic AI Builder deployment. Supported values are true and false.
+  enableAgenticAIBuilder: false
   # debug enables and disables the debugging mode. Supported values are true and false.
   debug: false
   # language specifies the language to be used.
@@ -61,6 +63,7 @@ global:
   # Hcl additional imagePullSecret to add to service account
   hclImagePullSecret:
   # cloudCredentials specify the service accounts to access cloud services
+  # This is only used in case internal genai service
   cloudCredentials:
     gcp:
       # gcp is the GCP service account key in JSON format. Replace the value with your GCP service account file content encoded in base64.
@@ -87,9 +90,6 @@ global:
       # genaiUri is the URI of the OpenAI service for chat completions. Mandatory parameter.
       genaiUri: /chat/completions
       # apiKey is the OpenAI API key to access the GenAI service. Replace the value with your OpenAI API key.
-      apiKey:
-    rag:
-      # apiKey is the API key to access the RAG service. Replace the value with your RAG API key.
       apiKey:
   dwcconsole:
     # Used to configure an external DWC. Set the name of secret containing the public certificate to verify the JWT token.
@@ -196,14 +196,15 @@ uno:
       enableLogout: false
       # defines the minutes after which the user is considered inactive and gets logged out from the UI. Supported values are integers.
       sessionTimeoutMinutes: 30
+
     genai:
-      # Enables the AI Pilot generative AI features. Supported values are true and false.
-      # Enabling this feature you agree that AI Pilot prompts are sent to HCL Software and stored for
-      # analytics and to improve the product in the future.
+      # Enables the AI Agent and AI Pilot generative AI features. Supported values are true and false.
+      # By enabling this feature with internal as false, you agree that AI Agent and AI Pilot prompts will be sent to HCL Software.
+      # We can collect statistical data for analytics and licensing purposes, but we won't retain the prompt content.
       # All information will be handled according to HCL Software privacy policy.
       enabled: false
       # the URL of the GenAI service.
-      serviceUrl: https://genai-beta.hcluno.mywire.org/api
+      serviceUrl: https://genai-beta.hcluno.mywire.org
       # betaKey is the custom key to access the GenAI service provided by HCL Software for beta testing.
       betaKey:
       # optional proxy configuration to access the GenAI service.
@@ -216,13 +217,24 @@ uno:
         username:
         # The password to authenticate to the proxy server.
         password:
-      # the genai service is internal deployment, bring your own licence.
-      internal:
+      # max number of user prompts to be sent to LLM for context.
+      maxUserPrompts:
+      # max number of actions triggered in a conversation.
+      maxActionPerConversation:
+      # max number of conversation that can happen without a user prompt.
+      maxUnattendedActions:
+      # Enables the GenAI service to be deployed in the same cluster in order to your own accounts for LLM services. Supported values are true and false.
+      internal: false
+      # Below information are only used if the genai service is internal deployment.
+
+      # Gemini model used for AI Pilot. This is also the default model used for AI Agents. It must be a Gemini model.
+      defaultVertexAiModel: gemini-2.0-flash
       # timeout is the timeout for the GenAI service requests.
       timeout:
-      chatbotModel:
+      # These models may take upto 5 minutes to reflect in the other services.
+      agentModels:
         # Model names that work with GenAI service for AI Agents from vertex-ai
-        vertexAiMdodels:
+        vertexAiModels:
         # Model names that work with GenAI service for AI Agents from open ai
         openAiModels:
         # Model names that work with GenAI service for AI Agents from bedrock
@@ -252,6 +264,7 @@ uno:
         # connectionTimeoutMs is the timeout in milliseconds for connecting to the SMTP server.
         connectionTimeoutMs: 30000
       # from is the email address from which the emails are sent. Mandatory if mail is enabled.
+      # optionally, specify the name of the sender in the format "Sender name example<from@mail.com>"
       from: #from@mail.com
       # credentialsSecretName is the name of the Kubernetes secret that contains the SMTP credentials. If smtp is enabled, this is a mandatory parameter.
       # The secret must contain the following keys: USERNAME and PASSWORD.
@@ -412,6 +425,8 @@ uno:
       minTargetReplicas: 1
       # maxTargetReplicas is the maximum number of target replicas to be deployed for each microservice.
       maxTargetReplicas: 3
+      # traceLevel specifes the trace detail level for trace.log. Supported values are ALL,FINE,INFO.
+      traceLevel: "INFO"
       autoscaler:
         # cpuAverageUtilization specifies the average usage of CPU which starts the autoscaler.
         cpuAverageUtilization: 200
@@ -467,6 +482,181 @@ uno:
       #minTargetReplicas: 1
     notification:
       #minTargetReplicas: 1
+  
+  agenticAIBuilder:
+    telemetry:
+      enableTelemetry: "false"
+      inferenceEndpoint : ""
+      telemetryBaseUrl : ""
+      telemetryServiceName: ""
+      telemetryExportIntervalMillis: "60000"
+    
+    common:
+      # By default the values are configured to work with the default Apisix deployed by the of bitnami/apisix.
+      apisix:
+        # existingSecret is the name of the Kubernetes secret that contains the API keys for APISIX.
+        existingSecret: "apisix-api-keys"
+        # existingSecretAdminTokenKey is the key in the Kubernetes secret that contains the admin API key for APISIX.
+        existingSecretAdminTokenKey : "admin-key"
+        # existingSecretViewerTokenKey is the key in the Kubernetes secret that contains the viewer API key for APISIX.
+        existingSecretViewerTokenKey : "viewer-key"
+        # apiTokenAdmin is the admin API token for APISIX. If you set existingSecret, this parameter is ignored.
+        apiTokenAdmin: ""
+        # The hostname of the APISIX control plane.
+        serviceName: "apisix-control-plane"
+        # The admin port of the APISIX control plane.
+        adminPort: "9180"
+        # The certificate of the APISIX control plane.
+        certificateSecret: "apisix-control-plane-tls"
+        # The ingressClassName of your APISIX ingress controller. By default, it is set to default value of the official and bitnami chart of apisix
+        ingressClassName: "apisix"
+        #  The https port of the APISIX gateway to access routes.
+        httpsGatewayPort: "443"
+        # extraTLSHosts is a list of additional hosts for which the TLS certificate is valid.
+        # If you expose the Gateway through an ingress controller, you must add the hostname of the ingress controller to this list.
+        extraTLSHosts:
+
+      # By default the values are configured to work with the default Valkey deployed by the bitnami/valkey chart.
+      valkey:
+        # valkeyPasswordSecret is the name of the Kubernetes secret that contains the Valkey password.
+        valkeyPasswordSecret : "valkey-password-secret"
+        # valkeyPasswordSecretKey is the key in the Kubernetes secret that contains the Valkey password.
+        valkeyPasswordSecretKey: "password"
+        # valkeyPassword is the Valkey password. If you set valkeyPasswordSecret, this parameter is ignored.
+        valkeyPassword : ""
+        # valkeyHost is the hostname of the Valkey service.
+        valkeyHost: "valkey-primary"
+        # valkeyPort is the port of the Valkey service.
+        valkeyPort: "6379"
+        # valkeyDb is the database number of the Valkey service.
+        valkeyDb: "0"
+
+      # By default the values are configured to work with the default pgvector deployed by UNOAIPilot.
+      # If you want to use a different PostgreSQL service, you can override the values below
+      # to point to your PostgreSQL service.
+      postgres: 
+        # postgresUser is the name of the PostgreSQL user used by the agentic ai builder microservices.
+        postgresUser: agenticbuilder
+        # postgresPort is the port of the PostgreSQL service.
+        postgresPort : "5432"
+        # postgresPasswordSecret is the name of the Kubernetes secret that contains the PostgreSQL password.
+        postgresPassword: "{{ .Release.Name }}-postgres-password-secret"
+        # postgresDB is the name of the PostgreSQL database used by the agentic ai builder microservices.
+        postgresDB: "agenticbuilder"
+        # postgresService is the name of the PostgreSQL service.
+        postgresService: "{{ .Release.Name }}-pgvector"
+        # postgresCertificateSecret is the name of the Kubernetes secret that contains the PostgreSQL certificate.
+        postgresCertificateSecret: "{{ .Release.Name }}-postgres-certificates-secret"
+      
+        # Only to let the init container create the database "$postgresDB" and the "$postgresUser" if it does not exist
+        adminUser: "postgres"
+        initDatabases: true
+    
+    authorization:
+        # The authorization configuration for the Agentic AI Builder microservices. to authenticate with the UNO instance
+        # Do not change the values below unless you know what you are doing.
+        certs:
+          HCL_AUTHORIZATION_HTTPS___WAJWT_API: "{{  .unofullname }}-jwt-key"
+          HCL_AUTHORIZATION_HTTPS___WAJWT_APIGATEWAY:  "{{  .unofullname }}-jwt-key"
+          HCL_AUTHORIZATION_HTTPS___WAJWT_MCP:  "{{  .unofullname }}-jwt-key"
+        # oidcServerURL is the URL of the OpenID Connect (OIDC) server. Mandatory parameter.
+        oidcServerURL: "https://uno-keycloak-ssl:8843"
+
+    certificates:
+      # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below. 
+      useCustomizedCert: false 
+      # To enable if you want to use a custom issuer
+      customIssuer: false
+      # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to false.
+      caPairSecretName: ca-key-pair
+      # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
+      certSecretName : "uno-agentic-ai-builder-certificate"
+      # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to false.
+      duration: 2160h
+      # renewBefore is the time before the certificate expires when the certificate manager service begins attempts to renew the certificate. This parameter applies if you set useCustomizedCert to false.
+      renewBefore: 360h
+      # If you are using a custom issuer, specify the issuer name
+      issuerName: ""
+      # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to false.
+      organization: hcl
+
+      additionalCASecrets:
+       - uno-certificate
+
+    serviceAccount:
+      # serviceAccount is the name of the service account used by the Agentic AI Builder microservices.
+      # By default will be used the global serviceAccountName.
+      name: ""
+
+    credentialManager:
+      # Name of the core service
+      name: cm
+      #Image name
+      imageName: hcl-agentic-cm
+      # The port on which the core service will be exposed
+      port: 8000
+      # The number of replicas for the core service
+      replicaCount: 1
+      # Resource Configuration
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
+
+    ams:
+      name: ams
+      #Image name
+      imageName: hcl-agentic-ams
+      # The port on which the core service will be exposed
+      port: 8080
+      # The number of replicas for the core service
+      replicaCount: 1
+      # Resource Configuration
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
+
+    runner:
+      name: runner
+      #Image name
+      imageName: hcl-agentic-runner
+      # The port on which the core service will be exposed
+      port: 8080
+      # The number of replicas for the core service
+      replicaCount: 2
+      hpa:
+        enabled: false
+        minReplicas: 1
+        maxReplicas: 10
+      # Resource Configuration
+      config:
+        unoMCPBaseURL : ""
+        maxAgents: 5
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
+
+    image:
+      # The registry where the image is hosted
+      repository: hclcr.io/uno-ea
+      # The tag of the images
+      tag: 2.1.2.0-beta3
+      # The Pull Policy for the images
+      imagePullPolicy: Always
+
+    additionalPullSecret : ""
+
   hclaipilot:  
     image:
       repository: hclcr.io/uno-ea
@@ -578,7 +768,7 @@ uno:
         renewBefore: 360h
         # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to false.
         organization: hcl
-      
+      sharedKeySecretName: "{{ .Release.Name }}-shared-key"
       resources:
         limits:
           cpu: "0.8"  # CPU limit
