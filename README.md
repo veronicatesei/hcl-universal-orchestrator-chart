@@ -14,7 +14,7 @@ To respond to the growing request to make automation opportunities more accessib
 
 HCL Universal Orchestrator is a complete, modern solution to orchestrate calendar-based and event-driven tasks, business and IT processes. It enables organizations to gain complete visibility and control over attended or unattended workflows. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
-For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.0/index.html).
+For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.2/index.html).
 
 ## Details
 
@@ -41,7 +41,8 @@ Ensure you modify the value of the `waconsole.console.exposeServiceType` paramet
 	
 ## Accessing the container images
 
-You can access the HCL Universal Orchestrator chart and container images from the Entitled Registry. See [Create the secret](#creating-the-secret) for more information about accessing the registry. The images are as follows:
+
+You do not need a license key to access the container images. Instead, use the same credentials you use for HCL services through OIDC provider to pull the necessary images from the HCL Container Registry. The images are as follows:
 
 Core:
 
@@ -141,14 +142,13 @@ To create the namespace, run the following command:
 
         kubectl create namespace <uno_namespace>
 	
-
 ### Creating the Secret 
 
 If you already have a license, then you can proceed to obtain your entitlement key. To learn more about acquiring an HCL Universal Orchestrator license, contact HWAinfo@hcl.com. 
 
 Obtain your entitlement key and store it on your cluster by creating a [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/). Using a Kubernetes secret allows you to securely store the key on your cluster and access the registry to download the chart and product images. 
 
-1. Access the entitled registry.  Contact your HCL sales representative for the login details required to access the HCL Entitled Registry.
+1. Access the entitled registry with your OIDC credentials after being accepted into the beta program.
 2. To create a pull secret for your entitlement key that enables access to the entitled registry, run the following command:
 
          kubectl create secret docker-registry -n <uno_namespace> sa-<uno_namespace> --docker-server=<registry_server> --docker-username=<user_name> --docker-password=<password>
@@ -172,7 +172,7 @@ To deploy HCL Universal Orchestrator, perform the following steps:
    
 2. Pull the Helm chart:
 
-        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.2-beta1
+        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.2-beta3
 	
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
@@ -276,13 +276,39 @@ The following are some useful Helm commands:
 
 ### Configuring optional product components
 
+**Human task e-mail notifications**
+
+Human tasks are associated with queues, which act as containers for Human tasks. When a Human task is created, it references a specific queue, which is defined by a folder and a name. When defining a queue, you can customize its notification behavior by overriding the global settings. The available optional parameters are **Group email** and **Sender name**; for more information, see [Human task queues](https://help.hcl-software.com/UnO/v2.1.2/Focused_Scenarios/Task/c_queue.html).
+
+To enable e-mail notifications, edit the **values.yaml** file to set the `uno.mail.enabled` parameter to `true`, and then specify the required Simple Mail Transfer Protocol (SMTP) configuration parameters and credentials. 
+
+For more information about email notifications and notification templates, see [Human tasks](https://help.hcl-software.com/UnO/v2.1.2/Focused_Scenarios/Task/c_human_task.html).
+
+**AI Agents**
+
+You can create an AI agent using three different agent types: External MCP, Basic, and Agentic AI Builder. For more information, see [Managing agent types in the AI Agent] (https://help.hcl-software.com/UnO/v2.1.2/Orchestrating/to_manage_agent_types.html).
+
 **UnoAIPilot**
 
 You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
 		
 		global.enableUnoAIPilot: true
   
-  
+
+
+**Generative AI**
+
+You can enable generative AI features by requesting access. You will then receive a specific genAikey to insert into your values.yaml file here:
+
+    uno:
+      config:
+        genai:
+          enabled: true
+          serviceUrl: https://genai.hcluno.mywire.org
+          betaKey: <GenAIKey>
+
+
+
 **Session timeout**
 
 After a period of inactivity on the UI, users are automatically logged out. You can change the session timeout value, which is set by default to 30 minutes, by modifying the following parameter in the **values.yaml** file of the Helm chart:
@@ -313,7 +339,7 @@ You can configure different justification levels by setting the related paramete
      uno.config.engine.justificationTicketNumberRequire: true
      uno.config.engine.justificationDescriptionRequired: true
 
-For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1/Deployment/justifications.html).
+For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1.2/Deployment/justifications.html).
 
 **Encryption**
 
@@ -488,7 +514,7 @@ HCL Universal Orchestrator uses Grafana to display performance data related to t
 
 The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<uno_namespace> <uno_release_name>**:
 
-For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/UnO/v2.1.0/Monitoring/awsrgmonprom.html).
+For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/UnO/v2.1.2/Monitoring/awsrgmonprom.html).
   
   ### Setting the Grafana service
 Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Promotheus](https://github.com/helm/charts/tree/master/stable/prometheus).
@@ -550,7 +576,7 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 
 ## Documentation
 
-To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.0/index.html).
+To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.2/index.html).
 
 
 

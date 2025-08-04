@@ -1,0 +1,234 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+#
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+
+replicaCount: 1
+
+global:
+  uno:
+    engineHost: ""
+    enginePort: ""
+  
+  hclImagePullSecret: regcred
+
+#Version Tracking
+track: dev
+common:
+  apisix:
+    existingSecret: "apisix-api-keys"
+    existingSecretAdminTokenKey : "admin-key"
+    existingSecretViewerTokenKey : "viewer-key"
+    apiTokenAdmin: ""
+    serviceName: "apisix-control-plane"
+    adminPort: "9180"
+    certificateSecret: "apisix-control-plane-tls"
+    
+    ingressClassName: "apisix"
+    
+    extraTLSHosts:
+      - "apisix-control-plane"
+      - "apisix.control.plane"
+    
+    httpsGatewayPort: "443"
+
+  valkey:
+    valkeyPasswordSecret : "valkey-password-secret"
+    valkeyPasswordSecretKey: "password"
+    valkeyPassword : ""
+    valkeyHost: "valkey-primary"
+    valkeyPort: "6379"
+    valkeyDb: "0"
+
+  postgres:
+    postgresUser: pguser
+    postgresPort : "5432"
+    postgresPassword: "postgres-password-secret" #"{{ .Release.Name }}-postgres-password-secret"
+    postgresDB: "agenticbuilder"
+    postgresService: "postgresdb-postgresql"
+    
+    clientCertificateSecret: ""
+    
+    # Only to let the init container create the database "$postgresDB" if it does not exist
+    adminUser: "postgres"
+    initDatabases: true
+
+  config:
+    unoURL: ""
+    unoTokenProvider: "STARLETTE"
+    unoToken: ""
+    enableAuthentication : "false"
+    tokenProvider: ""
+    tokenProviderOIDCServerURL:  ""
+    tokenProviderDefaultRealm: ""
+    tokenProviderClientId: ""
+    tokenProviderClientSecret: ""
+    tokenProviderOpenIdDiscovery: ""
+    tokenProviderOidcRealmKey: ""
+    tokenProviderCertPrivateKey: ""
+    tokenProviderCertPublicKey: ""
+    tokenProviderCertIssuer: ""
+    tokenProviderCertExtraClaims: ""
+    tokenProviderExpirationTimeInS: ""
+    tokenProviderEnvVar: ""
+    tokenProviderMockValue: ""
+    OIDCServerUrl: ""
+    OIDCClientId: ""
+    keycloakRealm: ""
+    internalGatewayCertPath: ""
+    APIKeyCertPath: ""
+    caFolderPath: ""
+    caCertificatePaths: ""
+    caCertificate: ""
+
+# Pilot Core Configuration
+ams:
+  # Name of the core service
+  name: ams
+  #Image name
+  imageName: hcl-agentic-ams
+  # Deployment strategy
+  port: 8080
+  # The number of replicas for the core service
+  replicaCount: 1
+  # Resource Configuration
+  config:
+    exportedSchemasFolder :
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2500Mi
+    requests:
+      cpu: 300m
+      memory: 500Mi
+
+credentialManager:
+  # Name of the core service
+  name: cm
+  #Image name
+  imageName: hcl-agentic-cm
+  # Deployment strategy
+  strategy:
+    type: Recreate
+  # The port on which the core service will be exposed
+  port: 8000
+  # The number of replicas for the core service
+  replicaCount: 1
+  # Resource Configuration
+  config:
+    exportedSchemasFolder :
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2500Mi
+    requests:
+      cpu: 300m
+      memory: 500Mi
+
+runner:
+  name: runner
+  #Image name
+  imageName: hcl-agentic-runner
+  # The port on which the core service will be exposed
+  port: 8080
+  # The number of replicas for the core service
+  replicaCount: 2
+  hpa:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+  # Resource Configuration
+  config:
+    stateManager: "valkey"
+    executorScheme : "https"
+    maxAgents: 5
+    #Long term memory configuration
+    memoryType: "raw" # raw or chunked
+    embeddingProvider : "huggingface"
+    embeddingModel : "sentence-transformers/all-mpnet-base-v2"
+    embeddingDimensions : "768"
+    # Leave Empty to use the installed UnO
+    unoMCPBaseURL : ""
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2500Mi
+    requests:
+      cpu: 300m
+      memory: 500Mi
+
+telemetry:
+    inferenceEndpoint : ""
+    telemetryBaseUrl : ""
+    enableTelemetry: "false"
+    telemetryServiceName: ""
+    telemetryExportIntervalMillis: "60000"
+
+certificates:
+  # No enable if you want to use customized certificates
+  useCustomizedCert: false 
+  # The secret name containing the CA to be used to sign the certificatesSecret
+  caPairSecretName:
+  # To enable if you want to use a custom issuer
+  customIssuer: false
+  # The organization name for the certificates
+  organization: hcl
+  # To select the duration before the certificates are renewed
+  renewBefore: 360h
+  # The duration for which the certificates are valid
+  duration: 2160h
+  # If you are using a custom issuer, specify the issuer name
+  issuerName: ""
+  # The secret name of the certificates secret
+  certSecretName : ""
+
+  additionalCASecrets:
+
+#To add configuration for the authorization mechanism
+authorization:
+  #EXAMPLE HCL_AUTHORIZATION_HTTPS___PILOT_CORE_5005: <secret-name >
+  certs:
+    #HCL_AUTHORIZATION_HTTPS___PILOT_CORE_5005: pilot-cert
+    HCL_AUTHORIZATION_HTTPS___WAJWT_API: "{{ .unofullname }}-jwt-key"
+    HCL_AUTHORIZATION_HTTPS___WAJWT_APIGATEWAY:  "{{ .unofullname }}-jwt-key"
+    #HCL_AUTHORIZATION_TEST: /opt/certs/jwt/pilot-jwt.crt
+
+  # TO ENABLE OIDC AUTHENTICATION
+  oidcServerURL: ""
+
+# Configuration for the images used in the deployment
+image:
+  # The registry where the image is hosted
+  repository: hclcr.io/slt/agenticbuilder
+  # The tag/version of the images
+  tag: 1.0.0
+  # The Pull Policy for the images
+  imagePullPolicy: Always
+
+# to configure if you want a custom service account
+serviceAccount:
+  name: ""
+
+# If you don't want to use the .Release.Name as the prefix on the name of the service specify the name here
+nameOverride: ""
+
+# To add any additional labels to the deployment
+podAnnotations: {}
+
+# To configure the security context for the deployment
+podSecurityContext: {}
+
+# To configure the node selector for the deployment
+nodeSelector: {}
+
+# To configure the tolerations for the deployment
+tolerations: []
+
+# To configure the affinity for the deployment
+affinity: {}
+
+additionalPullSecret : ""
