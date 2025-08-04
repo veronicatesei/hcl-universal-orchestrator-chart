@@ -21,11 +21,11 @@ type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
-version: "2.1.1"
+version: "2.1.2"
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application.
-appVersion: "2.1.1.0"
+appVersion: "2.1.2.0"
 kubeVersion: "=1.14.0 || >=1.14.0-0" 
 maintainers:
   - name: HCL Tech Software
@@ -33,12 +33,12 @@ maintainers:
 
 dependencies:
   - name: hcl-uno-engine-chart
-    version: 2.1.1
+    version: 2.1.2
     
     alias: uno
     condition: global.enableEngine
   - name: wa-console-prod
-    version: 10.2.4
+    version: 10.2.5
     
     alias: waconsole
     condition: global.enableConsole

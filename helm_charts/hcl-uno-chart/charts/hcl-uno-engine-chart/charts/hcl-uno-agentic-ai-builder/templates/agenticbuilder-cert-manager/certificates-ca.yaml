@@ -1,0 +1,40 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019, 2024. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
+{{ $fullname := include "agenticbuilder.fullname" . }}
+{{ $issuerName := include "agenticbuilder.cert.issuer" . }}
+{{- if not .Values.certificates.caPairSecretName }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ $fullname }}-selfsigned-issuer
+  labels:
+{{ include "agenticbuilder.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $fullname }}-selfsigned-ca
+  labels:
+{{ include "agenticbuilder.labels" . | nindent 4 }}
+spec:
+  isCA: true
+  renewBefore: {{  .Values.certificates.renewBefore }} # 15d
+  commonName: agenticbuilder
+  secretName: {{ include "agenticbuilder.ca.secret.name" . }}
+  dnsNames:
+    - agenticbuilder
+  privateKey:
+    size: 2048
+    algorithm: RSA
+    encoding: PKCS1
+  issuerRef:
+    name: {{ $fullname }}-selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io
+{{- end -}}

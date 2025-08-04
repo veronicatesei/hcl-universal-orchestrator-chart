@@ -31,13 +31,13 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/wa
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-workload-automation-plugins:10.2.4.00.20250423
+  pluginImageName: hcl-workload-automation-plugins:10.2.5.00.20250804
   # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImages:
     - registry: hclcr.io/uno
       name: hcl-uno-external-pod:2.1.2.0
     - registry: hclcr.io/wa
-      name: hcl-workload-automation-packages:10.2.4.00.20250423
+      name: hcl-workload-automation-packages:10.2.5.00.20250804
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -196,10 +196,10 @@ uno:
       enableLogout: false
       # defines the minutes after which the user is considered inactive and gets logged out from the UI. Supported values are integers.
       sessionTimeoutMinutes: 30
+
     genai:
-      # Enables the AI Pilot generative AI features. Supported values are true and false.
+      # Enables the AI Agent and AI Pilot generative AI features. Supported values are true and false.
       # By enabling this feature with internal as false, you agree that AI Agent and AI Pilot prompts will be sent to HCL Software.
-      # analytics and to improve the product in the future.
       # We can collect statistical data for analytics and licensing purposes, but we won't retain the prompt content.
       # All information will be handled according to HCL Software privacy policy.
       enabled: false
@@ -217,7 +217,7 @@ uno:
         username:
         # The password to authenticate to the proxy server.
         password:
-        # max number of user prompts to be sent to LLM for context.
+      # max number of user prompts to be sent to LLM for context.
       maxUserPrompts:
       # max number of actions triggered in a conversation.
       maxActionPerConversation:
@@ -247,7 +247,7 @@ uno:
       justificationTicketNumberRequired: false
       # justificationDescriptionRequired specifies whether the justification description is mandatory. Supported values are true and false.
       justificationDescriptionRequired: false
-      mail:
+    mail:
       enabled: false
       smtp:
         # host is the SMTP host to send emails.
@@ -481,7 +481,8 @@ uno:
       #minTargetReplicas: 1
     notification:
       #minTargetReplicas: 1
- agenticAIBuilder:
+  
+  agenticAIBuilder:
     telemetry:
       enableTelemetry: "false"
       inferenceEndpoint : ""
@@ -647,13 +648,14 @@ uno:
 
     image:
       # The registry where the image is hosted
-      repository: wa-registry.prod.hclpnp.com/maestro-dev
+      repository: hclcr.io/uno
       # The tag of the images
       tag: 2.1.2.0
       # The Pull Policy for the images
       imagePullPolicy: Always
 
     additionalPullSecret : ""
+
   hclaipilot:  
     image:
       repository: hclcr.io/uno
@@ -765,7 +767,7 @@ uno:
         renewBefore: 360h
         # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to false.
         organization: hcl
-      
+      sharedKeySecretName: "{{ .Release.Name }}-shared-key"
       resources:
         limits:
           cpu: "0.8"  # CPU limit
@@ -968,7 +970,7 @@ waconsole:
     # repository is the Dynamic Workload Console image repository. Mandatory parameter.
     repository: hclcr.io/wa/hcl-workload-automation-console
     # tag is the Dynamic Workload Console image tag. Mandatory parameter.
-    tag: 10.2.4.00.20250423
+    tag: 10.2.5.00.20250804
   persistence:
     dataPVC:
       # name is the prefix for the Persistent Volumes Claim name.
