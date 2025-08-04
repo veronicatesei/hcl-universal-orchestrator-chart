@@ -34,13 +34,24 @@
 {{- end -}}
 
 {{- define "uno.microservices.list" -}}
-{{- $myList := list "console" "agentmanager" "executor" "gateway" "eventmanager" "iaa" "orchestrator" "scheduler" "toolbox" "timer" "storage" "audit" "notification" -}}
+{{- $myList := list ""  -}}
+
+{{- if eq .Values.global.deploymentType  "full" }}
+{{- $myList =  concat $myList (list "console" "agentmanager" "executor" "gateway" "eventmanager" "iaa" "orchestrator" "scheduler" "toolbox" "timer" "storage" "audit" "notification") -}}
+{{- else if eq .Values.global.deploymentType  "aio" -}}
+{{- $myList =  append $myList "console-aio"  -}}
+{{- end -}}
+
 {{- if .Values.global.enableUnoAIPilot }}
 {{- $myList =  append $myList "pilot-notification" -}}
 {{- end -}}
-{{- if .Values.config.genai.internal }}
+
+{{- if and .Values.config.genai.enabled .Values.config.genai.internal }}
 {{- $myList =  append $myList "genai" -}}
 {{- end -}}
+
+{{ $myList = uniq $myList }}
+{{ $myList = compact $myList }}
 {{ toJson $myList }}
 {{- end -}}
 
@@ -187,7 +198,7 @@ prometheus.io/path: "/q/metrics"
 {{- end -}}
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 2.1.2.0-beta2
+uno.microservice.version: 2.1.2.0-beta3
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -456,7 +467,7 @@ release: {{ .Release.Name | quote }}
 - name: UNO_GENAI_CLIENT_ENABLED
   value: {{ .Values.config.genai.enabled | quote }}
 {{- end }}
-{{- if .Values.config.genai.internal }}
+{{- if and .Values.config.genai.enabled .Values.config.genai.internal }}
 - name: UNO_GENAI_INTERNAL
   value: {{ .Values.config.genai.internal | quote }}
 - name: UNO_GENAI_CLIENT_URL
@@ -497,8 +508,14 @@ release: {{ .Release.Name | quote }}
 - name: UNO_GATEWAY_ENDPOINT
   value: {{ printf "https://%s.%s" .Values.deployment.gateway.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
 {{- end }}
+{{- if eq .Values.global.deploymentType  "aio" }}
+- name: UNO_GATEWAY_PRIVATE_ENDPOINT
+  value: {{ printf "https://%s-console-aio:8443" $fullName | quote }}
+{{- else }}
 - name: UNO_GATEWAY_PRIVATE_ENDPOINT
   value: {{ printf "https://%s-gateway:8443" $fullName | quote }}
+{{- end }}
+
 - name: UNO_MAIL_ENABLED
   value: {{ .Values.config.mail.enabled | quote }}
 - name: UNO_MAIL_SMTP_HOST
@@ -649,6 +666,30 @@ release: {{ .Release.Name | quote }}
   value: {{ .Values.authentication.adminName | quote}}
 - name: UNO_DISABLE_HOSTNAMEVERIFY
   value: {{ .Values.config.certificates.disableHostnameVerification | quote}}
+{{- if eq .Values.global.deploymentType  "aio" }}
+- name: UNO_IAA_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_CALENDAR_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_ORCHESTRATOR_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_SCHEDULER_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_STORAGE_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_VARIABLETABLE_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_AGENTMANAGER_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_AUDIT_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_TIMER_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_EVENTMANAGER_CLIENT_URL
+  value: "https://localhost:8443"
+- name: UNO_NOTIFICATION_CLIENT_URL
+  value: "https://localhost:8443"
+{{- else }}
 - name: UNO_IAA_CLIENT_URL
   value: https://{{ $fullName }}-iaa:8443
 - name: UNO_CALENDAR_CLIENT_URL
@@ -671,18 +712,17 @@ release: {{ .Release.Name | quote }}
   value: https://{{ $fullName }}-eventmanager:8443
 - name: UNO_NOTIFICATION_CLIENT_URL
   value: https://{{ $fullName }}-notification:8443
+{{- end }}
 - name: CONSOLE_LOGOUT_ENABLED
   value: {{ .Values.config.console.enableLogout | default "false" | quote}}
 - name: CONSOLE_SESSION_TIMEOUT_MINUTES
   value: {{ .Values.config.console.sessionTimeoutMinutes | default "30" | quote}}
-{{- if .Values.config.encryption.key }}
 - name: UNO_AES_ENCRYPTION_PASSKEY
   valueFrom:
       secretKeyRef:
         name: {{ .Release.Name }}-uno-secret
         key: ENCRYPTION_KEY
         optional: false
-{{- end }}
 {{- end -}}
 
 {{- define "common.custom.env.variable" -}}
@@ -738,6 +778,24 @@ volumes:
       defaultMode: 0664
       secretName: {{ $dwcsecretname  | quote }}
 {{- end }}
+{{- if and .Values.global.enableAgenticAIBuilder .Values.agenticAIBuilder.common.apisix.certificateSecret }}
+  - name: {{ tpl .Values.agenticAIBuilder.common.apisix.certificateSecret . }}-cert-volume
+    secret:
+      defaultMode: 0664
+      secretName: {{ tpl .Values.agenticAIBuilder.common.apisix.certificateSecret . | quote }}
+      items:
+      - key: tls.crt
+        path: {{ tpl .Values.agenticAIBuilder.common.apisix.certificateSecret . }}.crt
+{{- end }}
+{{- if and .Values.global.enableAgenticAIBuilder .Values.agenticAIBuilder.certificates.certSecretName }}
+  - name: {{ tpl .Values.agenticAIBuilder.certificates.certSecretName . }}-cert-volume
+    secret:
+      defaultMode: 0664
+      secretName: {{ tpl .Values.agenticAIBuilder.certificates.certSecretName . | quote }}
+      items:
+      - key: tls.crt
+        path: {{ tpl .Values.agenticAIBuilder.certificates.certSecretName . }}.crt
+{{- end }}
   - name: ext-agent-cert-volume
     secret:
       defaultMode: 0664
@@ -784,6 +842,14 @@ volumeMounts:
 {{- range .Values.config.certificates.additionalCASecrets }}
   - name: {{ tpl . $}}-cert-ext-volume
     mountPath: /security/ext_agt_depot/additionalCAs/{{ tpl . $}}
+{{- end }}
+{{- if and .Values.global.enableAgenticAIBuilder .Values.agenticAIBuilder.common.apisix.certificateSecret }}
+  - name: {{ tpl .Values.agenticAIBuilder.common.apisix.certificateSecret . }}-cert-volume
+    mountPath: /security/certs/additionalCAs/{{ tpl .Values.agenticAIBuilder.common.apisix.certificateSecret . }}
+{{- end }}
+{{- if and .Values.global.enableAgenticAIBuilder .Values.agenticAIBuilder.certificates.certSecretName }}
+  - name: {{ tpl .Values.agenticAIBuilder.certificates.certSecretName . }}-cert-volume
+    mountPath: /security/certs/additionalCAs/{{ tpl .Values.agenticAIBuilder.certificates.certSecretName . }}
 {{- end }}
 {{- end -}}
 
@@ -885,6 +951,10 @@ gcr.io/blackjack-209019/services
 {{- end -}}
 
 {{- define "uno.genai.env.configuration" -}}
+{{- if .Values.config.defaultVertexAiModel }}
+- name: UNO_GENAI_AGENT_PLATFORM_VERTEX_AI_MODEL
+  value: {{ .Values.config.genai.defaultVertexAiModel | quote }}
+{{- end }}
 {{- if .Values.config.genai.agentModels.vertexAiModels }}
 - name: UNO_AIAGENT_MODELS_VERTEXAI
   value: {{ .Values.config.genai.agentModels.vertexAiModels | quote }}
@@ -896,6 +966,18 @@ gcr.io/blackjack-209019/services
 {{- if .Values.config.genai.agentModels.bedrockModels }}
 - name: UNO_AIAGENT_MODELS_BEDROCK
   value: {{ .Values.config.genai.agentModels.bedrockModels | quote }}
+{{- end }}
+{{- if .Values.config.genai.maxUserPrompts }}
+- name: UNO_GENAI_AGENT_MAX_USER_PROMPT_FOR_CONTEXT
+  value: {{ .Values.config.genai.maxUserPrompts | quote }}
+{{- end }}
+{{- if .Values.config.genai.maxActionPerConversation }}
+- name: UNO_GENAI_AGENT_MAX_ACTION
+  value: {{ .Values.config.genai.maxActionPerConversation | quote }}
+{{- end }}
+{{- if .Values.config.genai.maxUnattendedActions }}
+- name: UNO_GENAI_AGENT_MAX_UNATTENDED
+  value: {{ .Values.config.genai.maxUnattendedActions | quote }}
 {{- end }}
 {{- if .Values.global.cloudCredentials.gcp.serviceFile }}
 - name: GOOGLE_APPLICATION_CREDENTIALS
@@ -957,16 +1039,13 @@ gcr.io/blackjack-209019/services
       key: OPEN_AI_SERVICE_APIKEY
       optional: false
 {{- end }}
-{{- if .Values.global.cloudCredentials.rag }}
+{{- if .Values.hclaipilot.rag.sharedKeySecretName }}
 - name: UNO_GENAI_PLATFORM_RAG_URL
   value: https://{{ .Release.Name }}-rag-service:9999
-{{- end }}
-{{- if .Values.global.cloudCredentials.rag.apiKey }}
 - name: UNO_GENAI_PLATFORM_RAG_SHARED_KEY
   valueFrom:
     secretKeyRef:
-      name: {{ .Release.Name }}-cloud-credentials
-      key: RAG_APIKEY
-      optional: false
+      name: {{ (tpl ( .Values.hclaipilot.rag.sharedKeySecretName) .)}}
+      key: shared-key
 {{- end }}
 {{- end -}}

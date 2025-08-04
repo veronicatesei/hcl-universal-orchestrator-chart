@@ -77,7 +77,7 @@ spec:
       serviceAccountName: {{ $root.Values.global.serviceAccountName | default $saName }}
       serviceAccount:   {{ $root.Values.global.serviceAccountName | default $saName }}
 {{ include "uno.securityContext"  $root | indent 6 }}
-{{- if eq $k "agentmanager" }}
+{{- if or (eq $k "agentmanager") (eq $k "console-aio") }}
 {{- if $root.Values.global.pluginImageName }}
       initContainers:
       - name: init-copy-plugins
@@ -103,6 +103,10 @@ spec:
           ports:
             - name: https
               containerPort: 8443
+{{- if $root.Values.global.debug }}
+            - name: debug
+              containerPort: 7777
+{{- end }} 
           env:
             - name: QUARKUS_HTTP_HTTP2
               value: "true"
@@ -124,11 +128,12 @@ spec:
               value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.database.databaseName }}"
 {{ include "common.env.variable"  $root | indent 12 }}
 {{ include "common.custom.env.variable"  $root | indent 12 }}
-{{- if eq $k "eventmanager"  }}
+{{- if or (eq $k "eventmanager") (eq $k "console-aio")  }}
+
 {{ include "uno.eventmanager.plugins" $root | indent 12 }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
-{{- if eq $k "iaa"  }}
+{{- if or (eq $k "iaa") (eq $k "console-aio")  }}
 {{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.console.env.variable" $root | indent 12 }}
 {{ include "uno.oidc.enabled.variable" $root | indent 12 }}
@@ -142,7 +147,7 @@ spec:
             - name: UNO_GROUPS_CACHE_EXPIRATION_DURATION
               value: "{{ $root.Values.config.apiKey.groupsCacheExpirationDuration }}"
 {{- end}}
-{{- if eq $k "agentmanager"  }}
+{{- if or (eq $k "agentmanager") (eq $k "console-aio") }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
 {{- if (($root.Values).global).enableUnoAIPilot }}
@@ -154,15 +159,15 @@ spec:
 {{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{- end}}
-{{- if eq $k "iaa" }}
+{{- if or (eq $k "iaa") (eq $k "console-aio") }}
             - name : UNO_AIPILOT_JWT_ISSUERS
               value: https://pilot-core:5005
 {{- end}}
-{{- if eq $k "gateway" }}
+{{- if eq $k "gateway"  }}
             - name: EXTERNAL_MP_JWT__HTTPS___PILOT_CORE_5005__VERIFY_PUBLICKEY_LOCATION
               value: https://{{ $root.Release.Name }}-core:5005/jwks
 {{- end}}
-{{- if eq $k "console" }}
+{{- if or (eq $k "console") (eq $k "console-aio") }}
             - name: EXTERNAL_MP_JWT__HTTPS___PILOT_CORE_5005__VERIFY_PUBLICKEY_LOCATION
               value: https://{{ $root.Release.Name }}-core:5005/jwks
             - name: UNO_AI_PILOT_CLIENT_URL
@@ -171,7 +176,13 @@ spec:
               value: wss://{{ $fullName }}-pilot-notification:8443
 {{- end}}
 {{- end}}
-{{- if eq $k "gateway"  }}
+{{- if $root.Values.global.enableAgenticAIBuilder }}
+            - name : UNO_AGENTIC_AI_SERVICE_URL
+              value: https://{{ $root.Values.agenticAIBuilder.common.apisix.serviceName }}:{{ $root.Values.agenticAIBuilder.common.apisix.httpsGatewayPort }}
+            - name : UNO_AGENTIC_AI_WSS_CLIENT_URL
+              value: wss://{{ $root.Values.agenticAIBuilder.common.apisix.serviceName }}:{{ $root.Values.agenticAIBuilder.common.apisix.httpsGatewayPort }}
+{{- end}}
+{{- if or (eq $k "gateway") (eq $k "console-aio")  }}
 {{- if or ((($root.Values).global).enableConsole) ($dwcsecretname) }}
 ##### global.consoleCertSecretName  $dwcsecretname {{ $dwcsecretname }}
 
@@ -193,21 +204,22 @@ spec:
               value: "https://{{ $dwcInternalHost }}:9443/jwt/ibm/api/jwtBuilder/jwk"
 {{- end }}
 {{- end }}
+{{- if not (eq $k "console-aio")  }}
 {{ include "uno.apikey.warning.variable" $root | indent 12 }}
-{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
+{{- end }}
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
 {{- if eq $k "genai" }}
 {{ include "uno.genai.env.configuration" $root | indent 12 }}
 {{- end}}
-{{- if eq $k "console"  }}
+{{- if or (eq $k "console") (eq $k "console-aio")   }}
 {{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{- end}}
-
 {{ include "uno.secret.volumes.mounts" $root | indent 10 }}
-{{- if eq $k "agentmanager" }}
+{{- if or (eq $k "agentmanager") (eq $k "console-aio") }}
             - name: plugindir
               mountPath: /storage
             - name: config-plugin
@@ -219,12 +231,12 @@ spec:
               mountPath: /security/credentials
 {{- end}}
 
-{{- if eq $k "console" }}
+{{- if or (eq $k "console") (eq $k "console-aio") }}
             - name: engines
               mountPath: /config/engines
 {{- end }}   
 
-{{- if eq $k "audit"  }}
+{{- if or (eq $k "audit") (eq $k "console-aio")  }}
             - name: emptydir
               mountPath: /opt/app/audit
         - name: audit-log-sidecar
@@ -259,7 +271,7 @@ spec:
             mountPath: /opt/app/audit
 {{- end}}
 {{ include "uno.secret.volumes" $root | indent 6 }}
-{{- if eq $k "agentmanager" }}
+{{- if or (eq $k "agentmanager") (eq $k "console-aio") }}
         - name: config-plugin
           configMap:
             name: {{ $root.Values.global.configPlugins | default $pluginConfig }} 
@@ -274,7 +286,7 @@ spec:
             defaultMode: 0644
             secretName: {{ $root.Release.Name }}-cloud-credentials
 {{- end}}
-{{- if eq $k "console" }}
+{{- if or (eq $k "console") (eq $k "console-aio") }}
         - name: engines
           configMap:
             name: {{ $fullName }}-engines-config
