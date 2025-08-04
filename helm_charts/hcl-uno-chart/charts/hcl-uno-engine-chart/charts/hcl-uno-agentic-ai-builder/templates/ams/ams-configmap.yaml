@@ -1,0 +1,17 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+{{ $fullname := include "agenticbuilder.fullname" . }}
+
+{{ $unoFullName := include "uno.fullname" . }}
+
+apiVersion:  v1
+kind:  ConfigMap
+metadata: 
+  name:  "{{ $fullname }}-{{ .Values.ams.name }}-configmap"
+data: 
+  SCHEMA_FOLDER: {{ default "/tmp/exported_schemas" .Values.ams.config.exportedSchemasFolder  | quote }}

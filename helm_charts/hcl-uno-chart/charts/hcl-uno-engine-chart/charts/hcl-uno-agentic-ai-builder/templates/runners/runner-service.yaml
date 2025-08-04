@@ -1,0 +1,47 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+
+{{- $root := .  -}}
+{{- $deploymentType := include "agenticbuilder.runner.list" $root | fromJsonArray -}}
+{{- range $deploymentType}}
+{{- $currentDeploymentType := . -}}
+
+{{ $fullname :=  include "agenticbuilder.fullname" $root }}
+{{ $unoFullName := include "uno.fullname" $root }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+  labels:
+{{ include "agenticbuilder.selectorLabels.backend" (list $root $root.Values.runner) | indent 4 }}
+spec:
+  selector:
+    name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+  ports:
+    - name: port-{{ default 8080 $root.Values.runner.port }}
+      protocol: TCP
+      port: {{ default 8080 $root.Values.runner.port }}
+      targetPort: port-{{ default 8080 $root.Values.runner.port }}
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-headless"
+  labels:
+{{ include "agenticbuilder.selectorLabels.backend" (list $root $root.Values.runner) | indent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+  ports:
+    - name: port-{{ default 8080 $root.Values.runner.port }}
+      port: {{ default 8080 $root.Values.runner.port }}
+---
+{{- end}}
