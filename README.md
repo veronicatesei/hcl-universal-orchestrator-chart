@@ -68,6 +68,12 @@ UnO AI Pilot:
  - hcl-aipilot-actions
  - hcl-aipilot-nlg
  - pgvector
+ 
+ UnO Agentic AI Builder:
+
+ - hcl-agentic-ams
+ - hcl-agentic-runner
+ - hcl-agentic-cm
 
 ## Prerequisites
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
@@ -79,6 +85,14 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
  - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 for AWS deployment.
  - Enablement of an OIDC provider.
+ 
+ **For Agentic AI Builder**
+ - Valkey (Redis-compatible): Used as the in-memory data store. Acts as a drop-in replacement for Redis.
+ - PostgreSQL: Serves as the primary relational database for storing application data.
+ - APISIX Gateway: Functions as the API gateway to route traffic to services. Includes the following:
+  * etcd: Backend key-value store for APISIX configuration.
+  * Ingress Controller: Manages ingress traffic rules.
+  * APISIX Dashboard: Web interface for managing gateway configurations.
 
 **Strongly recommended**
 
