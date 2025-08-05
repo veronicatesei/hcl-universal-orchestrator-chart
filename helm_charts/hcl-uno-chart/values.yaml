@@ -226,6 +226,7 @@ uno:
       # Enables the GenAI service to be deployed in the same cluster in order to your own accounts for LLM services. Supported values are true and false.
       internal: false
       # Below information are only used if the genai service is internal deployment.
+
       # Gemini model used for AI Pilot. This is also the default model used for AI Agents. It must be a Gemini model.
       defaultVertexAiModel: gemini-2.0-flash
       # timeout is the timeout for the GenAI service requests.

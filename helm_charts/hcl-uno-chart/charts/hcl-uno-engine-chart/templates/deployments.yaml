@@ -129,7 +129,6 @@ spec:
 {{ include "common.env.variable"  $root | indent 12 }}
 {{ include "common.custom.env.variable"  $root | indent 12 }}
 {{- if or (eq $k "eventmanager") (eq $k "console-aio")  }}
-
 {{ include "uno.eventmanager.plugins" $root | indent 12 }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
@@ -204,11 +203,11 @@ spec:
               value: "https://{{ $dwcInternalHost }}:9443/jwt/ibm/api/jwtBuilder/jwk"
 {{- end }}
 {{- end }}
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{- if not (eq $k "console-aio")  }}
 {{ include "uno.apikey.warning.variable" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{- end }}
-{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
 {{- if eq $k "genai" }}
