@@ -153,7 +153,7 @@ spec:
               readOnly: true
             - name: root-ca-cert
               mountPath: "/security/certs/rootCACerts/"
-          args: ["/bin/bash", "-c", "if [ ! -f /app/models/latest_model.tar.gz ]; then rasa train --fixed-model-name latest_model.tar.gz; fi; rasa run --cors '*' --ssl-certificate /var/core-secret/tls.crt --ssl-keyfile /var/core-secret/tls.key --enable-api --debug"]
+          args: ["/bin/bash", "-c", "if [ ! -f /app/models/latest_model.tar.gz ]; then rasa train --fixed-model-name latest_model.tar.gz; fi; rasa run --cors '*' --ssl-certificate /var/core-secret/tls.crt --ssl-keyfile /var/core-secret/tls.key --enable-api"]
           {{- include "aipilot.resources" .Values.pilotCore | nindent 10 }}
       volumes:
         {{- if .Values.translation.google.credentials }}

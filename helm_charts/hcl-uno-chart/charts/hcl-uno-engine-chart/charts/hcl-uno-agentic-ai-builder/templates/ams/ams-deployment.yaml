@@ -1,0 +1,92 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+{{ $fullname := include "agenticbuilder.fullname" . }}
+{{ $unofullname := include "uno.fullname" . }}
+
+{{- $root := . -}}
+#####################################################################
+#
+#####################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ $fullname }}-{{ .Values.ams.name }}"
+  labels:
+    {{- include "agenticbuilder.labels" . | nindent 4 }}
+spec:
+  replicas: {{ default .Values.replicaCount .Values.ams.replicaCount }}
+  selector:
+    matchLabels:
+{{ include "agenticbuilder.selectorLabels.backend" (list $root .Values.ams) | indent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels: {{- include "agenticbuilder.selectorLabels.backend" (list $root .Values.ams) | nindent 8 }}
+    spec:
+{{ include "agenticbuilder.pull.secret" . | indent 6 }}
+{{ include "agenticbuilder.serviceAccountName" . | indent 6 }}
+      securityContext:
+{{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      volumes:
+{{- include "agenticbuilder.additionalCAs.volume" . | nindent 8 }}
+{{- include "agenticbuilder.hclauthorization.volume" . | nindent 8  }}
+{{- include "agenticbuilder.postgres.client.volume" . | nindent 8 }}
+{{- include "agenticbuilder.postgres.volume" . | nindent 8 }}
+        - name: https-cert
+          secret:
+            secretName: {{ include "agenticbuilder.cert.name" . }}
+{{- include "agenticbuilder.postgres.initContainer" . | nindent 6 }}
+      containers:
+        - name: "{{ $fullname }}-{{ .Values.ams.name }}"
+{{- include "agenticbuilder.image" (list $root .Values.ams) | nindent 10 }}
+{{- include "agenticbuilder.imagePullPolicy" (list $root .Values.ams) | nindent 10 }}          
+{{- include "agenticbuilder.resources" .Values.ams | nindent 10 }}
+          args: ["--ssl-keyfile" ,"/https/tls.key" ,"--ssl-certfile" ,"/https/tls.crt"]
+          ports:
+            - containerPort: {{ default 8080 .Values.ams.port }}
+              name: port-{{ default 8080 .Values.ams.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ $fullname }}-{{ .Values.ams.name }}-configmap
+            - configMapRef:
+                name: {{ $fullname }}-common-configmap
+          env:
+            - name: ROOT_PATH
+              value: "/{{ $fullname }}-{{ .Values.ams.name }}"
+{{- include "agenticbuilder.postgres.certificate.env" . | nindent 12 }}
+{{- include "agenticbuilder.hclauthorization.env" . | nindent 12 }}              
+{{- include "agenticbuilder.env.postgres.password" . | nindent 12 }}
+          volumeMounts:
+{{- include "agenticbuilder.hclauthorization.volume.mount" . | indent 12 }}
+{{ include "agenticbuilder.postgres.certificate.volume.mount" . | indent 12 }}
+            - name: https-cert
+              mountPath: "/https"
+              readOnly: true
+            - name: https-cert
+              subPath: "ca.crt"
+              mountPath: "/ca/ca.crt"
+              readOnly: true

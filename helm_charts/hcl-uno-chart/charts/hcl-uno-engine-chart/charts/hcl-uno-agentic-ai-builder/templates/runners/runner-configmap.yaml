@@ -1,0 +1,51 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+
+{{- $root := .  -}}
+{{- $deploymentType := include "agenticbuilder.runner.list" $root | fromJsonArray -}}
+{{- range $deploymentType}}
+{{- $currentDeploymentType := . -}}
+
+{{ $fullname :=  include "agenticbuilder.fullname" $root }}
+{{ $unoFullName := include "uno.fullname" $root }}
+
+apiVersion:  v1
+kind:  ConfigMap
+metadata: 
+  name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-configmap"
+data: 
+  STATE_MANAGER: {{ tpl (default "valkey" $root.Values.runner.config.stateManager) $root | quote }}
+  VALKEY_HOST: {{ tpl (default "valkey" $root.Values.common.valkey.valkeyHost) $root | quote }}
+  VALKEY_PORT: {{ tpl (default "6379" $root.Values.common.valkey.valkeyPort) $root | quote }}
+  VALKEY_DB: {{ tpl (default "0" $root.Values.common.valkey.valkeyDb) $root | quote }}
+  EXECUTOR_SCHEME: {{ tpl (default "https" $root.Values.runner.config.executorScheme) $root | quote }}
+
+  #APISIX CLIENT Configuration
+  CERTS_PATH: "/gateway-certs"
+  ENABLE_TELEMETRY: {{ tpl (default "false" $root.Values.telemetry.enableTelemetry) $root | quote }}
+  TELEMETRY_BASE_URL: {{ tpl (default "http://localhost:4317/v1/metrics" $root.Values.telemetry.telemetryBaseUrl) $root | quote }}
+  INFERENCE_ENDPOINT: {{ tpl (default "http://localhost:6006/v1/traces" $root.Values.telemetry.inferenceEndpoint) $root | quote }}
+  TELEMETRY_SERVICE_NAME: {{ tpl (default "runner" $root.Values.telemetry.telemetryServiceName) $root | quote }}
+  TELEMETRY_EXPORT_INTERVAL_MILLIS: {{ tpl (default "60000" $root.Values.telemetry.telemetryExportIntervalMillis) $root | quote }}
+  GATEWAY_ADMIN_URL : {{ tpl (printf "https://%s:%s" $root.Values.common.apisix.serviceName $root.Values.common.apisix.adminPort ) $root | quote }}
+  #Credential Manager
+  CREDENTIAL_MANAGER_HOST: {{ tpl (printf "https://%s-%s" (include "agenticbuilder.fullname" $root) $root.Values.credentialManager.name) $root | quote }}
+  CREDENTIAL_MANAGER_PORT: {{ tpl (toString $root.Values.credentialManager.port) $root | quote }}
+
+  #AMS Configuration
+  AMS_API_HOST: {{ tpl (printf "https://%s-%s" (include "agenticbuilder.fullname" $root) $root.Values.ams.name) $root | quote }}
+  AMS_API_PORT: {{ tpl (toString $root.Values.ams.port) $root | quote }}
+  UNO_MCP_BASE_URL : {{ default (printf "https://%s-gateway:8443/mcp/sse" (include "uno.fullname" $root)) $root.Values.runner.config.unoMCPBaseURL }}
+  MEMORY_TYPE : {{ default "raw" $root.Values.runner.config.memoryType | quote }}
+  EMBEDDING_PROVIDER: {{ default "huggingface" $root.Values.runner.config.embeddingProvider | quote }}
+  EMBEDDING_MODEL : {{ default "sentence-transformers/all-mpnet-base-v2" $root.Values.runner.config.embeddingModel | quote }}
+  EMBEDDING_DIMENSIONS : {{ default "768" $root.Values.runner.config.embeddingDimensions | quote }} 
+  #Runner configuration
+  MAX_AGENTS: {{ tpl (default "5"  (toString $root.Values.runner.config.maxAgents )) $root | quote }}
+---
+{{- end}}

@@ -14,7 +14,7 @@ To respond to the growing request to make automation opportunities more accessib
 
 HCL Universal Orchestrator is a complete, modern solution to orchestrate calendar-based and event-driven tasks, business and IT processes. It enables organizations to gain complete visibility and control over attended or unattended workflows. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
-For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.0/index.html).
+For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.2/index.html).
 
 ## Details
 
@@ -79,6 +79,12 @@ UnO AI Pilot:
  - hcl-aipilot-nlg
  - pgvector
 
+UnO Agentic AI Builder:
+
+ - hcl-agentic-ams
+ - hcl-agentic-runner
+ - hcl-agentic-cm
+
 ## Prerequisites
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
 
@@ -90,8 +96,15 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 for AWS deployment.
  - Enablement of an OIDC provider.
 
-**Strongly recommended**
+**For Agentic AI Builder**
+ - Valkey (Redis-compatible): Used as the in-memory data store. Acts as a drop-in replacement for Redis.
+ - PostgreSQL: Serves as the primary relational database for storing application data.
+ - APISIX Gateway: Functions as the API gateway to route traffic to services. Includes the following:
+     - etcd: Backend key-value store for APISIX configuration.
+     - Ingress Controller: Manages ingress traffic rules.
+     - APISIX Dashboard: Web interface for managing gateway configurations.
 
+ **Strongly recommended**
  - Jetstack cert-manager
 
   We strongly recommend the use of a cert-manager as it automatically generates and updates the required certificates. You can choose not to use it, in which case you need to:
@@ -132,6 +145,9 @@ The following are prerequisites specific to each supported cloud provider:
 |**AIPilot-nlg**| CPU: 0.3, Memory: 0.5GB | CPU: 0.1, Memory: 0.3GB
 |**AIPilot-rag**| CPU: 0.8, Memory: 1Gi | CPU: 0.2 , Memory: 0.2Gi
 |**PgVector**| CPU: 0.15 Memory: 0.192GB Ephemeral-storage : 2Gi |  CPU: 0.1 Memory: 0.1Gi Ephemeral-storage: 50Mi
+|**agentic-ams** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
+|**agentic-runner** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
+|**agentic-cm** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
 
 No disk space is required for the microservices, however, at least 100 GB are recommended for Kafka and 100 GB for MongoDB. Requirements vary depending on your workload.
 
@@ -287,6 +303,19 @@ The following are some useful Helm commands:
 
 ### Configuring optional product components
 
+**Human task email notifications**
+
+Human tasks are associated with queues, which act as containers for Human tasks. When a Human task is created, it references a specific queue, which is defined by a folder and a name. When defining a queue, you can customize its notification behavior by overriding the global settings. The available optional parameters are **Group email** and **Sender name**; for more information, see [Human task queues](https://help.hcl-software.com/UnO/v2.1.2/Focused_Scenarios/Task/c_queue.html).
+
+To enable e-mail notifications, edit the **values.yaml** file to set the `uno.mail.enabled` parameter to `true`, and then specify the required Simple Mail Transfer Protocol (SMTP) configuration parameters and credentials. 
+
+For more information about email notifications and notification templates, see [Human tasks](https://help.hcl-software.com/UnO/v2.1.2/Focused_Scenarios/Task/c_human_task.html).
+
+**AI Agents**
+
+You can create an AI agent using three different agent types: External MCP, Basic, and Agentic AI Builder. For more information, see [Managing agent types in the AI agent
+](https://help.hcl-software.com/UnO/v2.1.2/Orchestrating/to_manage_agent_types.html).
+
 **UnoAIPilot**
 
 You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
@@ -324,7 +353,7 @@ You can configure different justification levels by setting the related paramete
      uno.config.engine.justificationTicketNumberRequire: true
      uno.config.engine.justificationDescriptionRequired: true
 
-For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1/Deployment/justifications.html).
+For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1.2/Deployment/justifications.html).
 
 **Encryption**
 
@@ -501,7 +530,7 @@ HCL Universal Orchestrator uses Grafana to display performance data related to t
 
 The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<uno_namespace> <uno_release_name>**:
 
-For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/UnO/v2.1.0/Monitoring/awsrgmonprom.html).
+For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcl-software.com/UnO/v2.1.2/Monitoring/awsrgmonprom.html).
   
   ### Setting the Grafana service
 Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Promotheus](https://github.com/helm/charts/tree/master/stable/prometheus).
@@ -563,7 +592,7 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 
 ## Documentation
 
-To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.0/index.html).
+To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.2/index.html).
 
 
 

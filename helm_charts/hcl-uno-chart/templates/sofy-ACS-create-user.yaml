@@ -32,7 +32,7 @@ data:
         echo "#### Timeout: {{ .Release.Name }}-emissary-ca-cert secret was not created after 10 attempts."
     fi
     
-    KEYCLOAK_SERVICE=$(kubectl get svc -l "app.kubernetes.io/component=http,app.kubernetes.io/name=keycloak" -n {{ .Release.Namespace }} -o=jsonpath='{.items[*].metadata.name}')
+    KEYCLOAK_SERVICE=$(kubectl get svc -l "app.kubernetes.io/component=http,app.kubernetes.io/name=keycloakx" -n {{ .Release.Namespace }} -o=jsonpath='{.items[*].metadata.name}')
 
     if [ -z "$KEYCLOAK_SERVICE" ]; then
         echo "##### KEYCLOAK_SERVICE not found with labels, trying with default value..."
