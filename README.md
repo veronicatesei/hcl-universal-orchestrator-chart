@@ -292,10 +292,6 @@ The following are some useful Helm commands:
 * To update the Helm release:
 
         helm upgrade <uno_release_name> <repo_name>/hcl-uno-chart -f values.yaml -n <uno_namespace>
-		
-* To update helm repo release:
-  
-        helm repo update
 	
 * To delete the Helm release: 
 
@@ -593,6 +589,7 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 ## Documentation
 
 To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.2/index.html).
+
 
 
 
