@@ -189,7 +189,7 @@ Obtain your entitlement key and store it on your cluster by creating a [Kubernet
 
 ### Deploying the product components		
 
-Before starting to deploy the product components, make sure that all the [prerequisites](#prerequisites) are met.
+Before starting to deploy the product components, make sure that all the [prerequisites](#prerequisites) are met. The username to log in the HCL Entitled Registry is the same username used to login into https://hclcr.io/harbor/projects, and the password is the HCL Entitled Registry CLI secret that can be found in the User Profile.
 
 To deploy HCL Universal Orchestrator, perform the following steps:
 
@@ -292,10 +292,6 @@ The following are some useful Helm commands:
 * To update the Helm release:
 
         helm upgrade <uno_release_name> <repo_name>/hcl-uno-chart -f values.yaml -n <uno_namespace>
-		
-* To update helm repo release:
-  
-        helm repo update
 	
 * To delete the Helm release: 
 
@@ -593,6 +589,8 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 ## Documentation
 
 To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.2/index.html).
+
+
 
 
 
