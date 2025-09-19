@@ -172,7 +172,7 @@ To deploy HCL Universal Orchestrator, perform the following steps:
    
 2. Pull the Helm chart:
 
-        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.2-beta2
+        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.3-beta1
 	
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
@@ -276,17 +276,19 @@ The following are some useful Helm commands:
 
 ### Configuring optional product components
 
+**Multitenancy**
+Multitenancy is a new architecture that enables a single HCL Universal Orchestrator instance to serve multiple, independent tenants. Each tenant operates with its own data, configuration, and user permissions, ensuring strict separation and security.
+To enable multitenancy, edit the **values.yaml** file to set the `multitenant.enabled` parameter to `true`.
+
 **Human task e-mail notifications**
 
 Human tasks are associated with queues, which act as containers for Human tasks. When a Human task is created, it references a specific queue. A queue is defined by a folder and a name, and it can have optional e-mail addresses to notify users of new tasks:
 
 - **Group e-mail**: An optional email address used for notifications when new tasks are added.
   
-- **From e-mail**:  An optional email address that, if specified, is used as the sender address for email notifications specific to that queue.
+- **Sender name**:  An optional **display name** used for email notifications originating from a specific task queue. If specified, the **sender name** overrides the global display name defined in `config.mail.from`. 
   
-  > **Note:** Some SMTP providers override custom **From e-mail** addresses and use the provider's authentication address instead. Consequently, the **From** address that you specify might be ignored.
-
-To enable e-mail notifications, edit the **values.yaml** file to set the `uno.mail.enabled` parameter to `true`, and then specify the required Simple Mail Transfer Protocol (SMTP) configuration parameters and credentials.
+  To enable e-mail notifications, edit the **values.yaml** file to set the `uno.mail.enabled` parameter to `true`, and then specify the required Simple Mail Transfer Protocol (SMTP) configuration parameters and credentials.
 
  **Notification templates**
 
