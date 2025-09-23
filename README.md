@@ -46,6 +46,7 @@ You do not need a license key to access the container images. Instead, use the s
 
 Core:
 
+ - hcl-uno-saas-controller
  - hcl-uno-agentmanager
  - hcl-uno-gateway
  - hcl-uno-iaa
@@ -278,7 +279,26 @@ The following are some useful Helm commands:
 
 **Multitenancy**
 Multitenancy is a new architecture that enables a single HCL Universal Orchestrator instance to serve multiple, independent tenants. Each tenant operates with its own data, configuration, and user permissions, ensuring strict separation and security.
-To enable multitenancy, edit the **values.yaml** file to set the `multitenant.enabled` parameter to `true`.
+
+Below, you can find the main steps to enable and set up a multitenant environment on HCL Universal Orchestrator:
+
+1. Open the **values.yaml** file and go to the `uno.config.multitenant` section.
+
+2. Enable multitenancy by setting the `uno.config.multitenant.enabled` parameter to `true`. After you have enabled multitenancy, the `hcl-uno-saas-controller` microservice is deployed.
+
+3. Instance a tenant by accessing the URL exposed by the controller microservice.
+
+4. Edit the regular expression in the `uno.config.multitenant.hostnamePattern` parameter according to the hostname of your cluster.
+
+5. In the `uno.config.multitenant.controllerIngressCertIssuer`parameter, enter the secret name of the certificate that you want to use.
+
+6. Define the tenant administrators by editing the `uno.config.multitenant.admins`. You have three options to specify tenant administrators:
+  
+   - **userIds**: Authorize as administrators specific user IDs.
+   - **groupIDs**: Authorize as administrators an entire group of IDs.
+   - **userIdFilters**: Authorize as administrators every user that has a specific email domain.
+
+7. Edit all the optional parameter of the `uno.config.multitenant` section according to your needs.
 
 **Human task e-mail notifications**
 
@@ -499,7 +519,7 @@ HCL Universal Orchestrator is installed by default with autoscaling enabled. To 
     
 To use custom certificates: 
 
-1. Genereta your custom certificates
+1. Generate your custom certificates
 2. Set `uno.congfig.certificates.useCustomizedCert: true`
 3. Assign the certificate values as secrets in the certificates section of the **values.yaml** file:
 
