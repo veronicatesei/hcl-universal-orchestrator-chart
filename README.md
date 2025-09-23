@@ -278,6 +278,7 @@ The following are some useful Helm commands:
 ### Configuring optional product components
 
 **Multitenancy**
+
 Multitenancy is a new architecture that enables a single HCL Universal Orchestrator instance to serve multiple, independent tenants. Each tenant operates with its own data, configuration, and user permissions, ensuring strict separation and security.
 
 Multitenancy must be configured by editing the values.yaml file. The multitenant configuration enables the deployment of the `hcl-uno-saas-controller` microservice.
