@@ -280,25 +280,31 @@ The following are some useful Helm commands:
 **Multitenancy**
 Multitenancy is a new architecture that enables a single HCL Universal Orchestrator instance to serve multiple, independent tenants. Each tenant operates with its own data, configuration, and user permissions, ensuring strict separation and security.
 
+Multitenancy must be configured by editing the values.yaml file. The multitenant configuration enables the deployment of the `hcl-uno-saas-controller` microservice.
+
 Below, you can find the main steps to enable and set up a multitenant environment on HCL Universal Orchestrator:
 
 1. Open the **values.yaml** file and go to the `uno.config.multitenant` section.
 
-2. Enable multitenancy by setting the `uno.config.multitenant.enabled` parameter to `true`. After you have enabled multitenancy, the `hcl-uno-saas-controller` microservice is deployed.
+2. Enable multitenancy by setting the `uno.config.multitenant.enabled` parameter to `true`.
 
-3. Instance a tenant by accessing the URL exposed by the controller microservice.
+3. Edit the regular expression in the `uno.config.multitenant.hostnamePattern` parameter according to the hostname of your cluster.
 
-4. Edit the regular expression in the `uno.config.multitenant.hostnamePattern` parameter according to the hostname of your cluster.
-
-5. In the `uno.config.multitenant.controllerIngressCertIssuer`parameter, enter the secret name of the certificate that you want to use.
-
-6. Define the tenant administrators by editing the `uno.config.multitenant.admins`. You have three options to specify tenant administrators:
+4. Define the tenant administrators by editing the `uno.config.multitenant.admins`. You have three options to specify tenant administrators:
   
    - **userIds**: Authorize as administrators specific user IDs.
    - **groupIDs**: Authorize as administrators an entire group of IDs.
    - **userIdFilters**: Authorize as administrators every user that has a specific email domain.
 
-7. Edit all the optional parameter of the `uno.config.multitenant` section according to your needs.
+5. Edit all the optional parameter of the `uno.config.multitenant` section according to your needs.
+
+6. In the `uno.config.multitenant.controllerIngressCertIssuer`parameter, enter the secret name of the certificate that you want to use.
+
+7. Deploy HCL Universal Orchestrator.
+
+8. Instance a tenant by accessing the URL exposed by the controller microservice.
+
+Your multitenant environment is ready to be used.
 
 **Human task e-mail notifications**
 
