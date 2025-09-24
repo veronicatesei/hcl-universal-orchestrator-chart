@@ -1,0 +1,112 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+{{- $root := . -}}
+{{- $unofullname := include "uno.fullname" . }}
+{{- $deploymentType := include "agenticbuilder.runner.list" $root | fromJsonArray -}}
+{{- range $deploymentType}}
+{{- $currentDeploymentType := . -}}
+
+{{ $fullname :=  include "agenticbuilder.fullname" $root }}
+{{ $unoFullName := include "uno.fullname" $root }}
+
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+  labels:
+    name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+spec:
+  serviceName: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-headless"
+  replicas: {{ default $root.Values.replicaCount $root.Values.runner.replicaCount }}
+  selector:
+    matchLabels:
+      name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+  template:
+    metadata:
+      {{- with $root.Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+    spec:
+{{ include "agenticbuilder.pull.secret" $root | indent 6 }}
+{{ include "agenticbuilder.serviceAccountName" $root | indent 6 }}
+      securityContext:
+{{- toYaml $root.Values.podSecurityContext | nindent 8 }}
+      {{- with $root.Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $root.Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $root.Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      volumes:
+{{- include "agenticbuilder.hclauthorization.volume" $root | nindent 8 }}
+{{- include "agenticbuilder.additionalCAs.volume" $root | nindent 8 }}
+        - name: https-cert
+          secret:
+            secretName: {{ include "agenticbuilder.cert.name" $root }}
+        {{- if $root.Values.common.apisix.certificateSecret }}
+        - name: apisix-certificate
+          secret:
+            secretName: {{ tpl $root.Values.common.apisix.certificateSecret  $root }}
+        {{- end }}
+      containers:
+        - name: "{{ $fullname }}-{{ $root.Values.runner.name }}"
+{{- include "agenticbuilder.image" (list $root $root.Values.runner) | nindent 10 }}
+{{- include "agenticbuilder.imagePullPolicy" (list $root $root.Values.runner) | nindent 10 }}          
+{{- include "agenticbuilder.resources" $root.Values.runner | nindent 10 }}
+          args: ["--ssl-keyfile" ,"/https/tls.key" ,"--ssl-certfile" ,"/https/tls.crt"]
+          ports:
+            - containerPort: {{ default 8000 $root.Values.runner.port }}
+              name: port-{{ default 8000 $root.Values.runner.port }}
+              protocol: TCP
+          env:
+{{- include "agenticbuilder.env.valkey.password" $root | nindent 12 }}
+{{- include "agenticbuilder.env.apisix.apikey" $root | nindent 12 }}
+            - name: EXECUTOR_PREFIX_KEY
+              value: {{ $currentDeploymentType }}
+            - name: EXECUTOR_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ROOT_PATH
+              value: "/$(EXECUTOR_NAME)"
+            - name: EXECUTOR_ADDRESS
+              value: "$(EXECUTOR_NAME).{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-headless.{{ $root.Release.Namespace }}.svc.cluster.local:{{ default 8000 $root.Values.runner.port }}"
+{{- include "agenticbuilder.hclauthorization.env" $root | indent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-configmap
+            - configMapRef:
+                name: {{ $fullname }}-common-configmap
+          volumeMounts:
+{{- include "agenticbuilder.hclauthorization.volume.mount" $root | indent 12 }}
+            - name: https-cert
+              mountPath: "/https"
+              readOnly: true
+            - name: https-cert
+              subPath: "ca.crt"
+              mountPath: "/ca/ca.crt"
+              readOnly: true
+{{- include "agenticbuilder.additionalCAs.volumeMounts" $root | indent 12 }}
+            {{- if $root.Values.common.apisix.certificateSecret }}
+            - name: apisix-certificate
+              mountPath : "/gateway-certs/"
+              readOnly: true
+            {{- end }}
+---
+{{- end}}

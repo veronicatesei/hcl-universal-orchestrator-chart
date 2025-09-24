@@ -14,7 +14,7 @@ To respond to the growing request to make automation opportunities more accessib
 
 HCL Universal Orchestrator is a complete, modern solution to orchestrate calendar-based and event-driven tasks, business and IT processes. It enables organizations to gain complete visibility and control over attended or unattended workflows. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
-For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.0/index.html).
+For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.2/index.html).
 
 ## Details
 
@@ -69,6 +69,12 @@ UnO AI Pilot:
  - hcl-aipilot-actions
  - hcl-aipilot-nlg
  - pgvector
+ 
+ UnO Agentic AI Builder:
+
+ - hcl-agentic-ams
+ - hcl-agentic-runner
+ - hcl-agentic-cm
 
 ## Prerequisites
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
@@ -80,6 +86,14 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
  - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 for AWS deployment.
  - Enablement of an OIDC provider.
+ 
+ **For Agentic AI Builder**
+ - Valkey (Redis-compatible): Used as the in-memory data store. Acts as a drop-in replacement for Redis.
+ - PostgreSQL: Serves as the primary relational database for storing application data.
+ - APISIX Gateway: Functions as the API gateway to route traffic to services. Includes the following:
+  * etcd: Backend key-value store for APISIX configuration.
+  * Ingress Controller: Manages ingress traffic rules.
+  * APISIX Dashboard: Web interface for managing gateway configurations.
 
 **Strongly recommended**
 
@@ -174,7 +188,7 @@ To deploy HCL Universal Orchestrator, perform the following steps:
 2. Pull the Helm chart:
 
         helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.3-beta1
-	
+
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
 3. Customize the deployment.
@@ -325,10 +339,11 @@ Human tasks are associated with queues, which act as containers for Human tasks.
     
   To customize the HTML templates, edit the following sections of the **values.yaml** file:
 
-  - `config.orchestrator.humanTaskMailTaskCreatedTemplate` to modify the template used when a task is created.
-  - `config.orchestrator.humanTaskMailTaskAssignedTemplate` to modify the template used when a task is assigned or unassigned.
+For more information about email notifications and notification templates, see [Human tasks](https://help.hcl-software.com/UnO/v2.1.2/Focused_Scenarios/Task/c_human_task.html).
 
+**AI Agents**
 
+You can create an AI agent using three different agent types: External MCP, Basic, and Agentic AI Builder. For more information, see [Managing agent types in the AI Agent] (https://help.hcl-software.com/UnO/v2.1.2/Orchestrating/to_manage_agent_types.html).
 
 **UnoAIPilot**
 
@@ -381,7 +396,7 @@ You can configure different justification levels by setting the related paramete
      uno.config.engine.justificationTicketNumberRequire: true
      uno.config.engine.justificationDescriptionRequired: true
 
-For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1/Deployment/justifications.html).
+For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1.2/Deployment/justifications.html).
 
 **Encryption**
 
@@ -556,7 +571,7 @@ HCL Universal Orchestrator uses Grafana to display performance data related to t
 
 The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<uno_namespace> <uno_release_name>**:
 
-For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/UnO/v2.1.0/Monitoring/awsrgmonprom.html).
+For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/UnO/v2.1.2/Monitoring/awsrgmonprom.html).
   
   ### Setting the Grafana service
 Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Prometheus](https://github.com/helm/charts/tree/master/stable/prometheus).
@@ -618,7 +633,7 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 
 ## Documentation
 
-To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.0/index.html).
+To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcltechsw.com/UnO/v2.1.2/index.html).
 
 
 

@@ -67,7 +67,7 @@ spec:
         - name: "{{ $fullName }}-{{ .Values.pilotNlg.name }}"
           {{- include "aipilot.image" (list $root .Values.pilotNlg) | nindent 10 -}}
           {{- include "aipilot.imagePullPolicy" (list $root .Values.pilotNlg) | nindent 10 -}}          
-          command: ["/bin/bash", "-c", "uvicorn nlg.app:app --host=0.0.0.0 --port={{ .Values.pilotNlg.port }} --log-level=debug --ssl-certfile /var/nlg-secret/tls.crt --ssl-keyfile /var/nlg-secret/tls.key" ]
+          command: ["/bin/bash", "-c", "uvicorn nlg.app:app --host=0.0.0.0 --port={{ .Values.pilotNlg.port }} --log-level=info --ssl-certfile /var/nlg-secret/tls.crt --ssl-keyfile /var/nlg-secret/tls.key" ]
           ports:
             - containerPort: {{ default 5001 .Values.pilotNlg.port }}
               name: port-{{ default 5001 .Values.pilotNlg.port }}
