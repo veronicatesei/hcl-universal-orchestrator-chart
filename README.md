@@ -35,8 +35,8 @@ HCL Universal Orchestrator can be deployed across a single cluster, but you can 
 
 HCL Universal Orchestrator supports all the platforms supported by the runtime provider of your choice.
 
-### Openshift support
-You can deploy HCL Universal Orchestrator on Openshift by following the instruction in this documentation and using helm charts. 
+### OpenShift support
+You can deploy HCL Universal Orchestrator on OpenShift by following the instruction in this documentation and using helm charts. 
 Ensure you modify the value of the `waconsole.console.exposeServiceType` parameter from `LoadBalancer` to `Routes`.
 	
 ## Accessing the container images
@@ -183,7 +183,7 @@ To deploy HCL Universal Orchestrator, perform the following steps:
 
 - Accepting the license agreement
 
-The licence parameter determines whether the licence agreement is accepted or not. Supported values are `accept` and `not accepted`. To accept the license agreement, set the value as:
+The license parameter determines whether the license agreement is accepted or not. Supported values are `accept` and `not accepted`. To accept the license agreement, set the value as:
 
     global.license: accept
 
@@ -244,7 +244,7 @@ The values of the following parameters are placeholders used as an example. When
 
       uno.ingress.enabled: false
 
-  To make sure HCL Universal Orchestrator tusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
+  To make sure HCL Universal Orchestrator trusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
 
     uno.config.certificates.additionalCASecrets: certificatesecret
 
@@ -363,7 +363,7 @@ To enable the log out option, set the following parameter in the **values.yaml**
 
      uno.config.console.enableLogout: true
 
-**Generative workflows and knowledege base**
+**Generative workflows and knowledge base**
 
 You can enable the generative features of the UnO AI Pilot for both workflow generation and generative knowledge base by setting the following parameter in the **values.yaml** file of the Helm chart to true:
 
@@ -525,7 +525,7 @@ HCL Universal Orchestrator is installed by default with autoscaling enabled. To 
 To use custom certificates: 
 
 1. Generate your custom certificates
-2. Set `uno.congfig.certificates.useCustomizedCert: true`
+2. Set `uno.config.certificates.useCustomizedCert: true`
 3. Assign the certificate values as secrets in the certificates section of the **values.yaml** file:
 
     uno.config.certificates.caPairSecretName: ca-key-pair
@@ -559,7 +559,7 @@ The following metrics are collected and available to be visualized in the precon
 For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/UnO/v2.1.0/Monitoring/awsrgmonprom.html).
   
   ### Setting the Grafana service
-Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Promotheus](https://github.com/helm/charts/tree/master/stable/prometheus).
+Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Prometheus](https://github.com/helm/charts/tree/master/stable/prometheus).
   
 1. Log in to your cluster. To identify where Grafana is deployed, retrieve the value for the \<grafana-namespace> by running:
   
