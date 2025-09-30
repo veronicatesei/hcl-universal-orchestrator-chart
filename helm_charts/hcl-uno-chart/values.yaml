@@ -31,13 +31,13 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/uno-ea
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-workload-automation-plugins:2.1.2.0-beta3
+  pluginImageName: hcl-workload-automation-plugins:2.1.3.0-beta1
   # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
   extraImages:
     - registry: hclcr.io/uno-ea
-      name: hcl-uno-external-pod:2.1.2.0-beta3
+      name: hcl-uno-external-pod:2.1.3.0-beta1
     - registry: hclcr.io/uno-ea
-      name: hcl-workload-automation-packages:2.1.2.0-beta3
+      name: hcl-workload-automation-packages:2.1.3.0-beta1
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -156,13 +156,50 @@ uno:
     audit:
         # max number of days to keep audit logs
         retentionDays: P400D
+    # multitenant configuration
+    multitenant:
+      # Enables multitenant support. Supported values are true and false.
+      enabled: false
+      # hostnamePattern is the regular expression to extract the tenant name from hostname. The default value is "^([^.]+)\\.[^.]+\\.uno\\.local$".
+      hostnamePattern: "^([^.]+)\\.[^.]+\\.uno\\.local$"
+      # commonTenantDatabaseName is the name of the database used for common tenant data.
+      commonTenantDatabaseName: multitenant-common
+      # tenantDbPrefix is the prefix used for tenant databases.
+      tenantDbPrefix: saas-uno-tenant-
+      trial:
+        # defaultExpiration is the default expiration time for trial tenants.
+        defaultExpiration: P30D
+        # cleanupDelay is the delay after which expired trial tenants are cleaned up.
+        cleanupDelay: P60D
+      subscribed:
+        # cleanupDelay is the delay after which expired subscribed tenants are cleaned up.
+        cleanupDelay: P366D
+      # expirationCheckInterval is the interval at which expired tenants are checked.
+      expirationCheckInterval: PT6H
+      # region identifies the deployment.
+      region: development
+      # cert-manager certificate Issuer for controller if not specified it uses the default one 
+      controllerIngressCertIssuer:
+      # Tenant administrators
+      admins:
+        # List of user IDs that are authorized as tenant administrators
+        userIds:
+        # - unoSaaSAdmin@example.com
+        # List of group IDs that are authorized as tenant administrators
+        groupIds:
+        # - SaaSAdmins
+        # A list of user ID regex patterns to further filter user IDs. 
+        # This is used in conjunction to groupIds.
+        # If at least a filter is specified, Users that has at least one group in groupIds will also need to have a user ID matching at least one of the filters.
+        userIdFilters:
+        # - .*@example.com 
     registry:
       # name is the name of your registry.
       name:  hclcr.io/uno-ea
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 2.1.2.0-beta3
+      tag: 2.1.3.0-beta1
     orchestrator:
       # the maximum number of nested workflow in the plan. The subflow jobs exceeding this value will end in FAIL
       maxNestingLevel: 50
@@ -416,11 +453,6 @@ uno:
 
   deployment:
     global:
-      podDisruptionBudget:
-        # enabled specifies whether a PodDisruptionBudget is enabled. Supported values are true and false.
-        enabled: false
-        # maxUnavailable is the maximum number, or percentage, of unavailable pods during the disruption.
-        maxUnavailable: "33%"
       # minTargetReplicas is the minimum number of target replicas to be deployed for each microservice.
       minTargetReplicas: 1
       # maxTargetReplicas is the maximum number of target replicas to be deployed for each microservice.
@@ -430,6 +462,11 @@ uno:
       autoscaler:
         # cpuAverageUtilization specifies the average usage of CPU which starts the autoscaler.
         cpuAverageUtilization: 200
+      podDisruptionBudget:
+        # enabled specifies whether a PodDisruptionBudget is enabled. Supported values are true and false.
+        enabled: false
+        # maxUnavailable is the maximum number, or percentage, of unavailable pods during the disruption.
+        maxUnavailable: "33%"
       resources:
         limits:
           # cpu is the maximum amount of cpu services can use.
@@ -485,11 +522,32 @@ uno:
   
   agenticAIBuilder:
     telemetry:
-      enableTelemetry: "false"
-      inferenceEndpoint : ""
-      telemetryBaseUrl : ""
-      telemetryServiceName: ""
-      telemetryExportIntervalMillis: "60000"
+    # To enable telemetry
+    enableTelemetry: "false"
+    # The endpoint for traces 
+    inferenceEndpoint : ""
+    # The base URL for metrics
+    telemetryBaseUrl : ""
+    # The service name to be used in telemetry data
+    telemetryServiceName: ""
+    # The interval in milliseconds for exporting telemetry data
+    telemetryExportIntervalMillis: "60000"
+    # Protocol to be used for metrics export (http or grpc)
+    telemetryMetricsProtocol: "http"
+    # Protocol to be used for trace export (http or grpc)
+    telemetryTraceProtocol: "http"
+    #Set to "true" to disable TLS for trace export (useful for testing with insecure endpoints), supported values: "true" or "false"
+    telemetryMetricInsecure: "true"
+    # Set to "true" to disable TLS for trace export (useful for testing with insecure endpoints), supported values: "true" or "false"
+    telemetryTraceInsecure: "true"
+    # If your telemetry exporter requires a certificate, provide it here the secret name, the field telemetryTraceInsecure must be "false" or telemetryMetricInsecure must be "false"
+    telemetryExporterCertificate: ""
+    # If your telemetry exporter requires a certificate, provide it here the key inside the secret that points to the certificate, the field telemetryTraceInsecure must be "false" or telemetryMetricInsecure must be "false"
+    telemetryExporterCertificateKey: "tls.crt"
+    # If your telemetry exporter requires headers, provide them here in the format "key1=value1,key2=value2"
+    telemetryExporterHeaders: ""
+    # Timeout in milliseconds for the telemetry exporter
+    telemetryExporterTimeoutMillis: "10000"
     
     common:
       # By default the values are configured to work with the default Apisix deployed by the of bitnami/apisix.
@@ -651,7 +709,7 @@ uno:
       # The registry where the image is hosted
       repository: hclcr.io/uno-ea
       # The tag of the images
-      tag: 2.1.2.0-beta3
+      tag: 2.1.3.0-beta1
       # The Pull Policy for the images
       imagePullPolicy: Always
 
@@ -660,7 +718,7 @@ uno:
   hclaipilot:  
     image:
       repository: hclcr.io/uno-ea
-      tag: 2.1.2.0-beta3
+      tag: 2.1.3.0-beta1
 
     # Channels Configuration 
     # The following configuration is used to enable the AIPilot for the channels. For each channel, you need to provide the required configuration.
@@ -783,7 +841,7 @@ uno:
       
       container:
         registry: hclcr.io/uno-ea # Image name
-        tag: 2.1.2.0-beta3  # Image tag
+        tag: 2.1.3.0-beta1  # Image tag
     
       authorization:
         # Is the URL of the OpenID Connect (OIDC) server.
@@ -971,7 +1029,7 @@ waconsole:
     # repository is the Dynamic Workload Console image repository. Mandatory parameter.
     repository: hclcr.io/uno-ea/hcl-workload-automation-console
     # tag is the Dynamic Workload Console image tag. Mandatory parameter.
-    tag: 2.1.2.0-beta3
+    tag: 2.1.3.0-beta1
   persistence:
     dataPVC:
       # name is the prefix for the Persistent Volumes Claim name.

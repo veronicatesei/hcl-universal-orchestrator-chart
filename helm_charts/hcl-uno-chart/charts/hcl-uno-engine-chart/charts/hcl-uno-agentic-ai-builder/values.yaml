@@ -162,11 +162,32 @@ runner:
       memory: 500Mi
 
 telemetry:
-    inferenceEndpoint : ""
-    telemetryBaseUrl : ""
+    # To enable telemetry
     enableTelemetry: "false"
+    # The endpoint for traces 
+    inferenceEndpoint : ""
+    # The base URL for metrics
+    telemetryBaseUrl : ""
+    # The service name to be used in telemetry data
     telemetryServiceName: ""
+    # The interval in milliseconds for exporting telemetry data
     telemetryExportIntervalMillis: "60000"
+    # Protocol to be used for metrics export (http or grpc)
+    telemetryMetricsProtocol: "http"
+    # Protocol to be used for trace export (http or grpc)
+    telemetryTraceProtocol: "http"
+    #Set to "true" to disable TLS for trace export (useful for testing with insecure endpoints), supported values: "true" or "false"
+    telemetryMetricInsecure: "true"
+    # Set to "true" to disable TLS for trace export (useful for testing with insecure endpoints), supported values: "true" or "false"
+    telemetryTraceInsecure: "true"
+    # If your telemetry exporter requires a certificate, provide it here the secret name, the field telemetryTraceInsecure must be "false" or telemetryMetricInsecure must be "false"
+    telemetryExporterCertificate: ""
+    # If your telemetry exporter requires a certificate, provide it here the key inside the secret that points to the certificate, the field telemetryTraceInsecure must be "false" or telemetryMetricInsecure must be "false"
+    telemetryExporterCertificateKey: "tls.crt"
+    # If your telemetry exporter requires headers, provide them here in the format "key1=value1,key2=value2"
+    telemetryExporterHeaders: ""
+    # Timeout in milliseconds for the telemetry exporter
+    telemetryExporterTimeoutMillis: "10000"
 
 certificates:
   # No enable if you want to use customized certificates
@@ -193,8 +214,9 @@ authorization:
   #EXAMPLE HCL_AUTHORIZATION_HTTPS___PILOT_CORE_5005: <secret-name >
   certs:
     #HCL_AUTHORIZATION_HTTPS___PILOT_CORE_5005: pilot-cert
-    HCL_AUTHORIZATION_HTTPS___WAJWT_API: "{{ .unofullname }}-jwt-key"
-    HCL_AUTHORIZATION_HTTPS___WAJWT_APIGATEWAY:  "{{ .unofullname }}-jwt-key"
+    #HCL_AUTHORIZATION_HTTPS___WAJWT_API: "{{ .unofullname }}-jwt-key"
+    #HCL_AUTHORIZATION_HTTPS___WAJWT_APIGATEWAY:  "{{ .unofullname }}-jwt-key"
+    #HCL_AUTHORIZATION_HTTPS___WAJWT_MCP:  "{{ .unofullname }}-jwt-key"
     #HCL_AUTHORIZATION_TEST: /opt/certs/jwt/pilot-jwt.crt
 
   # TO ENABLE OIDC AUTHENTICATION

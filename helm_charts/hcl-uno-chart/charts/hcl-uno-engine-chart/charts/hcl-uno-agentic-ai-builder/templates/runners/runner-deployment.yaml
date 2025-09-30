@@ -56,6 +56,7 @@ spec:
       volumes:
 {{- include "agenticbuilder.hclauthorization.volume" $root | nindent 8 }}
 {{- include "agenticbuilder.additionalCAs.volume" $root | nindent 8 }}
+{{- include "agenticbuilder.otel.volume" $root | nindent 8 }}
         - name: https-cert
           secret:
             secretName: {{ include "agenticbuilder.cert.name" $root }}
@@ -108,5 +109,6 @@ spec:
               mountPath : "/gateway-certs/"
               readOnly: true
             {{- end }}
+{{- include "agenticbuilder.otel.volumeMounts" $root | indent 12 }}
 ---
 {{- end}}

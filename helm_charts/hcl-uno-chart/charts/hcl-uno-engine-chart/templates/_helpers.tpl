@@ -46,6 +46,10 @@
 {{- $myList =  append $myList "pilot-notification" -}}
 {{- end -}}
 
+{{- if .Values.config.multitenant.enabled }}
+{{- $myList =  append $myList "saas-controller" -}}
+{{- end -}}
+
 {{- if and .Values.config.genai.enabled .Values.config.genai.internal }}
 {{- $myList =  append $myList "genai" -}}
 {{- end -}}
@@ -198,7 +202,7 @@ prometheus.io/path: "/q/metrics"
 {{- end -}}
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 2.1.2.0-beta3
+uno.microservice.version: 2.1.3.0-beta1
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -209,6 +213,109 @@ release: {{ .Release.Name | quote }}
 {{ .name }}: {{ .value | quote }} 
 {{- end }}
 {{- end -}}
+
+
+{{- define "uno.saas-controller.env" -}}
+{{ $fullName := include "fullname" . }}
+# uno.controller.tenant.db.prefix
+- name: UNO_CONTROLLER_TENANT_DB_PREFIX
+  value: {{ .Values.config.multitenant.tenantDbPrefix | quote }}
+# uno.controller.tenant.trial.defaultExpiration
+- name: UNO_CONTROLLER_TENANT_TRIAL_DEFAULTEXPIRATION
+  value: {{ .Values.config.multitenant.trial.defaultExpiration | quote }}
+# uno.controller.tenant.trial.cleanup.delay
+- name: UNO_CONTROLLER_TENANT_TRIAL_CLEANUP_DELAY
+  value: {{ .Values.config.multitenant.trial.cleanupDelay | quote }}
+# uno.controller.tenant.subscribed.cleanup.delay
+- name: UNO_CONTROLLER_TENANT_SUBSCRIBED_CLEANUP_DELAY
+  value: {{ .Values.config.multitenant.subscribed.cleanupDelay | quote }}
+# uno.controller.tenant.expirationCheck.interval
+- name: UNO_CONTROLLER_TENANT_EXPIRATIONCHECK_INTERVAL
+  value: {{ .Values.config.multitenant.expirationCheckInterval | quote }}
+# uno.controller.region
+- name: UNO_CONTROLLER_REGION
+  value: {{ .Values.config.multitenant.region | quote }}
+# uno.controller.authorization.userIds
+- name: UNO_CONTROLLER_AUTHORIZATION_USERIDS
+  value: {{ .Values.config.multitenant.admins.userIds | join "," | quote }}
+# uno.controller.authorization.groupIds
+- name: UNO_CONTROLLER_AUTHORIZATION_GROUPIDS
+  value: {{ .Values.config.multitenant.admins.groupIds | join "," | quote }}
+# uno.controller.authorization.userIdFilters
+- name: UNO_CONTROLLER_AUTHORIZATION_USERIDFILTERS
+  value: {{ .Values.config.multitenant.admins.userIdFilters | join "," | quote }}
+# uno.controller.domain
+- name: UNO_CONTROLLER_DOMAIN
+  value: {{ .Values.ingress.baseDomainName | quote }}
+# uno.controller.domain.hyphenated
+- name: UNO_CONTROLLER_DOMAIN_HYPHENATED
+  value: {{ .Values.ingress.baseDomainName | replace "." "-" | quote }}
+# uno.controller.audit.max.retention.duration
+- name: UNO_CONTROLLER_AUDIT_MAX_RETENTION_DURATION
+  value: {{ .Values.config.controller.auditMaxRetentionDuration | quote }}
+# uno.controller.audit.cleanup.frequency
+- name: UNO_CONTROLLER_AUDIT_CLEANUP_FREQUENCY
+  value: {{ .Values.config.controller.auditCleanupFrequency | quote }}
+
+{{- if .Values.config.multitenant.marketplace.HCLSoftware.enabled }}
+# HCL Software Marketplace integration
+
+# uno.controller.marketplace.enabled
+- name: UNO_CONTROLLER_MARKETPLACE_ENABLED
+  value: "true"
+# uno.controller.marketplace.regions
+- name: UNO_CONTROLLER_MARKETPLACE_REGIONS
+  value: {{ .Values.config.multitenant.marketplace.HCLSoftware.regions | join "," | quote }}
+# uno.controller.marketplace.planIds
+- name: UNO_CONTROLLER_MARKETPLACE_PLANIDS
+  value: {{ .Values.config.multitenant.marketplace.HCLSoftware.planIds | join "," | quote }}
+# uno.controller.marketplace.kafka.bootstrap.servers
+- name: UNO_CONTROLLER_MARKETPLACE_KAFKA_BOOTSTRAP_SERVERS
+  value: {{ .Values.config.multitenant.marketplace.HCLSoftware.kafka.url | quote }}
+# uno.controller.marketplace.kafka.topic
+- name: UNO_CONTROLLER_MARKETPLACE_KAFKA_TOPIC
+  value: {{ .Values.config.multitenant.marketplace.HCLSoftware.kafka.topic | quote }}
+# uno.controller.marketplace.kafka.user
+- name: UNO_CONTROLLER_MARKETPLACE_KAFKA_USER
+  value: {{ .Values.config.multitenant.marketplace.HCLSoftware.kafka.username | quote }}
+# uno.controller.marketplace.kafka.password
+- name: UNO_CONTROLLER_MARKETPLACE_KAFKA_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: MARKETPLACE_KAFKA_PASSWORD
+      optional: false
+# uno.controller.marketplace.kafka.schema.registry.url
+- name: UNO_CONTROLLER_MARKETPLACE_KAFKA_SCHEMA_REGISTRY_URL
+  value: {{ .Values.config.multitenant.marketplace.HCLSoftware.schemaRegistry.url | quote }}
+# uno.controller.marketplace.kafka.schema.registry.user
+- name: UNO_CONTROLLER_MARKETPLACE_KAFKA_SCHEMA_REGISTRY_USER
+  value: {{ .Values.config.multitenant.marketplace.HCLSoftware.schemaRegistry.username | quote }}
+# mp.messaging.incoming.marketplace-incoming.value-deserialization-failure-handler=marketplace-failure-handler
+- name: MP_MESSAGING_INCOMING_MARKETPLACE_INCOMING_VALUE_DESERIALIZATION_FAILURE_HANDLER
+  value: "marketplace-failure-handler"
+# uno.controller.marketplace.kafka.schema.registry.password
+- name: UNO_CONTROLLER_MARKETPLACE_KAFKA_SCHEMA_REGISTRY_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: MARKETPLACE_KAFKA_REGISTRY_PASSWORD
+      optional: false
+#uno.controller.marketplace.tokenizer.url
+- name: UNO_CONTROLLER_MARKETPLACE_TOKENIZER_URL
+  value: {{ .Values.config.multitenant.marketplace.HCLSoftware.tokenizer.url | quote }}
+#uno.controller.marketplace.tokenizer.auth.token
+- name: UNO_CONTROLLER_MARKETPLACE_TOKENIZER_AUTH_TOKEN
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-uno-secret
+      key: MARKETPLACE_TOKENIZER_AUTH_TOKEN
+      optional: false
+# End of HCL Software Marketplace integration
+
+{{- end -}}
+{{- end -}}
+
 
 {{- define "uno.console.env.variable" -}}
 {{ $fullName := include "fullname" . }}
@@ -383,8 +490,13 @@ release: {{ .Release.Name | quote }}
 {{- define "uno.authentication.api.env.variable" -}}
 {{- if .Values.ingress.enabled }}
 {{- if .Values.ingress.baseDomainName }}
+{{- if .Values.config.multitenant.enabled }}
+- name: UNO_AUTHENTICATION_API_HOSTNAME
+  value: "{0}.gateway{{ include "common.baseDomainName" . }}"
+  {{- else }}
 - name: UNO_AUTHENTICATION_API_HOSTNAME
   value: "gateway{{ include "common.baseDomainName" . }}"
+  {{- end }}
 {{- else }}
 - name: UNO_AUTHENTICATION_API_HOSTNAME
   value: {{ .Values.authentication.apiHostname | quote }}
@@ -411,6 +523,14 @@ release: {{ .Release.Name | quote }}
 {{- if .Values.deployment.global.debug }}
 - name: UNO_DEBUG_SCRIPTS
   value: {{ .Values.deployment.global.debug | quote }}
+{{- end }}
+{{- if .Values.config.multitenant.enabled }}
+- name: QUARKUS_PROFILE
+  value: saas
+- name: UNO_MULTI_TENANT_HOSTNAME_PATTERN
+  value: {{ .Values.config.multitenant.hostnamePattern | quote }}
+- name: UNO_SAAS_CONTROLLER_CLIENT_URL
+  value: "https://{{ $fullName }}-saas-controller:8443"
 {{- end }}
 - name: UNO_LICENSE_SERVER_MHS_URL
   value: {{ $mhsUrl | quote }}
@@ -501,6 +621,16 @@ release: {{ .Release.Name | quote }}
 - name: UNO_CONSOLE_ENDPOINT
   value: {{ printf "https://%s.%s" .Values.deployment.console.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
 {{- end }}
+{{- if .Values.ingress.enabled }}
+{{- if .Values.config.multitenant.enabled }}
+- name: UNO_AGENTMANAGER_URL
+  value: {{ printf "https://%s.%s.%s"  "{0}" .Values.deployment.agentmanager.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
+{{- else }}
+- name: UNO_AGENTMANAGER_URL
+  value: {{ printf "https://%s.%s" .Values.deployment.agentmanager.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
+{{- end }}
+{{- end }}
+
 {{- if .Values.config.endpoint.gateway }}
 - name: UNO_GATEWAY_ENDPOINT
   value: {{ .Values.config.endpoint.gateway | quote }}
@@ -868,6 +998,14 @@ volumeMounts:
 {{- print .Values.config.certificates.customIngressIssuer -}}
 {{- else -}}
 {{ include "uno.cert.issuer" . }}
+{{- end -}}
+{{- end -}}
+
+{{- define "uno.cert.ingressControllerIssuer" -}}
+{{- if .Values.config.multitenant.controllerIngressCertIssuer -}}
+{{- print .Values.config.multitenant.controllerIngressCertIssuer -}}
+{{- else -}}
+{{ include "uno.cert.ingressIssuer" . }}
 {{- end -}}
 {{- end -}}
 

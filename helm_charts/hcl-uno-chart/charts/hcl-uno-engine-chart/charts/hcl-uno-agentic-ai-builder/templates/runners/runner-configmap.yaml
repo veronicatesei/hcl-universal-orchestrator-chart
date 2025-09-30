@@ -28,8 +28,8 @@ data:
   #APISIX CLIENT Configuration
   CERTS_PATH: "/gateway-certs"
   ENABLE_TELEMETRY: {{ tpl (default "false" $root.Values.telemetry.enableTelemetry) $root | quote }}
-  TELEMETRY_BASE_URL: {{ tpl (default "http://localhost:4317/v1/metrics" $root.Values.telemetry.telemetryBaseUrl) $root | quote }}
-  INFERENCE_ENDPOINT: {{ tpl (default "http://localhost:6006/v1/traces" $root.Values.telemetry.inferenceEndpoint) $root | quote }}
+  TELEMETRY_BASE_URL: {{ tpl (default "" $root.Values.telemetry.telemetryBaseUrl) $root | quote }}
+  INFERENCE_ENDPOINT: {{ tpl (default "" $root.Values.telemetry.inferenceEndpoint) $root | quote }}
   TELEMETRY_SERVICE_NAME: {{ tpl (default "runner" $root.Values.telemetry.telemetryServiceName) $root | quote }}
   TELEMETRY_EXPORT_INTERVAL_MILLIS: {{ tpl (default "60000" $root.Values.telemetry.telemetryExportIntervalMillis) $root | quote }}
   GATEWAY_ADMIN_URL : {{ tpl (printf "https://%s:%s" $root.Values.common.apisix.serviceName $root.Values.common.apisix.adminPort ) $root | quote }}
