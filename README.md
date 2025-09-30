@@ -254,10 +254,18 @@ The values of the following parameters are placeholders used as an example. When
       uno.ingress.ingressClassName: nginx
       uno.ingress.baseDomainName: .k8s.uat.uno
 
-  If you are using OpenShift routes, set the following parameter is the **values.yaml** file to false:
+  If you are using OpenShift routes, set the following parameter in the **values.yaml** file to false:
 
       uno.ingress.enabled: false
 
+  To customize the Ingress, add annotations by editing the following parameter in the **values.yaml** file:
+
+      uno.ingress.annotations.xxxxxxxxx: yyyyyyyyy
+ 
+  For example: 
+  
+      uno.ingress.annotations.nginx.ingress.kubernetes.io/client-header-buffer-size: 8k
+ 
   To make sure HCL Universal Orchestrator trusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
 
     uno.config.certificates.additionalCASecrets: certificatesecret
