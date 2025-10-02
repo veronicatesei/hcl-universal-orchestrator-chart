@@ -91,18 +91,27 @@ serviceAccountName: {{ tpl .Values.serviceAccount.name  .}}
 {{- end }}
 
 {{/*
-Create image name as "repository-name:tag".
+Create image name as "repository/name:tag".
+If imageName already has :tag or @digest, return it as-is.
 */}}
 {{- define "agenticbuilder.image" -}}
 {{- $root := index . 0 -}}
 {{- $container := index . 1 -}}
-{{- if $container.image -}} 
-image: "{{ default $root.Values.image.repository $container.image.repository}}/{{ $container.imageName }}:{{ default $root.Values.image.tag $container.image.tag }}"
-{{- else -}}
-image: "{{ $root.Values.image.repository }}/{{ $container.imageName }}:{{ $root.Values.image.tag }}"
-{{- end -}}
-{{- end -}}
+{{- $img := $container.imageName | trim -}}
+{{- $last := last (splitList "/" $img) -}}
+{{- $hasTag := contains ":" $last -}}
+{{- $hasDigest := contains "@" $img -}}
 
+{{- if or $hasTag $hasDigest -}}
+image: "{{ $img }}"
+{{- else -}}
+  {{- if $container.image -}}
+image: "{{ default $root.Values.image.repository $container.image.repository }}/{{ $container.imageName }}:{{ default $root.Values.image.tag $container.image.tag }}"
+  {{- else -}}
+image: "{{ $root.Values.image.repository }}/{{ $container.imageName }}:{{ $root.Values.image.tag }}"
+  {{- end -}}
+{{- end -}}
+{{- end -}}
 {{/*
 Create image pull policy.
 */}}
@@ -498,5 +507,24 @@ initContainers:
 {{- range .Values.certificates.additionalCASecrets }}
 - name: {{ tpl . $}}-cert-volume
   mountPath: /ca/{{ tpl . $ }}
+{{- end }}
+{{- end -}}
+
+{{- define "agenticbuilder.otel.volume" -}}
+{{- if or ( eq (tpl .Values.telemetry.telemetryTraceInsecure .) "false")  (eq (tpl .Values.telemetry.telemetryMetricInsecure .) "false") }}
+- name: {{ tpl .Values.telemetry.telemetryExporterCertificate . }}-cert-volume
+  secret:
+    defaultMode: 0664
+    secretName: {{ tpl .Values.telemetry.telemetryExporterCertificate . | quote }}
+    items:
+    - key: tls.crt
+      path: {{ tpl .Values.telemetry.telemetryExporterCertificate .  }}.crt
+{{- end }}
+{{- end -}}
+
+{{- define "agenticbuilder.otel.volumeMounts" -}}
+{{- if or ( eq (tpl .Values.telemetry.telemetryTraceInsecure .) "false")  (eq (tpl .Values.telemetry.telemetryMetricInsecure .) "false") }}
+- name: {{ tpl .Values.telemetry.telemetryExporterCertificate . }}-cert-volume
+  mountPath: /ca/otel/
 {{- end }}
 {{- end -}}

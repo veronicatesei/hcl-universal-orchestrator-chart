@@ -21,8 +21,17 @@
 {{- $k := . -}}
 {{- $v := (index $root.Values.deployment . ) -}}
 
-
 {{ $data := dict "root" $root "item" $v }}
+
+{{- $min := (coalesce (index $root.Values.deployment $k ).minTargetReplicas $root.Values.deployment.global.minTargetReplicas | default 1) }}
+{{- $max := (coalesce (index $root.Values.deployment $k ).maxTargetReplicas $root.Values.deployment.global.maxTargetReplicas | default 1) }}
+{{- $previous := (lookup "apps/v1" "Deployment" $root.Release.Namespace (printf "%s-%s" $fullName $k)) }}
+
+{{- $replicas := $min }}
+{{- if and $previous $previous.spec.replicas }}
+{{- $replicas = $previous.spec.replicas | min $max | max $min }}
+# Keeping replicas from current deployment: {{ $replicas }}
+{{- end }}
 ####################################################################
 # 
 ####################################################################
@@ -38,7 +47,7 @@ metadata:
 {{ toYaml $root.Values.global.customPodAnnotations | indent 4}}
 
 spec:
-  replicas: {{  coalesce (index $root.Values.deployment $k ).minTargetReplicas $root.Values.deployment.global.minTargetReplicas|default 1 }}
+  replicas: {{ $replicas }}
   minReadySeconds: 60
   selector:
     matchLabels:
@@ -124,12 +133,16 @@ spec:
                   optional: false
             - name: UNO_MICROSERVICE_JWT_EXPIRATION_DURATION
               value: "{{  $root.Values.config.jwt.internalExpirationDuration }}"
+{{- if $root.Values.config.multitenant.enabled }}
+            - name: UNO_MONGODB_DATABASE
+              value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.config.multitenant.commonTenantDatabaseName }}"
+{{- else }}
             - name: UNO_MONGODB_DATABASE
               value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.database.databaseName }}"
+{{- end }}
 {{ include "common.env.variable"  $root | indent 12 }}
 {{ include "common.custom.env.variable"  $root | indent 12 }}
 {{- if or (eq $k "eventmanager") (eq $k "console-aio")  }}
-
 {{ include "uno.eventmanager.plugins" $root | indent 12 }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
@@ -149,6 +162,9 @@ spec:
 {{- end}}
 {{- if or (eq $k "agentmanager") (eq $k "console-aio") }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
+{{- end}}
+{{- if (eq $k "saas-controller") }}
+{{ include "uno.saas-controller.env" $root | indent 12 }}
 {{- end}}
 {{- if (($root.Values).global).enableUnoAIPilot }}
 {{- if eq $k "pilot-notification" }}
@@ -204,11 +220,11 @@ spec:
               value: "https://{{ $dwcInternalHost }}:9443/jwt/ibm/api/jwtBuilder/jwk"
 {{- end }}
 {{- end }}
+{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{- if not (eq $k "console-aio")  }}
 {{ include "uno.apikey.warning.variable" $root | indent 12 }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{- end }}
-{{ include "uno.sofy.env.variables" $root | indent 12 }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
 {{- end}}
 {{- if eq $k "genai" }}
@@ -216,6 +232,8 @@ spec:
 {{- end}}
 {{- if or (eq $k "console") (eq $k "console-aio")   }}
 {{ include "uno.sofy.env.variables" $root | indent 12 }}
+{{- end}}
+{{- if or (eq $k "console") (eq $k "console-aio") (eq $k "saas-controller")  }}
 {{ include "uno.oidc.env.variable" $root | indent 12 }}
 {{- end}}
 {{ include "uno.secret.volumes.mounts" $root | indent 10 }}
@@ -236,7 +254,7 @@ spec:
               mountPath: /config/engines
 {{- end }}   
 
-{{- if or (eq $k "audit") (eq $k "console-aio")  }}
+{{- if or (eq $k "audit") (eq $k "console-aio") (eq $k "saas-controller") }}
             - name: emptydir
               mountPath: /opt/app/audit
         - name: audit-log-sidecar
@@ -254,6 +272,8 @@ spec:
           volumeMounts:
           - name: emptydir
             mountPath: /opt/app/audit
+{{- end }}
+{{- if or (eq $k "audit") (eq $k "console-aio")  }}
         - name: error-log-sidecar
           resources:
             limits:

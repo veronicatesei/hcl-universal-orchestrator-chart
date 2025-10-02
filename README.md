@@ -35,8 +35,8 @@ HCL Universal Orchestrator can be deployed across a single cluster, but you can 
 
 HCL Universal Orchestrator supports all the platforms supported by the runtime provider of your choice.
 
-### Openshift support
-You can deploy HCL Universal Orchestrator on Openshift by following the instruction in this documentation and using helm charts. 
+### OpenShift support
+You can deploy HCL Universal Orchestrator on OpenShift by following the instruction in this documentation and using helm charts. 
 Ensure you modify the value of the `waconsole.console.exposeServiceType` parameter from `LoadBalancer` to `Routes`.
 	
 ## Accessing the container images
@@ -46,6 +46,7 @@ You do not need a license key to access the container images. Instead, use the s
 
 Core:
 
+ - hcl-uno-saas-controller
  - hcl-uno-agentmanager
  - hcl-uno-gateway
  - hcl-uno-iaa
@@ -186,8 +187,8 @@ To deploy HCL Universal Orchestrator, perform the following steps:
    
 2. Pull the Helm chart:
 
-        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.2-beta3
-	
+        helm pull oci://hclcr.io/uno-ea/hcl-uno-chart --version 2.1.3-beta1
+
 **Note:** If you want to download a specific version of the chart use the `--version` option in the `helm pull` command.
 	
 3. Customize the deployment.
@@ -196,7 +197,7 @@ To deploy HCL Universal Orchestrator, perform the following steps:
 
 - Accepting the license agreement
 
-The licence parameter determines whether the licence agreement is accepted or not. Supported values are `accept` and `not accepted`. To accept the license agreement, set the value as:
+The license parameter determines whether the license agreement is accepted or not. Supported values are `accept` and `not accepted`. To accept the license agreement, set the value as:
 
     global.license: accept
 
@@ -253,11 +254,19 @@ The values of the following parameters are placeholders used as an example. When
       uno.ingress.ingressClassName: nginx
       uno.ingress.baseDomainName: .k8s.uat.uno
 
-  If you are using OpenShift routes, set the following parameter is the **values.yaml** file to false:
+  If you are using OpenShift routes, set the following parameter in the **values.yaml** file to false:
 
       uno.ingress.enabled: false
 
-  To make sure HCL Universal Orchestrator tusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
+  To customize the Ingress, add annotations by editing the following parameter in the **values.yaml** file:
+
+      uno.ingress.annotations.xxxxxxxxx: yyyyyyyyy
+ 
+  For example: 
+  
+      uno.ingress.annotations.nginx.ingress.kubernetes.io/client-header-buffer-size: 8k
+ 
+  To make sure HCL Universal Orchestrator trusts the external components used for the environment deployment, you must assign the certificate values of the external components as secrets for the following parameters:
 
     uno.config.certificates.additionalCASecrets: certificatesecret
 
@@ -290,11 +299,53 @@ The following are some useful Helm commands:
 
 ### Configuring optional product components
 
+**Multitenancy**
+
+Multitenancy is a new architecture that enables a single HCL Universal Orchestrator instance to serve multiple, independent tenants. Each tenant operates with its own data, configuration, and user permissions, ensuring strict separation and security.
+
+Multitenancy must be configured by editing the **values.yaml** file. The multitenant configuration enables the deployment of the `hcl-uno-saas-controller` microservice.
+
+Below, you can find the main steps to enable and set up a multitenant environment on HCL Universal Orchestrator:
+
+ 1. Open the **values.yaml** file and go to the `uno.config.multitenant` section.
+
+ 2. Enable multitenancy by setting the `uno.config.multitenant.enabled` parameter to `true`.
+
+ 3. Edit the regular expression in the `uno.config.multitenant.hostnamePattern` parameter according to the hostname of your cluster.
+
+ 4. Define the tenant administrators by editing the `uno.config.multitenant.admins`. You have three options to specify tenant administrators:
+  
+   - **userIds**: Authorize as administrators specific user IDs.
+   - **groupIDs**: Authorize as administrators an entire group of IDs.
+   - **userIdFilters**: Authorize as administrators every user that has a specific email domain.
+
+ 5. Edit all the optional parameters of the `uno.config.multitenant` section according to your needs.
+
+ 6. In the `uno.config.multitenant.controllerIngressCertIssuer`parameter, enter the secret name of the certificate that you want to use.
+
+ 7. After the deployment, instance a tenant by accessing the URL exposed by the `hcl-uno-saas-controller` microservice.
+
+Your multitenant environment is ready to be used.
+
 **Human task e-mail notifications**
 
-Human tasks are associated with queues, which act as containers for Human tasks. When a Human task is created, it references a specific queue, which is defined by a folder and a name. When defining a queue, you can customize its notification behavior by overriding the global settings. The available optional parameters are **Group email** and **Sender name**; for more information, see [Human task queues](https://help.hcl-software.com/UnO/v2.1.2/Focused_Scenarios/Task/c_queue.html).
+Human tasks are associated with queues, which act as containers for Human tasks. When a Human task is created, it references a specific queue. A queue is defined by a folder and a name, and it can have optional e-mail addresses to notify users of new tasks:
 
-To enable e-mail notifications, edit the **values.yaml** file to set the `uno.mail.enabled` parameter to `true`, and then specify the required Simple Mail Transfer Protocol (SMTP) configuration parameters and credentials. 
+- **Group e-mail**: An optional email address used for notifications when new tasks are added.
+  
+- **Sender name**:  An optional **display name** used for email notifications originating from a specific task queue. If specified, the **sender name** overrides the global display name defined in `config.mail.from`. 
+  
+  To enable e-mail notifications, edit the **values.yaml** file to set the `uno.mail.enabled` parameter to `true`, and then specify the required Simple Mail Transfer Protocol (SMTP) configuration parameters and credentials.
+
+ **Notification templates**
+
+  Two customizable HTML templates are used for notifications, one for task creation and one for task assignment or unassignment. By default, the two templates contain:
+
+  - Basic human task information such as task ID, task title, and the name of the queue where the human task was created.
+    
+  - A button with a direct link to the task in the HCL Universal Orchestrator UI, with which the user can open the form and complete the task.
+    
+  To customize the HTML templates, edit the following sections of the **values.yaml** file:
 
 For more information about email notifications and notification templates, see [Human tasks](https://help.hcl-software.com/UnO/v2.1.2/Focused_Scenarios/Task/c_human_task.html).
 
@@ -335,7 +386,7 @@ To enable the log out option, set the following parameter in the **values.yaml**
 
      uno.config.console.enableLogout: true
 
-**Generative workflows and knowledege base**
+**Generative workflows and knowledge base**
 
 You can enable the generative features of the UnO AI Pilot for both workflow generation and generative knowledge base by setting the following parameter in the **values.yaml** file of the Helm chart to true:
 
@@ -496,8 +547,8 @@ HCL Universal Orchestrator is installed by default with autoscaling enabled. To 
     
 To use custom certificates: 
 
-1. Genereta your custom certificates
-2. Set `uno.congfig.certificates.useCustomizedCert: true`
+1. Generate your custom certificates
+2. Set `uno.config.certificates.useCustomizedCert: true`
 3. Assign the certificate values as secrets in the certificates section of the **values.yaml** file:
 
     uno.config.certificates.caPairSecretName: ca-key-pair
@@ -531,7 +582,7 @@ The following metrics are collected and available to be visualized in the precon
 For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcltechsw.com/UnO/v2.1.2/Monitoring/awsrgmonprom.html).
   
   ### Setting the Grafana service
-Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Promotheus](https://github.com/helm/charts/tree/master/stable/prometheus).
+Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Prometheus](https://github.com/helm/charts/tree/master/stable/prometheus).
   
 1. Log in to your cluster. To identify where Grafana is deployed, retrieve the value for the \<grafana-namespace> by running:
   

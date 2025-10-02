@@ -8,6 +8,9 @@
 {{ $certIssuer := include "uno.cert.ingressIssuer" . }}
 
 {{- if .Values.ingress.enabled }}
+
+
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -34,12 +37,23 @@ spec:
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   tls:
     - hosts:
+    
+{{- if .Values.config.multitenant.enabled }}
+      - "*.{{.Values.deployment.console.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
+      - "*.{{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
+      - "*.{{.Values.deployment.agentmanager.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
+{{- else }}
       - {{.Values.deployment.console.ingressPrefix }}{{.Values.ingress.baseDomainName }}
       - {{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}
       - {{.Values.deployment.agentmanager.ingressPrefix }}{{.Values.ingress.baseDomainName }}
+{{- end }}
       secretName: {{ $fullName }}-uno-tls-secret
   rules:
+{{- if .Values.config.multitenant.enabled }}
+    - host: "*.{{.Values.deployment.console.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
+{{- else }}
     - host: {{.Values.deployment.console.ingressPrefix }}{{.Values.ingress.baseDomainName }}
+{{- end }}
       http:
         paths:
           - path: /
@@ -53,7 +67,11 @@ spec:
 {{- end }}
                 port:
                   number: 8443
+{{- if .Values.config.multitenant.enabled }}
+    - host: "*.{{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
+{{- else }}
     - host: {{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}
+{{- end }}
       http:
         paths:
           - path: / 
@@ -67,7 +85,11 @@ spec:
 {{- end }}
                 port: 
                   number: 8443
+{{- if .Values.config.multitenant.enabled }}
+    - host: "*.{{.Values.deployment.agentmanager.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
+{{- else }}
     - host: {{.Values.deployment.agentmanager.ingressPrefix }}{{.Values.ingress.baseDomainName }}
+{{- end }}
       http:
         paths:
           - path: /
@@ -83,3 +105,4 @@ spec:
                   number: 8443
   
 {{- end }}
+
