@@ -277,5 +277,7 @@ pgvector:
     ragCertCommonName: "rag"
   # Adding the volume permissions for the pgvector and changing the data directory
   volumePermissions:
+    image:
+      repository: bitnamilegacy/os-shell
     enabled: true
   postgresqlDataDir: /bitnami/postgresql/data-17
