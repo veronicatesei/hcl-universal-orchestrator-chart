@@ -908,5 +908,7 @@ hclaipilot:
         pilotCertCommonName : "aipilot"
         # must be equal of the common name(CN) of the certificate used by rag for the connection to the database
         ragCertCommonName: "rag"
-      
+      volumePermissions:
+        image:
+          repository: bitnamilegacy/os-shell
     
