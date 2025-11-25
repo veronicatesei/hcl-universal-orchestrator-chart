@@ -41,10 +41,10 @@ You can deploy HCL Universal Orchestrator on OpenShift by following the instruct
 
 For a successful deployment on OCP, you must configure specific parameters in the `values.yaml` file using the URL assigned to the route exposing the API gateway.
 
-**1. Configure Authentication:**
+**1. Configure authentication:**
 By default, the value for the `apiHostname` parameter is set to `gateway`. Update it to ensure smooth operation within the OCP environment.
 
-**2. Configure Endpoint for External Agents:**
+**2. Configure endpoint for external AI agents:**
 To ensure the console correctly generates connection links for external agents (such as the MCP AI agent), you must explicitly define the gateway endpoint.
 
 Update your `values.yaml` as follows:
@@ -603,6 +603,7 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 ## Documentation
 
 To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.2/index.html).
+
 
 
 
