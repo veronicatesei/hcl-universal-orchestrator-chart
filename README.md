@@ -18,7 +18,7 @@ For more information about HCL Universal Orchestrator, see the product documenta
 
 ## Details
 
-All microservices and the UnO Console are installed. The Dynamic Workload Console is available by enabling a specific parameter in the values.yaml file.
+All microservices and the UnO Console are installed.
 
 To achieve high availability in an HCL Universal Orchestrator environment, the minimum base configuration is composed of 2 replicas of all microservices.
 
@@ -153,7 +153,6 @@ The following are prerequisites specific to each supported cloud provider:
 |--|--|--|
 |**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 1 GB|
 |**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 0.5 GB  |
-|**Dynamic Workload Console**  | CPU: 4, Memory: 16 GB  |CPU: 1, Memory: 4 GB, Storage: 5 GB  |
 |**AIPilot-core** | CPU : 1, Memory: 2.5GB | CPU 0.5, Memory: 2GB
 |**AIPilot-action**| CPU: 0.3, Memory: 0.3GB | CPU: 0.1, Memory: 0.2GB
 |**AIPilot-nlg**| CPU: 0.3, Memory: 0.5GB | CPU: 0.1, Memory: 0.3GB
@@ -603,6 +602,7 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 ## Documentation
 
 To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.2/index.html).
+
 
 
 
