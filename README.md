@@ -36,18 +36,32 @@ HCL Universal Orchestrator can be deployed across a single cluster, but you can 
 HCL Universal Orchestrator supports all the platforms supported by the runtime provider of your choice.
 
 ### OpenShift support
-You can deploy HCL Universal Orchestrator on OpenShift by following the instruction in this documentation and using helm charts. 
-Ensure you modify the value of the `waconsole.console.exposeServiceType` parameter from `LoadBalancer` to `Routes`.
 
-For the successful deployment on OCP, you must configure the **apiHostname** parameter in the **values.yaml** file with the specific URL that is assigned to the route exposing the API gateway.
+You can deploy HCL Universal Orchestrator on OpenShift by following the instructions in this documentation and using Helm charts.
 
-By default the value for the **apiHostname** parameter is set to `gateway`. Update it as follows:
+For a successful deployment on OCP, you must configure specific parameters in the `values.yaml` file using the URL assigned to the route exposing the API gateway.
 
-        authentication:
-		#apiHostname specifies the api gateway hostname and is used only when ingress. enabled is set to false.
-		apiHostname: Gateway_URL
+**1. Configure authentication:**
+By default, the value for the `apiHostname` parameter is set to `gateway`. Update it to ensure smooth operation within the OCP environment.
 
-Where _Gateway_URL_ stands for the URL assigned to the route exposing the API gateway.
+**2. Optional - Configure endpoint for external AI agents:**
+To ensure the console correctly generates connection links for external agents (such as the MCP AI agent), you must explicitly define the gateway endpoint.
+
+Update your `values.yaml` as follows:
+
+
+    authentication:
+      # apiHostname specifies the api gateway hostname and is used only when ingress.enabled is set to false.
+      apiHostname: "Gateway_URL"
+
+    uno:
+      config:
+        endpoint:
+          # gateway specifies the OpenShift Route assigned to the API gateway.
+          # This is required for generating correct links for external AI agents.
+          gateway: "https://Gateway_URL"
+
+Where Gateway_URL stands for the fully qualified URL assigned to the route exposing the API gateway (e.g., my-uno-gateway.apps.cluster.domain.com).
 This ensures smooth operation within the OCP environment and facilitates communication with the gateway via its externally accessible address.
 
 ## Accessing the container images
@@ -589,6 +603,9 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 ## Documentation
 
 To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.2/index.html).
+
+
+
 
 
 
