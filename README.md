@@ -103,11 +103,11 @@ UnO Agentic AI Builder:
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
 
 **Mandatory**
- - Kubectl v 1.29.4 or later
- - Kubernetes cluster v 1.29 or later
- - Helm v 3.12 or later
- - Messaging system: Apache Kafka v 3.4.0 or later OR Redpanda v 23.11 or later 
- - Database: MongoDB v 5 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 for AWS deployment.
+ - Kubectl v 1.32 or later
+ - Kubernetes cluster v 1.32 or later
+ - Helm v 4.0.0 or later
+ - Messaging system: Apache Kafka v 3.9.1 or later OR Redpanda v 25.1.12 or later 
+ - Database: MongoDB v 8 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 for AWS deployment.
  - Enablement of an OIDC provider.
 
 **For Agentic AI Builder**
@@ -602,6 +602,7 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 ## Documentation
 
 To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.2/index.html).
+
 
 
 
