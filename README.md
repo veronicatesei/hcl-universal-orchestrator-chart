@@ -121,12 +121,17 @@ Before you begin the deployment process, ensure your environment meets the follo
 **For Agentic AI Builder**
  - Valkey (Redis-compatible): Used as the in-memory data store. Acts as a drop-in replacement for Redis.
  - PostgreSQL: Serves as the primary relational database for storing application data.
- - APISIX Gateway: Functions as the API gateway to route traffic to services. Includes the following:
-     - etcd: Backend key-value store for APISIX configuration.
-     - Ingress Controller: Manages ingress traffic rules.
-     - APISIX Dashboard: Web interface for managing gateway configurations.
+ - Percona pgvector: Serves as PostgreSQL extension. This prerequisite is optional. 
 
- **Strongly recommended**
+**Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance.
+
+
+ **For AI Pilot**
+ - Percona pgvector: Serves as PostgreSQL extension. This prerequisite is optional. 
+ **Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance.
+
+ 
+**Strongly recommended**
  - Jetstack cert-manager
 
   We strongly recommend the use of a cert-manager as it automatically generates and updates the required certificates. You can choose not to use it, in which case you need to:
@@ -159,7 +164,7 @@ The following are prerequisites specific to each supported cloud provider:
  
 | Component | Container resource limit | Container resource request |
 |--|--|--|
-|**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 1 GB|
+|**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.3, Memory: 0.5 GB|
 |**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 0.5 GB  |
 |**AIPilot-core** | CPU : 1, Memory: 2.5GB | CPU 0.5, Memory: 2GB
 |**AIPilot-action**| CPU: 0.3, Memory: 0.3GB | CPU: 0.1, Memory: 0.2GB
@@ -346,13 +351,20 @@ Below, you can find the main steps to enable and set up a multitenant environmen
 
 Your multitenant environment is ready to be used.
 
-**Human task email notifications**
-
-Human tasks are associated with queues, which act as containers for Human tasks. When a Human task is created, it references a specific queue, which is defined by a folder and a name. When defining a queue, you can customize its notification behavior by overriding the global settings. The available optional parameters are **Group email** and **Sender name**; for more information, see [Human task queues](https://help.hcl-software.com/UnO/v2.1.3/Focused_Scenarios/Task/c_queue.html).
+**Email notifications**
 
 To enable e-mail notifications, edit the **values.yaml** file to set the `uno.mail.enabled` parameter to `true`, and then specify the required Simple Mail Transfer Protocol (SMTP) configuration parameters and credentials. 
 
-For more information about email notifications and notification templates, see [Human tasks](https://help.hcl-software.com/UnO/v2.1.3/Focused_Scenarios/Task/c_human_task.html).
+Email notifications are sent from a default sender, which is configured using the `config.mail.from` parameter of the **values.yaml** file. The parameter contains an email address, and it can optionally contain a display name in the following format:
+
+      config.mail.from = DisplayName <email@address.com>
+      
+For example:
+
+      config.mail.from = John <noreply@uno.com>
+
+In this case, the recipient sees emails originating from John with the sending address noreply@uno.com.
+On multitenant environments, you can edit the display name used for email notifications by editing the `uno.config.multitenant.eMailSender` parameter. 
 
 **AI Agents**
 
