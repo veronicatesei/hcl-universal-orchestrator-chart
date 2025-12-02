@@ -165,7 +165,7 @@ The following are prerequisites specific to each supported cloud provider:
 | Component | Container resource limit | Container resource request |
 |--|--|--|
 |**uno-orchestrator microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.3, Memory: 0.5 GB|
-|**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.6, Memory: 0.5 GB  |
+|**Each remaining microservice**  | CPU: 2, Memory: 1 GB  |CPU: 0.3, Memory: 0.5 GB  |
 |**AIPilot-core** | CPU : 1, Memory: 2.5GB | CPU 0.5, Memory: 2GB
 |**AIPilot-action**| CPU: 0.3, Memory: 0.3GB | CPU: 0.1, Memory: 0.2GB
 |**AIPilot-nlg**| CPU: 0.3, Memory: 0.5GB | CPU: 0.1, Memory: 0.3GB
