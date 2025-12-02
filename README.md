@@ -364,6 +364,7 @@ For example:
       config.mail.from = John <noreply@uno.com>
 
 In this case, the recipient sees emails originating from John with the sending address noreply@uno.com.
+
 On multitenant environments, you can edit the display name used for email notifications by editing the `uno.config.multitenant.eMailSender` parameter. 
 
 **AI Agents**
