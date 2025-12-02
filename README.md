@@ -120,14 +120,13 @@ Before you begin the deployment process, ensure your environment meets the follo
 
 **For Agentic AI Builder**
  - Valkey (Redis-compatible): Used as the in-memory data store. Acts as a drop-in replacement for Redis.
- - PostgreSQL: Serves as the primary relational database for storing application data.
- - Percona pgvector: Serves as PostgreSQL extension. This prerequisite is optional. 
+ - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. 
 
 **Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance.
 
 
  **For AI Pilot**
- - Percona pgvector: Serves as PostgreSQL extension. This prerequisite is optional. 
+ - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. 
  **Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance.
 
  
