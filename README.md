@@ -120,13 +120,15 @@ Before you begin the deployment process, ensure your environment meets the follo
 
 **For Agentic AI Builder**
  - Valkey (Redis-compatible): Used as the in-memory data store. Acts as a drop-in replacement for Redis.
- - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. 
-
-**Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance.
+ - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/v2.1.3/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
 
 
- **For AI Pilot**
- - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. 
+**Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance. 
+
+
+ **For UnO AI Pilot**
+ - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/v2.1.3/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
+
  **Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance.
 
  
@@ -169,7 +171,7 @@ The following are prerequisites specific to each supported cloud provider:
 |**AIPilot-action**| CPU: 0.3, Memory: 0.3GB | CPU: 0.1, Memory: 0.2GB
 |**AIPilot-nlg**| CPU: 0.3, Memory: 0.5GB | CPU: 0.1, Memory: 0.3GB
 |**AIPilot-rag**| CPU: 0.8, Memory: 1Gi | CPU: 0.2 , Memory: 0.2Gi
-|**PgVector**| CPU: 0.15 Memory: 0.192GB Ephemeral-storage : 2Gi |  CPU: 0.1 Memory: 0.1Gi Ephemeral-storage: 50Mi
+|**PgVector**| Ephemeral-storage : 5Gi |  Ephemeral-storage: 5Gi
 |**agentic-ams** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
 |**agentic-runner** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
 |**agentic-cm** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
@@ -388,6 +390,13 @@ You can enable UnoAIPilot by configuring the **values.yaml** file as follows:
 		global.enableUnoAIPilot: true
   
   
+**Agentic AI Builder**
+
+You can enable AgenticBuilder by configuring the **values.yaml** file as follows: 
+		
+		global.enableAgenticAIBuilder: true
+  
+
 **Session timeout**
 
 After a period of inactivity on the UI, users are automatically logged out. You can change the session timeout value, which is set by default to 30 minutes, by modifying the following parameter in the **values.yaml** file of the Helm chart:
@@ -583,6 +592,10 @@ When using custom certificates make sure to update the following fields:
 			uno.hclaipilot.rag.certificates.useCustomizedCert: true
 			uno.hclaipilot.rag.certificates.caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
 			uno.hclaipilot.rag.certificates.certSecretName: <the name of the custom certificate you want to use>
+            
+			uno.agenticAIBuilder.certificates.useCustomizedCert: true
+            uno.agenticAIBuilder.certificates.caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
+            uno.agenticAIBuilder.certificates.certSecretName: <the name of the custom certificate you want to use>
 
 ## Metrics monitoring 
 
