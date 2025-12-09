@@ -358,7 +358,7 @@ Below, you can find the main steps to enable and set up a multitenant environmen
 
  5. Optionally, in the `uno.config.multitenant.tenantManagerIngressCertIssuer` parameter, enter the secret name of the issuer of the certificate that you want to use.
 
- 6. After the deployment, instance a tenant by accessing the URL exposed by the `hcl-uno-tenantmanager` microservice.
+ 6. After the deployment, you can create a tenant by accessing the URL exposed by the `hcl-uno-tenantmanager` microservice.
 
 Your multitenant environment is ready to be used.
 
