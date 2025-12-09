@@ -360,7 +360,7 @@ Below, you can find the main steps to enable and set up a multitenant environmen
 
  6. After the deployment, you can create a tenant by accessing the URL exposed by the `hcl-uno-tenantmanager` microservice.
 
-Your multitenant environment is ready to be used.
+Your multitenant environment is ready.
 
 **Email notifications**
 
