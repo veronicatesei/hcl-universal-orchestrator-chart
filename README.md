@@ -342,7 +342,7 @@ Multitenancy is a new architecture that enables a single HCL Universal Orchestra
 
 Multitenancy must be configured by editing the **values.yaml** file. The multitenant configuration enables the deployment of the `hcl-uno-tenantmanager` microservice.
 
-Below, you can find the main steps to enable and set up a multitenant environment on HCL Universal Orchestrator:
+Follow the steps below to enable and set up a multitenant environment on HCL Universal Orchestrator:
 
  1. Open the **values.yaml** file and go to the `uno.config.multitenant` section.
 
@@ -374,7 +374,7 @@ For example:
 
       config.mail.from = John <noreply@uno.com>
 
-In this case, the recipient sees emails originating from John with the sending address noreply@uno.com.
+In this case, the recipient receives emails originating from John with the sending address noreply@uno.com.
 
 On multitenant environments, you can edit the display name used for email notifications by editing the `uno.config.multitenant.eMailSender` parameter. 
 
