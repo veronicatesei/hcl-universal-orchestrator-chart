@@ -36,8 +36,3 @@ dependencies:
     version: 0.1.0
     repository: "file://charts/hcl-uno-aipilot-rag"
     alias: rag
-    
-  - name: postgresql
-    version: 16.2.5
-    repository: "https://charts.bitnami.com/bitnami"
-    alias: pgvector

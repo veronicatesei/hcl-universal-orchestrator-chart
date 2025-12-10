@@ -52,13 +52,13 @@ spec:
 {{- range $myList }}
   - {{ $fullname }}-{{ . }}
 {{- end }}
-  - {{ .Values.common.apisix.serviceName }}
   - "ams"
   - "credential-manager"
 {{- $deploymentType := include "agenticbuilder.runner.list" . | fromJsonArray }}
 {{- range $deploymentType }}
 {{- $currentDeploymentType := . }}
   - "runner-{{ $currentDeploymentType }}"
+  - {{ $fullname }}-runner-{{ $currentDeploymentType }}
 {{- end }}
 {{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
   privateKey:

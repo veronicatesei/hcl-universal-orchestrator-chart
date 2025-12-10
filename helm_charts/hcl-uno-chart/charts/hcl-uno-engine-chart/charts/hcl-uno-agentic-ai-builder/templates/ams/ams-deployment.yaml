@@ -53,16 +53,15 @@ spec:
       volumes:
 {{- include "agenticbuilder.additionalCAs.volume" . | nindent 8 }}
 {{- include "agenticbuilder.hclauthorization.volume" . | nindent 8  }}
-{{- include "agenticbuilder.postgres.client.volume" . | nindent 8 }}
-{{- include "agenticbuilder.postgres.volume" . | nindent 8 }}
+{{- include "agenticbuilder.commonssl.volume.definition" . | nindent 8 }}
         - name: https-cert
           secret:
             secretName: {{ include "agenticbuilder.cert.name" . }}
 {{- include "agenticbuilder.postgres.initContainer" . | nindent 6 }}
       containers:
         - name: "{{ $fullname }}-{{ .Values.ams.name }}"
-{{- include "agenticbuilder.image" (list $root .Values.ams) | nindent 10 }}
-{{- include "agenticbuilder.imagePullPolicy" (list $root .Values.ams) | nindent 10 }}          
+{{- include "agenticbuilder.image" (list . .Values.ams) | nindent 10 }}
+{{- include "agenticbuilder.imagePullPolicy" (list . .Values.ams) | nindent 10 }}          
 {{- include "agenticbuilder.resources" .Values.ams | nindent 10 }}
           args: ["--ssl-keyfile" ,"/https/tls.key" ,"--ssl-certfile" ,"/https/tls.crt"]
           ports:
@@ -75,14 +74,20 @@ spec:
             - configMapRef:
                 name: {{ $fullname }}-common-configmap
           env:
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-{{ .Values.credentialManager.name }}-encryption-key
+                  key: encryption-key
             - name: ROOT_PATH
               value: "/{{ $fullname }}-{{ .Values.ams.name }}"
-{{- include "agenticbuilder.postgres.certificate.env" . | nindent 12 }}
+{{- include "agenticbuilder.commonssl.env.definition" . | nindent 12 }}
 {{- include "agenticbuilder.hclauthorization.env" . | nindent 12 }}              
 {{- include "agenticbuilder.env.postgres.password" . | nindent 12 }}
           volumeMounts:
+{{- include "agenticbuilder.commonssl.volumeMounts.definition" . | indent 12 }}
 {{- include "agenticbuilder.hclauthorization.volume.mount" . | indent 12 }}
-{{ include "agenticbuilder.postgres.certificate.volume.mount" . | indent 12 }}
+{{- include "agenticbuilder.additionalCAs.volumeMounts" . | indent 12 }}
             - name: https-cert
               mountPath: "/https"
               readOnly: true
