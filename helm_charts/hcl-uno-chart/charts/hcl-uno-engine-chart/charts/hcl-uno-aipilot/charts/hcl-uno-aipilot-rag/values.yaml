@@ -54,7 +54,7 @@ container:
 
 vectordb:
   # The name of the service of the pgvector
-  name: "pgvector" 
+  name: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-primary'
 
 # ConfigMap settings
 configMap:
@@ -106,3 +106,78 @@ service:
   type: "ClusterIP"  # Service type
 
 podSecurityContext: {}
+
+postgres:
+  postgresUser: ragUser
+  #The postgres port
+  postgresPort : "5432"
+  #The postgres database name used by the application
+  postgresDB: "vector_db"
+  #The postgres service name
+  postgresService: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-primary'
+  connectTimeout: "60"
+  # Application name to be used in the Postgres connection
+  applicationName: "rag-app"
+  # Additional connection options
+  options: ""
+  # Client Required Authentication for Postgres connection ( scram-sha-256, md5, password, gss, sspi, ident, peer, ldap, none)
+  requiredAuthentication : "scram-sha-256"
+  #The postgres user password
+  postgresPassword: "" 
+  #postgresPasswordSecretName: '{{ .Release.Name }}-postgres-password'
+  #postgresPasswordSecretKey: "password"
+  # Only to let the init container create the database "$postgresDB" if it does not exist
+  initDatabases: true
+  postgresAdminUserSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
+  postgresAdminUserSecretKey: "user"
+  postgresAdminPasswordSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
+  postgresAdminPasswordSecretKey: "password"
+  
+  ssl:
+    enabled: "true"
+    # Client Configuration for Mutual TLS
+    certSecretName: ""
+    #By default the SecretKey is "tls.crt", you can override it by specifying the
+    certSecretKey: ""
+    certKeySecretName: ""
+    #By default the SecretKey is "tls.key", you can override it by specifying the
+    certKeySecretKey: ""
+    
+    certKeyPassword: ""
+    # Optional CA for Mutual TLS, If not provided the trustore CA will be used
+    certCaSecretName: ""
+    # By default the SecretKey is "ca.crt", you can override it by specifying the
+    certCaSecretKey: ""
+    # Client Configuration for One-way TLS to verify server certificate
+    caSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-cluster-cert'
+    # By default the SecretKey is "ca.crt", you can override it by specifying the caSecretKey
+    caSecretKey: "" 
+    # SSL Mode for Postgres connection ( disable, allow, prefer, require, verify-ca, verify-full)
+    sslMode : "prefer"
+    # Whether to validate the hostname in the Postgres certificate
+    hostnameValidation : "true"
+
+pgdb:
+  crVersion: "v1"
+  image: "docker.io/percona/percona-postgresql-operator:2.7.0-ppg17.5.2-postgres"
+  port: 5432
+  postgresVersion: 17
+  pause: false
+  unmanaged: false
+  instanceName: "agentic-postgres"
+  replicas: 1
+  affinityLabel: "postgres"
+  topologyKey: "kubernetes.io/hostname"
+  storageSize: "5Gi"
+  
+  users:
+    - name: postgres
+      options: "SUPERUSER"
+
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        pg_hba:
+        - hostssl all all all md5 
+        - hostssl all all all scram-sha-256
+        - hostssl all all all cert

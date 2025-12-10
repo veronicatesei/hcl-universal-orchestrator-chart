@@ -14,5 +14,17 @@ metadata:
     grafana_dashboard: "1"
 {{ $uniqueId := printf "%s-%s" .Release.Namespace  .Release.Name }}
 data:
+  # The UnO main dashboard
   k8s-{{ $uniqueId }}-dashboard.json: |-
-{{ .Files.Get "dashboards/WA_Performance_Metrics.json" | replace "%RELEASE%" .Release.Name | replace "%NAMESPACE%" .Release.Namespace | indent 4 }}
+{{ .Files.Get "dashboards/UnODashboard.json" | replace "%RELEASE%" .Release.Name | replace "%NAMESPACE%" .Release.Namespace | indent 4 }}
+
+{{if .Values.config.multitenant.enabled}}
+  # The UnO multitenant dashboard
+  k8s-{{ $uniqueId }}-tenants.json: |-
+{{ .Files.Get "dashboards/UnOMultitenant_start.fragment" | replace "%RELEASE%" .Release.Name | replace "%NAMESPACE%" .Release.Namespace | indent 4 }}
+{{ .Files.Get "dashboards/UnOMultitenant_panels_tenants.fragment" | replace "%RELEASE%" .Release.Name | replace "%NAMESPACE%" .Release.Namespace | indent 4 }}
+{{- if .Values.config.multitenant.marketplace.HCLSoftware.enabled -}}
+{{ .Files.Get "dashboards/UnOMultitenant_panels_marketplace.fragment" | replace "%RELEASE%" .Release.Name | replace "%NAMESPACE%" .Release.Namespace | indent 4 }}
+{{- end -}}
+{{ .Files.Get "dashboards/UnOMultitenant_end.fragment" | replace "%RELEASE%" .Release.Name | replace "%NAMESPACE%" .Release.Namespace | indent 4 }}
+{{- end -}}

@@ -1,0 +1,92 @@
+######################################################################
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020, 2025. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
+
+global:
+  # debug enables and disables the debugging mode. Supported values are true and false.
+  debug: false
+
+  # license indicates whether you accept the license. Supported values are accept and not accepted. Mandatory parameter.
+  license: "not accepted"
+  # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
+  serviceAccountName:
+  customLabels:
+    - name: "environment"
+      value: "prod"
+  customPodAnnotations:
+    env.name: "" 
+  customEnv:
+  #- name: "MY_ENVKEY"
+  #  value: "MY_EN_VALUE"
+  #enableTestPrereq: true
+  # Hcl additional imagePullSecret to add to service account
+  hclImagePullSecret:
+
+# nameOverride changes the resources names. By default, the release name is used.
+nameOverride: ""
+
+    
+config:
+  registry:
+    # name is the name of your registry.
+    name:  hclcr.io/uno
+    # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
+    pullPolicy: Always
+    # tag is the tag of the image. The default value is latest.
+    tag: 2.1.3.0
+  tracing:
+    # enabled specifies whether tracing is enabled. Supported value are true and false.
+    enabled: false
+    # otelEndpoint is the endpoint to which OpenTelemetry traces are sent.
+    otelEndpoint: "http://simplest-collector.default:4317/api/traces"
+    # traceAll specifies whether all events are traced. Supported value are true and false. If you set it to true, also internal calls are traced.
+    traceAll: false    
+agent:
+  configuration:
+    name: uno-agent
+    # apiKeySecretName is the name of the secret that contains the API key. Specify it to use a different secret not managed by the chart
+    apiKeySecretName:
+    apiKeySecret: changeme
+    agentManagerUrl: https://agentmanager_ingress_hostname
+    insecure: true
+    proxy:
+      url:
+      username:
+      password:
+    log:
+      level:
+      size:
+      rotation:
+    traceLog:
+      level:
+      size:
+      rotation:
+    completedTaskMaxAge:
+    commonTempPath:
+    localJobLogStore:
+
+persistence:
+  # Determine whether to use Storage Classes to dynamically create Persistent Volumes for the pods
+  useDynamicProvisioning: true
+  #
+  # Settings for the pod Persistent Volume Claims,
+  # which each pod uses for data in stdlist
+  dataPVC:
+    # Name of the Storage Class to use. If no Storage Class is used, leave an empty string
+    storageClassName: ""
+    # If your not using dynamic provisioning, you can use selectors to
+    # refine the binding process. You cannot specify a selector if you are using dynamic provisioning!
+    selector:
+      label: ""
+      value: ""
+    # Minimum size of the Persistent Volume
+    size: 2Gi
+  extraVolumes: [ ]
+  extraVolumeMounts: []
+    
+    
+

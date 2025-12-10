@@ -29,6 +29,10 @@ spec:
       port: {{ default 8080 $root.Values.runner.port }}
       targetPort: port-{{ default 8080 $root.Values.runner.port }}
   type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
 ---
 apiVersion: v1
 kind: Service
@@ -43,5 +47,9 @@ spec:
   ports:
     - name: port-{{ default 8080 $root.Values.runner.port }}
       port: {{ default 8080 $root.Values.runner.port }}
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
 ---
 {{- end}}
