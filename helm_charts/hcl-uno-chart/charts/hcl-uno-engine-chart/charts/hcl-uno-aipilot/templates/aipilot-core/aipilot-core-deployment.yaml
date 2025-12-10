@@ -53,35 +53,40 @@ spec:
         - name: init-wait-for-vector-db
           image: busybox
           env:
-            - name: POSTGRES_HOST
-              value: {{ .Release.Name }}-pgvector 
+{{- include "sltCommon.postgres.env.common" . | nindent 12 }}
           command: ['sh', '-c', 'until nc -z $POSTGRES_HOST:5432; do echo waiting for $POSTGRES_HOST:5432; sleep 30; done;']
+        - name: init-create-postgres-user
+          image: postgres:latest
+          volumeMounts:
+{{- include "aipilot.commonssl.volumeMounts.definition" . | nindent 12 }}
+          env:
+{{- include "sltCommon.postgres.env.common" . | nindent 12 }}
+{{- include "sltCommon.postgres.env.password" . | nindent 12 }}
+{{- include "sltCommon.postgres.env.adminpassword" . | nindent 12 }}
+{{- include "sltCommon.init.postgres.certificate.env" . | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              if [ "$(PGPORT=$POSTGRES_PORT PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -tAc "SELECT 1 FROM pg_roles WHERE rolname='$POSTGRES_USER'")" != "1" ]; then
+                PGPORT=$POSTGRES_PORT PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -c "CREATE USER \"$POSTGRES_USER\" WITH PASSWORD '$POSTGRES_PASSWORD';"
+              else
+                echo "User $POSTGRES_USER already exists"
+              fi
         - name: init-create-db
           image: postgres:latest
           volumeMounts:
-            - name: https-cert
-              mountPath: "/security/postgres/certs"
-              readOnly: true
+{{- include "aipilot.commonssl.volumeMounts.definition" . | nindent 12 }}
           env:
-            - name: POSTGRES_HOST
-              value: {{ .Release.Name }}-pgvector
-            - name: PGSSLCERT 
-              value: /security/postgres/certs/tls.crt
-            - name: PGSSLKEY
-              value: /security/postgres/certs/tls.key
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "postgres.password" . }}
-                  key: postgres-password
-            - name: POSTGRES_USER
-              value: {{ .Values.pgvector.auth.username | default "postgres"  | quote }}
-            - name: POSTGRES_ADMIN_USER
-              value: "postgres"
-          command: ['sh', '-c', 'if ! PGPORT=5432 PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -lqt | cut -d \| -f 1 | grep -qw rasa; then PGPORT=5432 PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -c "CREATE DATABASE rasa WITH OWNER $POSTGRES_USER ENCODING=UTF8 TEMPLATE=template0;"; else echo "Database rasa already exists with this $POSTGRES_PASSWORD and this user $POSTGRES_USER"; fi']  
+{{- include "sltCommon.postgres.env.common" . | nindent 12 }}
+{{- include "sltCommon.postgres.env.password" . | nindent 12 }}
+{{- include "sltCommon.postgres.env.adminpassword" . | nindent 12 }}
+{{- include "sltCommon.init.postgres.certificate.env" . | nindent 12 }}
+          command: ['sh', '-c', 'for DB in $POSTGRES_DB; do if ! PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql "host=$POSTGRES_HOST user=$POSTGRES_ADMIN_USER" -lqt | cut -d \| -f 1 | grep -qw $DB; then PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql "host=$POSTGRES_HOST user=$POSTGRES_ADMIN_USER" -c "CREATE DATABASE $DB WITH OWNER \"$POSTGRES_USER\" ENCODING=UTF8 TEMPLATE=template0;"; fi; PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql "host=$POSTGRES_HOST user=$POSTGRES_ADMIN_USER dbname=$DB" -c "CREATE EXTENSION IF NOT EXISTS vector;"; done']
         - name: inizialize-root-cert
 {{- include "aipilot.image" (list $root .Values.pilotCore) | nindent 10 }}
           volumeMounts:
+{{- include "aipilot.commonssl.volumeMounts.definition" . | nindent 12 }}
             - name: base-root-ca-cert
               mountPath: "/security/certs/baseRootCACerts/"
             - name: root-ca-cert
@@ -92,6 +97,9 @@ spec:
           {{- include "aipilot.image" (list $root .Values.pilotCore) | nindent 10 }}
           {{- include "aipilot.imagePullPolicy" (list $root .Values.pilotCore) | nindent 10 -}}          
           env:
+{{- include "aipilot.commonssl.env.definition" . | nindent 12  }}
+{{- include "sltCommon.postgres.env.common" . | nindent 12 }}
+{{- include "sltCommon.postgres.env.password" . | nindent 12 }}
             - name: PILOT_ACTIONS_URL
               value: "https://{{ $fullName }}-{{ .Values.pilotActions.name }}:{{ default 5055 .Values.pilotActions.port }}"
             - name: PILOT_NLG_URL
@@ -112,20 +120,12 @@ spec:
               value: {{ .Values.channels.botframeworkAppPassword | default "NOVALUE" | quote }}
             - name: GROUPLESS_AUTHENTICATION
               value: {{ .Values.channels.groupless | default "false" | quote }}  
-            - name: PASSWORD_TRACKERSTORE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "postgres.password" . }}
-                  key: password
-            - name: PASSWORD_LOCKSTORE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "postgres.password" . }}
-                  key: password
-            - name: POSTGRES_DB
-              value:  {{ .Release.Name }}-pgvector
-            - name: POSTGRES_USER
-              value: {{ .Values.pgvector.auth.username | default "postgres"  | quote }}
+            - name: SQL_TRACKER_STORE_SSL_MODE
+              value: {{ .Values.postgres.ssl.sslMode | default "require" | quote }}
+            {{- if include "sltCommon.exists.valueOrSecret" (list . "postgres.ssl.caSecretName") }}
+            - name: SQL_TRACKER_STORE_SSL_ROOT_CERTIFICATE
+              value: /security/postgres/certs/ca.crt
+            {{- end }}
           envFrom:
             - configMapRef:
                 name: "{{ $fullName }}-{{ .Values.pilotCore.name }}-configmap"
@@ -153,9 +153,11 @@ spec:
               readOnly: true
             - name: root-ca-cert
               mountPath: "/security/certs/rootCACerts/"
+{{- include "aipilot.commonssl.volumeMounts.definition" . | nindent 12 }}
           args: ["/bin/bash", "-c", "if [ ! -f /app/models/latest_model.tar.gz ]; then rasa train --fixed-model-name latest_model.tar.gz; fi; rasa run --cors '*' --ssl-certificate /var/core-secret/tls.crt --ssl-keyfile /var/core-secret/tls.key --enable-api"]
           {{- include "aipilot.resources" .Values.pilotCore | nindent 10 }}
       volumes:
+{{- include "aipilot.commonssl.volume.definition" . | nindent 8 }}
         {{- if .Values.translation.google.credentials }}
         - name: google-credentials
           secret: 

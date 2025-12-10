@@ -1,0 +1,122 @@
+{{- if .Values.global.enableRagGenAI }}
+{{- if not (.Capabilities.APIVersions.Has "pgv2.percona.com/v2") }}
+{{ fail ( printf "PerconaPGCluster CRD is not installed in the cluster, make sure to install https://github.com/percona/percona-helm-charts/tree/main/charts/pg-operator you can use the command 'helm install pg-operator percona/pg-operator --version 2.8.0 -n %s" .Release.Namespace ) }}
+{{- end }}
+apiVersion: pgv2.percona.com/v2
+kind: PerconaPGCluster
+metadata:
+  annotations:
+    current-primary: {{ include "common.postgres.fullname" .  }} 
+  labels:
+    crunchy-pgha-scope: {{ include "common.postgres.fullname" .  }} 
+    deployment-name: {{ include "common.postgres.fullname" .  }} 
+    name: {{ include "common.postgres.fullname" . }} 
+    pg-cluster: {{ include "common.postgres.fullname" .  }} 
+    pgo-version: 2.7.0
+    pgouser: admin
+    app.kubernetes.io/name: pg-db
+    helm.sh/chart: pg-db-2.7.0
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: "2.7.0"
+    app.kubernetes.io/managed-by: Helm
+  name: {{ include "common.postgres.fullname" .  }} 
+  
+spec:
+  crVersion: {{ .Values.pgdb.crVersion }}
+  image: {{ .Values.pgdb.image }}
+  imagePullPolicy: Always
+  port: {{ .Values.pgdb.port }}
+  postgresVersion: {{ .Values.pgdb.postgresVersion }}
+  standby:
+    enabled: false
+  {{- if .Values.pgdb.users }}
+  users:
+  {{- range $user := .Values.pgdb.users }}
+    - name: {{ $user.name }}
+      {{- if $user.databases }} 
+      databases:
+      {{- range $database := $user.databases }}
+        - {{ $database }}
+      {{- end }}
+      {{- end }}
+      {{- if $user.options }}
+      options: {{ $user.options }}
+      {{- end }}
+      {{- if $user.password }}
+      password:
+        type: {{ $user.password.type }}
+      {{- end }}
+      {{- if $user.secretName }}
+      secretName: {{ $user.secretName }}
+      {{- end }}
+  {{- end }}
+  {{- end }}
+  pause : {{ default false .Values.pgdb.pause }}
+  unmanaged: {{ default false .Values.pgdb.unmanaged }}
+  instances:
+    - name: {{ tpl .Values.pgdb.instanceName . }}      
+      replicas: {{ .Values.pgdb.replicas }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  postgres-operator.crunchydata.com/data: {{ tpl .Values.pgdb.affinityLabel . | default "postgres" }}
+              topologyKey: {{ tpl .Values.pgdb.topologyKey . | default "kubernetes.io/hostname" }}
+            weight: 1      
+      dataVolumeClaimSpec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.pgdb.storageSize }}
+
+  proxy:
+    pgBouncer:
+      image: docker.io/percona/percona-pgbouncer:1.24.1
+      replicas: 0
+      exposeSuperusers: true      
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  postgres-operator.crunchydata.com/role: pgbouncer
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+
+  pmm:
+    enabled: false
+    image: docker.io/percona/pmm-client:3.3.0
+    secret: {{ include "common.postgres.fullname" . }}-pmm-secret
+    serverHost: monitoring-service    
+
+  backups:
+    enabled: false
+{{- if .Values.pgdb.patroni }}
+  patroni:
+    {{- if .Values.pgdb.patroni.syncPeriodSeconds }}
+    syncPeriodSeconds: {{ .Values.pgdb.patroni.syncPeriodSeconds }}
+    {{- end }}
+    {{- if .Values.pgdb.patroni.leaderLeaseDurationSeconds }}
+    leaderLeaseDurationSeconds: {{ .Values.pgdb.patroni.leaderLeaseDurationSeconds }}
+    {{- end }}
+    {{- if .Values.pgdb.patroni.dynamicConfiguration }}
+    dynamicConfiguration:
+{{- .Values.pgdb.patroni.dynamicConfiguration | toYaml | nindent 6 }}
+    {{- end }}
+    {{- if .Values.pgdb.patroni.switchover }}
+    switchover:
+      enabled: {{ .Values.pgdb.patroni.switchover.enabled }}
+      {{- if .Values.pgdb.patroni.switchover.targetInstance }}
+      targetInstance: {{ .Values.pgdb.patroni.switchover.targetInstance }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.pgdb.patroni.createReplicaMethods }}
+    createReplicaMethods:
+{{ .Values.pgdb.patroni.createReplicaMethods | toYaml | indent 6 }}
+    {{- end }}
+{{- end }}
+{{- end }}
