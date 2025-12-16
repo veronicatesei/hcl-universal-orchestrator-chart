@@ -75,7 +75,6 @@ Core:
  - hcl-uno-audit
  - hcl-uno-chart
  - hcl-uno-console
- - hcl-uno-console-aio
  - hcl-uno-eventmanager
  - hcl-uno-executor
  - hcl-uno-external-pod
@@ -121,7 +120,7 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Kubernetes cluster v 1.32 or later
  - Helm v 4.0.0 or later
  - Messaging system: Apache Kafka v 3.9.1 or later OR Redpanda v 25.1.12 or later 
- - Database: MongoDB v 8 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 for AWS deployment.
+ - Database: MongoDB v 8 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 Instance-base cluster for AWS deployment.
  - Enablement of an OIDC provider.
 
 **For Agentic AI Builder**
@@ -182,7 +181,6 @@ The following are prerequisites specific to each supported cloud provider:
 |**AIPilot-action**| CPU: 0.3, Memory: 0.3GB | CPU: 0.1, Memory: 0.2GB
 |**AIPilot-nlg**| CPU: 0.3, Memory: 0.5GB | CPU: 0.1, Memory: 0.3GB
 |**AIPilot-rag**| CPU: 0.8, Memory: 1Gi | CPU: 0.2 , Memory: 0.2Gi
-|**PgVector**| Ephemeral-storage : 5Gi |  Ephemeral-storage: 5Gi
 |**agentic-ams** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
 |**agentic-runner** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi
 |**agentic-cm** | CPU : 1, Memory: 250 Mi | CPU 300m, Memory: 500Mi																	
@@ -399,6 +397,12 @@ On multitenant environments, you can edit the display name used for email notifi
 You can create an AI agent using three different agent types: External MCP, Basic, and Agentic AI Builder. For more information, see [Managing agent types in the AI agent
 ](https://help.hcl-software.com/UnO/v2.1.3/Orchestrating/to_manage_agent_types.html).																					 
 
+**Generative workflows and knowledge base**
+
+You can enable the generative features of the AI Agent and the UnO AI Pilot for both workflow generation and generative knowledge base by setting the following parameter in the **values.yaml** file of the Helm chart to true:
+
+    uno.config.genai.enabled: true
+
 **UnoAIPilot**
 
 You can enable UnoAIPilot by configuring the **values.yaml** file as follows: 
@@ -427,11 +431,6 @@ To enable the log out option, set the following parameter in the **values.yaml**
 
      uno.config.console.enableLogout: true
 
-**Generative workflows and knowledge base**
-
-You can enable the generative features of the UnO AI Pilot for both workflow generation and generative knowledge base by setting the following parameter in the **values.yaml** file of the Helm chart to true:
-
-    uno.config.genai.enabled: true
 
 **Justifications**
 
