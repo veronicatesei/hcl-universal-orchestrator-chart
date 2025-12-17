@@ -443,6 +443,38 @@ You can change the name of the default administrative user modifying the paramet
 Check the **values.yaml** file for more customization options.
 
 
+### Verifying container images with Cosign
+
+Use Cosign to verify the image signature. The supported versions are 3.x (3.0.0 or later) and 1.x (1.13.0 or later).  
+To verify the signature, run the following command:  
+
+`cosign verify --key HCL_Universal_Orchestrator_key.pub image-name:release-version` 
+
+  
+Where:  
+
+-   `--key HCL_Universal_Orchestrator_key.pub` is the public key provided.  
+    
+-   `image-name` is the name of the image.  
+    
+-   `release-version` is the release version target.  
+    
+
+  
+This is an output example:  
+  
+```
+cosign verify --key HCL_Universal_Orchestrator_key.pub hclcr.io/uno/hcl-uno-audit:2.1.3.0  
+  
+Verification for hclcr.io/uno/hcl-uno-audit:2.1.3.0 --  
+The following checks were performed on each of these signatures:  
+- The cosign claims were validated  
+- The signatures were verified against the specified public key  
+  
+[{"critical":{"identity":{"docker-reference":"hclcr.io/uno/hcl-uno-audit"},"image":{"docker-manifest-digest":"sha256:310ef58ca404429fecb5ebd4b21dc16635de14d84127070a496d7f3313945b9d"},"type":"cosign container image signature"},"optional":null}]
+```
+
+
 ### Security and verification for OCLI and UnO agent binaries 
 
 To ensure the integrity and authenticity of the downloaded files, we use GPG (GNU Privacy Guard) encryption. You must have the GPG tool installed on your system to decrypt and verify the files. 
