@@ -1,11 +1,12 @@
 ######################################################################
 # Licensed Materials Property of HCL*
-# (c) Copyright HCL Technologies Ltd. 2020, 2023. All rights reserved.
+# (c) Copyright HCL Technologies Ltd. 2020, 2025. All rights reserved.
 #
 # * Trademark of HCL Technologies Limited
 ######################################################################
 {{ $fullName := include "fullname" . }}
 {{ $certIssuer := include "uno.cert.issuer" . }}
+{{- $root := .  -}}
 
 {{- if not .Values.config.certificates.useCustomizedCert }} 
 
@@ -55,12 +56,16 @@ spec:
   dnsNames:
   - {{ .Values.authentication.apiHostname  }}
   - "gateway{{ .Values.ingress.baseDomainName }}"
+  - localhost
 {{- $myList := include "uno.microservices.list" . | fromJsonArray -}}
 {{- range $myList}}
   - {{ . }}
 {{- end -}}
 {{- range $myList}}
   - {{ $fullName }}-{{ . }}
+{{- if $root.Values.config.multitenant.enabled }}
+  - {{ printf "%s-%s-headless" $fullName . }}
+{{- end }}
 {{- end -}}
 {{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
   privateKey:

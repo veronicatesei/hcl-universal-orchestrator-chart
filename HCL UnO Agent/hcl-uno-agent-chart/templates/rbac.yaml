@@ -1,0 +1,60 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2020, 2025. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
+{{ $saName := include "uno.serviceAccount" . }}
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $saName }}-agent-role
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+rules:
+- apiGroups:
+  - "batch"
+  resources:
+  - "jobs"
+  verbs:
+  - "*"
+- apiGroups:
+  - ""
+  resources:
+  - "pods"
+  - "pods/log"
+  verbs:
+  - "get"
+  - "watch"
+  - "list"
+- apiGroups:
+  - ""
+  resources:
+  - "secrets"
+  verbs:
+  - "get"
+  - "watch"
+  - "list"
+{{- if .Capabilities.APIVersions.Has "oidc.security.ibm.com/v1" }} 
+- apiGroups:
+  - 'oidc.security.ibm.com'
+  resources:
+  - clients
+  verbs:
+  - get
+{{- end }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{  $saName }}-agent-role-binding
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{  $saName }}
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name:  {{  $saName }}-agent-role

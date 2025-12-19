@@ -1,6 +1,6 @@
 ######################################################################
 # Licensed Materials Property of HCL*
-# (c) Copyright HCL Technologies Ltd. 2020, 2023. All rights reserved.
+# (c) Copyright HCL Technologies Ltd. 2020, 2025. All rights reserved.
 #
 # * Trademark of HCL Technologies Limited
 ######################################################################
@@ -14,10 +14,10 @@ global:
   
   # enableEngine enables and disables the engine deployment. Supported values are true and false.
   enableEngine: true
-  # enableConsole enables and disables the Dynamic Workload Console deployment. Supported values are true and false.
-  enableConsole: false
   # enableUnoAIPilot  enables and disables the aipilot deployment. Supported values are true and false.
   enableUnoAIPilot: false
+  # enable Agentic AI Builder enables and disables the Agentic AI Builder deployment. Supported values are true and false.
+  enableAgenticAIBuilder: false
   # debug enables and disables the debugging mode. Supported values are true and false.
   debug: false
   # language specifies the language to be used.
@@ -29,13 +29,11 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/uno-ea
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-workload-automation-plugins:2.1.2.0-beta2
-  # extraImages is the list of images with tags containing OCLI and agent for download from Dynamic Workload Console or engine.
+  pluginImageName: hcl-uno-automation-plugins:2.1.4.0-beta1
+  # extraImages is the list of images with tags containing OCLI and agent for download from engine.
   extraImages:
     - registry: hclcr.io/uno-ea
-      name: hcl-uno-external-pod:2.1.2.0-beta2
-    - registry: hclcr.io/uno-ea
-      name: hcl-workload-automation-packages:2.1.2.0-beta2
+      name: hcl-uno-external-pod:2.1.4.0-beta1
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -56,11 +54,12 @@ global:
   wapassword:
   # dbadminpassword is the password of the database administrator.
   dbadminpassword:
-  # dbpassword is the password for the user that has been granted access to the HCL Universal Orchestrator or Dynamic Workload Console tables on the database server
+  # dbpassword is the password for the user that has been granted access to the HCL Universal Orchestrator on the database server
   dbpassword:
   # Hcl additional imagePullSecret to add to service account
   hclImagePullSecret:
   # cloudCredentials specify the service accounts to access cloud services
+  # This is only used in case internal genai service
   cloudCredentials:
     gcp:
       # gcp is the GCP service account key in JSON format. Replace the value with your GCP service account file content encoded in base64.
@@ -88,16 +87,6 @@ global:
       genaiUri: /chat/completions
       # apiKey is the OpenAI API key to access the GenAI service. Replace the value with your OpenAI API key.
       apiKey:
-    rag:
-      # apiKey is the API key to access the RAG service. Replace the value with your RAG API key.
-      apiKey:
-  dwcconsole:
-    # Used to configure an external DWC. Set the name of secret containing the public certificate to verify the JWT token.
-    certSecretName:
-    # Used to configure an external DWC. Set the name of jwt token issuer
-    dwcissuer:
-  # For internal use
-  waconsole:
 uno:
   database:
     # url is the URL of the database. Mandatory parameter.
@@ -114,6 +103,10 @@ uno:
     tls: false
     # tlsInsecure specifies whether certificate validation must be skipped. Supported values are true and false.
     tlsInsecure: false
+    # Specifies the minimum number of connections in the pool.
+    databaseMinPoolSize: 1
+    # Specifies the maximum number of connections in the pool.
+    databaseMaxPoolSize: 20
   kafka:
     # url is the URL of the event streaming platform. Mandatory parameter.
     url: hcl-uno-kafka-0.kafka-headless.kafka.svc.cluster.local:9092
@@ -125,14 +118,14 @@ uno:
     password:
     # tls specifies whether TLS is enabled. Supported values are true and false.
     tls: false
+    # tlsInsecure specifies whether certificate validation must be skipped. Supported values are true and false.
+    tlsInsecure: false
     # Kafka sasl mechanism as kafka client configuration provides.
     saslMechanism:
     # Kafka jass config as kafka client configuration provides.
     jaasConfig:
     # Kafka security protocol as kafka client configuration provides.
     securityProtocol:
-    # tlsInsecure specifies whether certificate validation must be skipped. Supported values are true and false.
-    tlsInsecure: false
     # kerberos service name
     kerberosServiceName:
     #Oauth login call back handler class
@@ -142,6 +135,10 @@ uno:
     # topicReplicas is the number of replicas for the topic.
     topicReplicas: 1
   config:
+    serviceAccount:
+      # use the serviceAccount.annotations to add annotations to serviceAccount.
+      annotations:
+        #MY_ANNOTATION_NAME: MY_ANNOTATION_VALUE
     license:
       # Url of MHS license server
       licenseServerUrl: https://api.hcltechsw.com
@@ -156,22 +153,110 @@ uno:
     audit:
         # max number of days to keep audit logs
         retentionDays: P400D
+    # multitenant configuration
+    multitenant:
+      # Enables multitenant support. Supported values are true and false.
+      enabled: false
+      # commonTenantDatabaseName is the name of the database used for common tenant data.
+      commonTenantDatabaseName: multitenant-common
+      # tenantDbPrefix is the prefix used for tenant databases.
+      tenantDbPrefix: uno-tenant-
+      trial:
+        # defaultExpiration is the default expiration time for trial tenants.
+        defaultExpiration: P30D
+        # cleanupDelay is the delay after which expired trial tenants are cleaned up.
+        cleanupDelay: P60D
+      subscribed:
+        # cleanupDelay is the delay after which expired subscribed tenants are cleaned up.
+        cleanupDelay: P366D
+      # expirationCheckInterval is the interval at which expired tenants are checked.
+      expirationCheckInterval: PT6H
+      # maximum duration for which audit logs are retained. After this duration, audit logs are deleted.
+      auditMaxRetentionDuration: P3650D
+      # frequency for the cleanup job that deletes old audit logs.
+      auditCleanupFrequency: P1D
+      # region identifies the deployment.
+      region: development
+      # max value for job per day for TRIAL
+      trialMaxJobPerDay : 500
+      # max value for AI Agent calls per day for TRIAL
+      trialMaxAIAgentPerDay : 500
+      # token value per job
+      tokenPerJob: 1
+      # token value per AI Agent call
+      # 1 token = 8 ai agent calls
+      tokenPerAIAgentCall: 0.125
+      # for internal use only
+      tenantMetricsEnabled: false
+      # the support email address or http(s) link to include in the tenant notification emails for trials. Optional.
+      trialSupportLink: mailto:support@example.com
+      # the support email address or http(s) link to include in the tenant notification emails for subscribed tenants. Optional.
+      subscribedSupportLink: https://support.example.com
+      # the name to include in the "from" field of the tenant notification emails. Optional.
+      eMailSender: UnO SaaS
+      # Custom subject for the email sent as notifications when a tenant is created. Optional.
+      # Use ${TENANT_NAME} as a placeholder for the tenant name.
+      eMailTenantReadySubject: "Your UnO Tenant ${TENANT_NAME} is Ready"
+      # Custom template in HTML format for the email sent as notifications when a tenant is created. Optional.
+      # Use ${TENANT_NAME}, ${TENANT_URL} as placeholders for the tenant name and URL,
+      # ${SUPPORT_LINK}, and ${SUPPORT_TXT} as placeholders for the support link and text (based on trial or subscribed support links above)
+      eMailTenantReadyTemplate: # |
+        # <!DOCTYPE html>
+        # <html lang="en">
+        # <head>
+        #   <title>UnO Tenant is Ready</title>
+        # </head>
+        # <body>
+        #   <div>
+        #     <h2>
+        #       HCL Universal Orchestrator tenant <strong>${TENANT_NAME}</strong> is now ready.
+        #     </h2>
+        #     <p>Hello,</p>
+        #     <p>The requested tenant <strong>${TENANT_NAME}</strong> has been successfully provisioned and is now ready for use.</p>
+        #     <p>To access the tenant follow the following link: <a href="${TENANT_URL}">${TENANT_URL}</a></p>
+        #     <p>For any assistance, please contact support at ${SUPPORT_EMAIL}.</p>
+        #   </div>
+        # </body>
+        # </html>
+      # cert-manager certificate Issuer for tenant manager if not specified it uses the default one
+      tenantManagerIngressCertIssuer:
+      # Tenant administrators
+      admins:
+        # List of user IDs that are authorized as tenant administrators
+        userIds:
+        # - unoSaaSAdmin@example.com
+        # List of group IDs that are authorized as tenant administrators
+        groupIds:
+        # - SaaSAdmins
+        # A list of user ID regex patterns to further filter user IDs. 
+        # This is used in conjunction to groupIds.
+        # If at least a filter is specified, Users that has at least one group in groupIds will also need to have a user ID matching at least one of the filters.
+        userIdFilters:
+        # - .*@example.com
+      justification:
+        # justificationCategoryRequired specifies whether the justification category is mandatory for tenants. Supported values are true and false.
+        justificationCategoryRequired: false
+        # justificationTicketNumberRequired specifies whether the justification ticket number is mandatory for tenants. Supported values are true and false.
+        justificationTicketNumberRequired: false
+        # justificationDescriptionRequired specifies whether the justification description is mandatory for tenants. Supported values are true and false.
+        justificationDescriptionRequired: false
+        # list of all the possible justification categories for the tenant manager, comma separated.
+        justificationCategories: Change Request,Trouble Ticket,New Application,Optimization,Emergency Change
+
     registry:
       # name is the name of your registry.
       name:  hclcr.io/uno-ea
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 2.1.2.0-beta2
+      tag: 2.1.4.0-beta1
     orchestrator:
+      # Specifies for how long the Task Run History is retained (in ISO 8601 format, e.g., P400D).
+      jobRunHistoryRetentionDuration: P400DT0H
       # the maximum number of nested workflow in the plan. The subflow jobs exceeding this value will end in FAIL
       maxNestingLevel: 50
       # the time windows, in seconds, that permits the user to cancel the completion of a human task
       humanTaskCancelWindowSeconds: 20
-      # Custom template in HTML format for the email sent as notifications when a human task is created. Optional.
-      humanTaskMailTaskCreatedTemplate: #<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>New task</title></html>
-      # Custom template in HTML format for the email sent as notifications when a human task is assigned/unassigned. Optional.
-      humanTaskMailTaskAssignedTemplate: #<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>Assigned task</title></html>
     planning:
       # max number of days to generate not active instance
       notActiveWindowMax: P9DT0H
@@ -188,22 +273,19 @@ uno:
       # Frequency to remove the past failed jobs
       frequencyFailJobCleanUp: PT1H
     console:
-      # hostname is the hostname of the Dynamic Workload Console.
-      hostname:
-      # port is the port of the Dynamic Workload Console.
-      port:
-      # enableLogout specifies whether the new Console logout is enabled. Supported values are true and false.
+      # enableLogout specifies whether the Console logout is enabled. Supported values are true and false.
       enableLogout: false
       # defines the minutes after which the user is considered inactive and gets logged out from the UI. Supported values are integers.
       sessionTimeoutMinutes: 30
+
     genai:
-      # Enables the AI Pilot generative AI features. Supported values are true and false.
-      # Enabling this feature you agree that AI Pilot prompts are sent to HCL Software and stored for
-      # analytics and to improve the product in the future.
+      # Enables the AI Agent and AI Pilot generative AI features. Supported values are true and false.
+      # By enabling this feature with internal as false, you agree that AI Agent and AI Pilot prompts will be sent to HCL Software.
+      # We can collect statistical data for analytics and licensing purposes, but we won't retain the prompt content.
       # All information will be handled according to HCL Software privacy policy.
       enabled: false
       # the URL of the GenAI service.
-      serviceUrl: https://genai-beta.hcluno.mywire.org/api
+      serviceUrl: https://genai.services.hcluno.cloud
       # betaKey is the custom key to access the GenAI service provided by HCL Software for beta testing.
       betaKey:
       # optional proxy configuration to access the GenAI service.
@@ -216,18 +298,31 @@ uno:
         username:
         # The password to authenticate to the proxy server.
         password:
-      # the genai service is internal deployment, bring your own licence.
-      internal:
+      # max number of user prompts to be sent to LLM for context.
+      maxUserPrompts:
+      # max number of actions triggered in a conversation.
+      maxActionPerConversation:
+      # max number of conversation that can happen without a user prompt.
+      maxUnattendedActions:
+      # Enables the GenAI service to be deployed in the same cluster in order to your own accounts for LLM services. Supported values are true and false.
+      internal: false
+      # Below information are only used if the genai service is internal deployment.
+
+      # Gemini model used for AI Pilot. This is also the default model used for AI Agents. It must be a Gemini model.
+      defaultVertexAiModel: gemini-2.0-flash
       # timeout is the timeout for the GenAI service requests.
       timeout:
-      chatbotModel:
+      # These models may take upto 5 minutes to reflect in the other services.
+      agentModels:
         # Model names that work with GenAI service for AI Agents from vertex-ai
-        vertexAiMdodels:
+        vertexAiModels:
         # Model names that work with GenAI service for AI Agents from open ai
         openAiModels:
         # Model names that work with GenAI service for AI Agents from bedrock
         bedrockModels:
     engine:
+      # allowed_referer specifies the allowed referer for the engine and console in case of Invalid Referer.
+      allowed_referer:
       # justificationsEnabled specifies whether the justification feature is enabled. Supported values are true and false.
       justificationEnabled: false
       # justificationCategoryRequired specifies whether the justification category is mandatory. Supported values are true and false.
@@ -252,6 +347,7 @@ uno:
         # connectionTimeoutMs is the timeout in milliseconds for connecting to the SMTP server.
         connectionTimeoutMs: 30000
       # from is the email address from which the emails are sent. Mandatory if mail is enabled.
+      # optionally, specify the name of the sender in the format "Sender name example<from@mail.com>"
       from: #from@mail.com
       # credentialsSecretName is the name of the Kubernetes secret that contains the SMTP credentials. If smtp is enabled, this is a mandatory parameter.
       # The secret must contain the following keys: USERNAME and PASSWORD.
@@ -267,6 +363,8 @@ uno:
     plugins:
       #If the size of the plug-in that needs to be installed exceeds 10 MB, specify a value higher than the plug-in size.
       maxSize:
+      #Controls whether user can perform plugin management operations (install, update, delete), Supported values are true and false.
+      managePluginsEnabled: true
     eventmanager:
       plugins:
         gcp:
@@ -297,7 +395,7 @@ uno:
       renewBefore: 360h
       # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to true.
       organization: hcl
-      # additionalCASecrets contains additional secrets, for example to trust MongoDb or Kafka certificates. This parameter applies if you set useCustomizedCert to true.
+      # additionalCASecrets contains secret names for additional CAs, for example to trust MongoDb, Kafka, OIDC certificates.
       additionalCASecrets: 
       #  - secretname1
     apiKey:
@@ -339,9 +437,9 @@ uno:
       # enabled specifies whether authentication through OpenID Connect (OIDC) server is enabled.
       # If enabled is set to false, the other properties in this section are ignored.
       enabled: false
-      # useToManageApiKeys specifies whether the OpenID Connect (OIDC) server must be used in place of the Dynamic Workload Console to manage API keys (for example, when authentication information expires).
+      # useToManageApiKeys specifies whether the OpenID Connect (OIDC) server must be used to manage API keys in case of fail (for example, when authentication information expires).
       # Supported values are true and false.
-      useToManageApiKeys: false
+      useToManageApiKeys: true
       # server is the base URL of the OpenID Connect (OIDC) server. This parameter applies when enabled is set to true.
       server: https://unokeycloak.k8s.uat.uno/realms/uno
       # clientId is the client-id of the application in the OpenID Connect (OIDC) server. This parameter applies when enabled is set to true.
@@ -388,8 +486,16 @@ uno:
     baseDomainName: .k8s.uat.uno
     annotations:
       # For more information, see the ingress controller documentation.
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
+      #kubernetes.io/ingress.class: nginx
+      #kubernetes.io/tls-acme: "true"
+      #
+      # When using ingress-nginx controller, specify the following properties to set proper client-header buffers
+      #nginx.ingress.kubernetes.io/client-header-buffer-size: 8k
+      #nginx.ingress.kubernetes.io/large-client-header-buffers: 8 64k
+      #
+      # When using nginx-ingress controller, specify the following properties to set proper client-header buffers.
+      # To use server-snippets, set allow-snippet-annotations to true in the ingress controller.
+      #nginx.ingress.kubernetes.io/server-snippet: client_header_buffer_size 8k; large_client_header_buffers 4 64k;
     hosts:
       - host: chart-example.local
         paths: []
@@ -403,29 +509,33 @@ uno:
 
   deployment:
     global:
-      podDisruptionBudget:
-        # enabled specifies whether a PodDisruptionBudget is enabled. Supported values are true and false.
-        enabled: false
-        # maxUnavailable is the maximum number, or percentage, of unavailable pods during the disruption.
-        maxUnavailable: "33%"
+      # debug enables and disables the debugging mode. Supported values are true and false.
+      debug: false
       # minTargetReplicas is the minimum number of target replicas to be deployed for each microservice.
       minTargetReplicas: 1
       # maxTargetReplicas is the maximum number of target replicas to be deployed for each microservice.
       maxTargetReplicas: 3
+      # traceLevel specifes the trace detail level for trace.log. Supported values are ALL,FINE,INFO.
+      traceLevel: "INFO"
       autoscaler:
         # cpuAverageUtilization specifies the average usage of CPU which starts the autoscaler.
         cpuAverageUtilization: 200
+      podDisruptionBudget:
+        # enabled specifies whether a PodDisruptionBudget is enabled. Supported values are true and false.
+        enabled: true
+        # maxUnavailable is the maximum number, or percentage, of unavailable pods during the disruption.
+        maxUnavailable: "33%"
       resources:
         limits:
           # cpu is the maximum amount of cpu services can use.
           cpu: "2"
           # memory is the maximum amount of memory services can use.
-          memory: 1024Mi
+          memory: "1024Mi"
         requests:
           # cpu is the minimum amount of cpu services require to run.
-          cpu: "0.6"
+          cpu: "0.3"
           # memory is the minimum amount of memory services require to run.
-          memory: 512Mi
+          memory: "512Mi"
     # The properties listed below apply to single microservices. You can use them to override the global settings defined above for one or more microservices.
     console:
       # ingressPrefix is the prefix of the name of the endpoint of the console microservice.
@@ -433,7 +543,7 @@ uno:
       #minTargetReplicas: 1
     agentmanager:
       # ingressPrefix is the prefix of the name of the endpoint of the agentmanager microservice.
-      ingressPrefix: agentmanager
+      ingressPrefix: "agentmanager"
       #minTargetReplicas: 1
     gateway:
       # ingressPrefix is the prefix of the name of the endpoint of the gateway microservice.
@@ -448,17 +558,19 @@ uno:
     iaa:
       #minTargetReplicas: 1
     executor:
-      #minTargetReplicas: 1
       enableExecutorSandbox: "false"
+      #minTargetReplicas: 1
     orchestrator:
       #minTargetReplicas: 1
       resources:
         limits:
           cpu: "2"
-          memory: 1024Mi
+          memory: "1024Mi"
         requests:
-          cpu: "0.6"
-          memory: 1024Mi
+          cpu: "0.3"
+          memory: "1024Mi"
+      #databaseMinPoolSize: 1
+      #databaseMaxPoolSize: 20
     scheduler:
       #minTargetReplicas: 1
     storage:
@@ -467,12 +579,17 @@ uno:
       #minTargetReplicas: 1
     notification:
       #minTargetReplicas: 1
-  hclaipilot:  
+    tenantmanager:
+      minTargetReplicas: 2
+      maxTargetReplicas: 2
+      databaseName: "tenantmanager-db"
+ 
+  hclaipilot:
     image:
       repository: hclcr.io/uno-ea
-      tag: 2.1.2.0-beta2
+      tag: 2.1.4.0-beta1
 
-    # Channels Configuration 
+    # Channels Configuration
     # The following configuration is used to enable the AIPilot for the channels. For each channel, you need to provide the required configuration.
     channels:
       ### Slack Configuration ###
@@ -491,7 +608,7 @@ uno:
       # To be enabled when the OIDC provider is not setup with the same LDAP/User provider of the channels and is not possible to add user to it manually
       # so the email of the configured channels are manually added in the ACL
       groupless: "false"
-    
+
 
     translation:
       # Configuration for the Azure Translation API
@@ -507,7 +624,55 @@ uno:
       google:
         # The Credentials json file for the Google Translation API encoded in base64
         credentials: ""
-    
+    postgres:
+      postgresUser: aipilot
+      #The postgres port
+      postgresPort : "5432"
+      #The postgres database name used by the application
+      postgresDB: "rasa"
+      #The postgres service name
+      postgresService: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-primary'
+      connectTimeout: "60"
+      # Application name to be used in the Postgres connection
+      applicationName: "agenticbuilder-app"
+      # Additional connection options
+      options: ""
+      # Client Required Authentication for Postgres connection ( scram-sha-256, md5, password, gss, sspi, ident, peer, ldap, none)
+      requiredAuthentication : "scram-sha-256"
+      #The postgres user password
+      postgresPassword: "Kt3oDP8KWBs3Hg5L11kR9hLhPekw8tIC" 
+      #postgresPasswordSecretName: '{{ .Release.Name }}-postgres-password'
+      #postgresPasswordSecretKey: "password"
+      # Only to let the init container create the database "$postgresDB" if it does not exist
+      initDatabases: true
+      postgresAdminUserSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
+      postgresAdminUserSecretKey: "user"
+      postgresAdminPasswordSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
+      postgresAdminPasswordSecretKey: "password"
+
+      ssl:
+        enabled: "true"
+        # Client Configuration for Mutual TLS
+        certSecretName: ""
+        #By default the SecretKey is "tls.crt", you can override it by specifying the
+        certSecretKey: ""
+        certKeySecretName: ""
+        #By default the SecretKey is "tls.key", you can override it by specifying the
+        certKeySecretKey: ""
+
+        certKeyPassword: ""
+        # Optional CA for Mutual TLS, If not provided the trustore CA will be used
+        certCaSecretName: ""
+        # By default the SecretKey is "ca.crt", you can override it by specifying the
+        certCaSecretKey: ""
+        # Client Configuration for One-way TLS to verify server certificate
+        caSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-cluster-cert'
+        # By default the SecretKey is "ca.crt", you can override it by specifying the caSecretKey
+        caSecretKey: "" 
+        # SSL Mode for Postgres connection ( disable, allow, prefer, require, verify-ca, verify-full)
+        sslMode : "prefer"
+        # Whether to validate the hostname in the Postgres certificate
+        hostnameValidation : "true"
     #Core Service Deployment Configuration
     pilotCore:
       # The number of replicas for the core service
@@ -519,7 +684,7 @@ uno:
         requests:
           cpu: "0.5"
           memory: 2000Mi
-    
+
     #NLG Service Deployment Configuration
     pilotNlg:
       # The number of replicas for the nlg service
@@ -531,7 +696,7 @@ uno:
         requests:
           cpu: "0.1"
           memory: 300Mi
-    
+
     #Actions Service Deployment Configuration
     pilotActions:
       # The number of replicas for the actions service
@@ -545,7 +710,7 @@ uno:
           memory: 200Mi
 
     certificates:
-      # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below. 
+      # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below.
       useCustomizedCert: false
       # customIssuer is the name of the issuer. This parameter applies if you set useCustomizedCert to false. If not specified, a self-signed issuer is created.
       customIssuer:
@@ -562,14 +727,14 @@ uno:
 
     rag:
       certificates:
-        # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below. 
+        # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below.
         useCustomizedCert: false
         # customIssuer is the name of the issuer. This parameter applies if you set useCustomizedCert to false. If not specified, a self-signed issuer is created.
         customIssuer:
         # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to false.
         # Must be the same as the value of caPairSecretName in the other certificates section. Change only if you want to use a different CA to sign the certificates
         caPairSecretName: ca-key-pair
-        # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false. 
+        # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
         # Change the value if you want to use a different certificates, by default it will be created by the core service signed with the CA of caPairSecretName
         certSecretName: uno-aipilot-rag-certificate
         # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to false.
@@ -578,7 +743,7 @@ uno:
         renewBefore: 360h
         # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to false.
         organization: hcl
-      
+      sharedKeySecretName: "{{ .Release.Name }}-shared-key"
       resources:
         limits:
           cpu: "0.8"  # CPU limit
@@ -590,249 +755,330 @@ uno:
       hpa:
         minReplicas: 1  # Minimum number of replicas
         maxReplicas: 2  # Maximum number of replicas
-      
+
       container:
         registry: hclcr.io/uno-ea # Image name
-        tag: 2.1.2.0-beta2  # Image tag
-    
+        tag: 2.1.4.0-beta1  # Image tag
+
       authorization:
         # Is the URL of the OpenID Connect (OIDC) server.
         oidcServerURL: "https://uno-keycloak-ssl:8843"
+      
+      postgres:
+        postgresUser: ragUser
+        #The postgres port
+        postgresPort : "5432"
+        #The postgres database name used by the application
+        postgresDB: "vector_db"
+        #The postgres service name
+        postgresService: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-primary'
+        connectTimeout: "60"
+        # Application name to be used in the Postgres connection
+        applicationName: "rag-app"
+        # Additional connection options
+        options: ""
+        # Client Required Authentication for Postgres connection ( scram-sha-256, md5, password, gss, sspi, ident, peer, ldap, none)
+        requiredAuthentication : "scram-sha-256"
+        #The postgres user password
+        postgresPassword: "Kt3oDP8KWBs3Hg5L11kR9hLhPekw8tIC" 
+        #postgresPasswordSecretName: '{{ .Release.Name }}-postgres-password'
+        #postgresPasswordSecretKey: "password"
+        # Only to let the init container create the database "$postgresDB" if it does not exist
+        initDatabases: true
+        postgresAdminUserSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
+        postgresAdminUserSecretKey: "user"
+        postgresAdminPasswordSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
+        postgresAdminPasswordSecretKey: "password"
 
-    pgvector:
-      # Image Configuration
-      image:
-        # The registry where the pgvector image is hosted
-        registry: hclcr.io/uno-ea
-        # The repository name for the pgvector image
-        repository: pgvector
-        # The tag/version of the pgvector image
-        tag: 17
-        # The secret used to pull the image from the registry
-        pullSecrets:
-          - '{{ include "aipilot.pgvector.pull.secret" $ }}'
-      auth:
-        # The existing secret containing the PostgreSQL password Change, the value if you want to use a different secret
-        existingSecret: '{{ include "aipilot.pgvector.credentials.secret.name" $ }}'
-        # The username for PostgreSQL authentication
-        username: "aipilot"
-        # The database name to be used for the rag service
-        database: "vector_db"
-      
-      tls:
-        # Enable TLS for secure connections
-        enabled: true
-        # The secret containing TLS certificates, Change the value if you want to use custom certificates
-        # By default it will be created by default by the core service
-        certificatesSecret: '{{ include "aipilot.pgvector.cert.secret.name" $ }}'
-        # The filename Inside the secret for the TLS certificate
-        certFilename: tls.crt
-         # The filename  Inside the secret for the TLS certificate key
-        certKeyFilename: tls.key
-        # The filename  Inside the secret for the CA certificate
-        certCAFilename: ca.crt
-        # The secret name for the CA to be used to sign the certificatesSecret, 
-        # Must be the same as the value of caPairSecretName in the certificates section Change if you want to use a custom CA to sign the certificates
-        caPairSecretName: ca-key-pair
-        # Must be equal  to the common name(CN) of the certificate used by pilot for the connection to the database
-        pilotCertCommonName : "aipilot"
-        # Must be equal of the common name(CN) of the certificate used by rag for the connection to the database
-        ragCertCommonName: "rag"
-      
-waconsole:
-  # runAsUser specfies the user to be used for running the Dynamic Workload Console.
-  runAsUser: 999
-  # fsGroupId is the secondary group ID of the user.
-  fsGroupId: 999
-  # supplementalGroupId is the supplemental group ID of the user.
-  supplementalGroupId:
-  # enable page to download extra packages from DWC
-  enableNginxServer: true
-  console:
-    # certSecretName is the name of the secret to store customized SSL certificates.
-    certSecretName: waconsole-cert-secret
-    # containerDebug specifies that the container is executed in debug mode.
-    containerDebug: false
-    # enableSSO specifies whether Single Sign On (SSO) is enabled. It's enable by default always false
-    enableSSO: false
-    # adminGroup is the name of the administrative group.
-    adminGroup:
-    # engineHostName specifies the hostname of the engine to connect to. Mandatory parameter.
-    engineHostName:
-    # enginePort specifies the port of the engine to connect to.
-    enginePort: 8443
-    db:
-      # add as supported DB ORACLE MSSQL DB2
-      # type is the preferred remote database server type.
-      type: POSTGRESQL
-      # adminUser is the database administrator who accesses the Console tables on the database server.
-      adminUser: postgres
-      # hostname is the hostname or the IP address of the database server. Mandatory parameter.
-      hostname: postgreshost
-      # alternateHostName is the hostname or the IP address of the alternate database server.
-      alternateHostName:
-      # name is the database name.
-      name: DWC
-      # port is the port of the database server.
-      port: 5432
-      #alternatePort is the alternative port of the database server.
-      alternatePort:
-      # server is the name of the database server. Mandatory parameter.
-      server:
-      # sslConnection specifies whether the connection to the database is in SSL mode.
-      sslConnection: false
-      # Only for mongodb disable TLS hostname verification 
-      invalidHostnameAllowed: false
-      # Only for documentdb specify the retryWrites option. Supported values are true and false.
-      retryWrites: "false"
-      # Only for documentdb specify the read preference. Supported values are primary, primaryPreferred, secondary, secondaryPreferred, nearest.
-      readPreference: "secondaryPreferred"
-      # Only for mongodb optially specify the admin database  
-      authDb:
-      # tsName is the name of the DATA table space.
-      tsName: null
-      # tsPath is the path of the DATA table space.
-      tsPath: null
-      # tsTempName is the name of the TEMP table space.
-      tsTempName: null
-      # tssbspace is the name of the SB table space.
-      tssbspace: null
-     
-      # usepartitioning specifies whether partitioning is used.
-      usepartitioning: true
-      # user is the database user who accesses the Console tables on the database server.
-      user: db2inst1
-      # skipCheck specifies whether a database integrity check should be performed.
-      skipCheck: false
-    routes:
-      # enabled specifies whether the ingress controller rules are enabled.
-      enabled: true
-    ingress:
-      # hostname is the virtual hostname defined in the DNS used to reach the Console.
-      hostname:
-      # className is the name of the class.
-      className:
-      # secretName is the name fot he secret to store the ingress data.
-      secretName: wa-console-ingress-secret
-    # exposeServiceType specifies the network enablement configuration implemented. Supported values are Load balancer or Ingress.
-    exposeServiceType: Ingress
-    # exposeServiceAnnotation specifies the annotations of either the resource of the service or the resource of the ingress, customized in accordance with the cloud provider.
-    exposeServiceAnnotation:
-      #cert-manager.io/issuer: wa-ca-issuer
-      #service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
-      #service.beta.kubernetes.io/aws-load-balancer-type: "clb"
-      #service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-      #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-      #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-      #networking.gke.io/load-balancer-type: "Internal"
-    # networkpolicyEgress controls network traffic and how a component pod is allowed to communicate with other pods. If empty, no egress policy is defined.
-    networkpolicyEgress:
-    # Allows all  Egress to mdm.
-    #  - name: to-mdm
-    #    egress:
-    #    - to:
-    #      - podSelector:
-    #          matchLabels:
-    #            app.kubernetes.io/name: waserver
-    #
-    #  - name: dns
-    #    egress:
-    #    - to:
-    #        - namespaceSelector:
-    #            matchLabels:
-    #              name: kube-system
-    #    - ports:
-    #        - port: 53
-    #          protocol: UDP
-    #        - port: 53
-    #          protocol: TCP
-    # nodeAffinityRequired is a set of rules that determines on which nodes a console can be deployed using custom labels on nodes and label selectors specified in pods.
-    nodeAffinityRequired:
-    livenessProbe:
-      # initialDelaySeconds is the number of seconds after which the liveness probe starts checking if the server is running.
-      initialDelaySeconds: 100
-    # pwdSecretName is the name of the secret to store the password.
-    pwdSecretName: wa-pwd-secret
-    # useCustomizedCert specifies whether customized SSL certificates are used to connect to the Dynamic Workload Console.
-    useCustomizedCert: false
-    # tz sets the timezone (TZ) operating system environment variable.
-    tz:
-    # libConfigName is the name of the ConfigMap to store all custom Liberty configurations.
-    libConfigName: null
-    # Enable the following row to configure DWC with oidc provider
-    #libConfigName: hcl-uno-oidc-config
-    disableAccessControl:
-    oidc:
-      clientId: uno-service
-      clientSecret: put_oidc_secret_here
-      httpsRequired: true
-      userIdentifier: preferred_username
-      signatureAlgorithm: RS256
-      scope: openid
-      authFilterRef: restFilterOpenID
-      inboundPropagation: supported
-      groupIdentifier: groups
-      groupNameAttribute: groups
-      redirectToRPHostAndPort: https://dwc_ingress_hostname
-      discoveryEndpointUrl: https://<oidc ingress hostname>/realms/uno/.well-known/openid-configuration
-  image:
-    # pullPolicy specifies the image pull policy. Supported values are Always, Never, IfNotPresent.
-    pullPolicy: Always
-    # repository is the Dynamic Workload Console image repository. Mandatory parameter.
-    repository: hclcr.io/uno-ea/hcl-workload-automation-console
-    # tag is the Dynamic Workload Console image tag. Mandatory parameter.
-    tag: 2.1.2.0-beta2
-  persistence:
-    dataPVC:
-      # name is the prefix for the Persistent Volumes Claim name.
-      name: data
-      selector:
-        # label is the volume label to bind (only limited to single label).
-        label: ""
-        # value is the volume label value to bind (only limited to single label).
-        value: ""
-      # size is the minimum size of the Persistent Volume.
-      size: 5Gi
-      # storageClassName is the name of the StorageClass to be used. Leave empty if you do not use a storage class.
-      storageClassName: ""
-    # enabled specifies whether persistent volumes for the pods are used.
-    enabled: true
-    # useDynamicProvisioning specifies whether StorageClasses are used to dynamically create persistent volumes for the pods.
-    useDynamicProvisioning: true
-    # extraVolumes provides a list of additional extra volumes.
-    extraVolumes: []
-      # - name: custom-volume-1
-      #   configMap:
-      #      name: custom-configMap
-      #      defaultMode: 0755
-      # - name: custom-volume-2
-      #   secret:
-      #     secretName: custom-secret
-      #     defaultMode: 0744
-      # - name: nfs-volume
-      #   nfs:
-      #     # URL for the NFS server
-      #     server: <nfs_server> # Change this!
-      #     path: /
-    # extraVolumeMounts provides a list of additional extra volumes.
-    extraVolumeMounts: []
-      # - name: custom-volume-1
-      #   mountPath: /custom/mount/path-1
-      #   readOnly: false
-      # - name: custom-volume-2
-      #   mountPath: /custom/mount/path-2
-      # - name: nfs-volume
-      #   mountPath: /path/nfs
-  # replicaCount specifies the number of replicas to deploy.
-  replicaCount: 1
-  resources:
-    limits:
-      # cpu is the maximum amount of cpu services can use.
-      cpu: 4
-      # memory is the maximum amount of memory services can use.
-      memory: 16Gi
-    requests:
-      # cpu is the minimum amount of cpu services require to run.
-      cpu: 1
-      # memory is the minimum amount of memory services require to run.
-      memory: 4Gi
+        ssl:
+          enabled: "true"
+          # Client Configuration for Mutual TLS
+          certSecretName: ""
+          #By default the SecretKey is "tls.crt", you can override it by specifying the
+          certSecretKey: ""
+          certKeySecretName: ""
+          #By default the SecretKey is "tls.key", you can override it by specifying the
+          certKeySecretKey: ""
+
+          certKeyPassword: ""
+          # Optional CA for Mutual TLS, If not provided the trustore CA will be used
+          certCaSecretName: ""
+          # By default the SecretKey is "ca.crt", you can override it by specifying the
+          certCaSecretKey: ""
+          # Client Configuration for One-way TLS to verify server certificate
+          caSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-cluster-cert'
+          # By default the SecretKey is "ca.crt", you can override it by specifying the caSecretKey
+          caSecretKey: "" 
+          # SSL Mode for Postgres connection ( disable, allow, prefer, require, verify-ca, verify-full)
+          sslMode : "prefer"
+          # Whether to validate the hostname in the Postgres certificate
+          hostnameValidation : "true"
+    
+  agenticAIBuilder:
+    telemetry:
+      # To enable telemetry
+      enableTelemetry: "false"
+      # The endpoint for traces
+      inferenceEndpoint : ""
+      # The base URL for metrics
+      telemetryBaseUrl : ""
+      # The service name to be used in telemetry data
+      telemetryServiceName: ""
+      # The interval in milliseconds for exporting telemetry data
+      telemetryExportIntervalMillis: "60000"
+      # Protocol to be used for metrics export (http or grpc)
+      telemetryMetricsProtocol: "http"
+      # Protocol to be used for trace export (http or grpc)
+      telemetryTraceProtocol: "http"
+      #Set to "true" to disable TLS for trace export (useful for testing with insecure endpoints), supported values: "true" or "false"
+      telemetryMetricInsecure: "true"
+      # Set to "true" to disable TLS for trace export (useful for testing with insecure endpoints), supported values: "true" or "false"
+      telemetryTraceInsecure: "true"
+      # If your telemetry exporter requires a certificate, provide it here the secret name, the field telemetryTraceInsecure must be "false" or telemetryMetricInsecure must be "false"
+      telemetryExporterCertificate: ""
+      # If your telemetry exporter requires a certificate, provide it here the key inside the secret that points to the certificate, the field telemetryTraceInsecure must be "false" or telemetryMetricInsecure must be "false"
+      telemetryExporterCertificateKey: "tls.crt"
+      # If your telemetry exporter requires headers, provide them here in the format "key1=value1,key2=value2"
+      telemetryExporterHeaders: ""
+      # Timeout in milliseconds for the telemetry exporter
+      telemetryExporterTimeoutMillis: "10000"
+
+    common:
+      truststore:
+        agenticAdditionalCASecrets: 
+          - "uno-certificate"
+      rest:
+        timeout: "30"
+        scheme: "https"
+        # SSL Client Configuration
+        ssl:
+          enabled: "true"
+          # Client Configuration for Mutual TLS
+          certSecretName: ""
+          #By default the SecretKey is "tls.crt", you can override it by specifying the
+          certSecretKey: ""
+
+          certKeySecretName: ""
+          #By default the SecretKey is "tls.key", you can override it by specifying the
+          certKeySecretKey: ""
+
+          certKeyPassword: ""
+          # Optional CA for Mutual TLS, If not provided the trustore CA will be used
+          certCaSecretName: ""
+          # By default the SecretKey is "ca.crt", you can override it by specifying the
+          certCaSecretKey: ""
+          # Client Configuration for One-way TLS to verify server certificate
+          caSecretName: ""
+          # By default the SecretKey is "ca.crt", you can override it by specifying the caSecretKey
+          caSecretKey: "" 
+          # Whether to validate the hostname in the server certificate
+          hostnameValidation : "true"
+      # By default the values are configured to work with the default Valkey deployed by the bitnami/valkey chart.
+      valkey:
+        # valkeyPasswordSecret is the name of the Kubernetes secret that contains the Valkey password.
+        valkeyPasswordSecret : "valkey-password-secret"
+        # valkeyPasswordSecretKey is the key in the Kubernetes secret that contains the Valkey password.
+        valkeyPasswordSecretKey: "password"
+        # valkeyPassword is the Valkey password. If you set valkeyPasswordSecret, this parameter is ignored.
+        valkeyPassword : ""
+        # valkeyHost is the hostname of the Valkey service.
+        valkeyHost: "valkey-primary"
+        # valkeyPort is the port of the Valkey service.
+        valkeyPort: "6379"
+        # valkeyDb is the database number of the Valkey service.
+        valkeyDb: "0"
+        # Username To be used to connect to Valkey service.
+        valkeyUser:
+        #SSL Configuration for Valkey connection
+        ssl:
+          enabled: "false"
+          # Client Configuration for Mutual TLS
+          certSecretName: ""
+          #By default the SecretKey is "tls.crt", you can override it by specifying the
+          certSecretKey: ""
+
+          certKeySecretName: ""
+          #By default the SecretKey is "tls.key", you can override it by specifying the
+          certKeySecretKey: ""
+
+          certKeyPassword: ""
+          # Optional CA for Mutual TLS, If not provided the trustore CA will be used
+          certCaSecretName: ""
+          # By default the SecretKey is "ca.crt", you can override it by specifying the
+          certCaSecretKey: ""
+          # Client Configuration for One-way TLS to verify server certificate
+          caSecretName: ""
+          # By default the SecretKey is "ca.crt", you can override it by specifying the caSecretKey
+          caSecretKey: ""
+          # Whether to validate the hostname in the Valkey certificate
+          hostnameValidation : "true"
+
+        # By default the values are configured to work with the default pgvector deployed by UNOAIPilot.
+        # If you want to use a different PostgreSQL service, you can override the values below
+        # to point to your PostgreSQL service.
+      postgres:
+        #The postgres User used by the application
+        postgresUser: agenticbuilder
+        #The postgres port
+        postgresPort : "5432"
+        #The postgres database name used by the application
+        postgresDB: "agenticbuilder"
+        #The postgres service name
+        postgresService: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-primary'
+        #The postgres user password
+        postgresPassword: "Kt3oDP8KWBs3Hg5L11kR9hLhPekw8tIC" 
+        #postgresPasswordSecretName: "{{ .Release.Name }}-postgres-password"
+        #postgresPasswordSecretKey: "password"
+        # Only to let the init container create the database "$postgresDB" if it does not exist
+        # Postgres Client connection timeout in seconds
+        connectTimeout: "60"
+        # Application name to be used in the Postgres connection
+        applicationName: "agenticbuilder-app"
+        # Additional connection options
+        options: ""
+        # Client Required Authentication for Postgres connection ( scram-sha-256, md5, password, gss, sspi, ident, peer, ldap, none)
+        requiredAuthentication : "scram-sha-256"
+        #### Those settings are for Creating The user and the database if not present ####
+        # Those values will not be used by the application, only in the initContainer for the initialization of the DB #
+        initDatabases: true
+        postgresAdminUserSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
+        postgresAdminUserSecretKey: "user"
+        postgresAdminPasswordSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
+        postgresAdminPasswordSecretKey: "password"
+        # SSL Configuration for Postgres connection
+        ssl:
+          enabled: "true"
+          # Client Configuration for Mutual TLS
+          certSecretName: ""
+          #By default the SecretKey is "tls.crt", you can override it by specifying the
+          certSecretKey: ""
+          certKeySecretName: ""
+          #By default the SecretKey is "tls.key", you can override it by specifying the
+          certKeySecretKey: ""
+          certKeyPassword: ""
+          # Optional CA for Mutual TLS, If not provided the trustore CA will be used
+          certCaSecretName: ""
+          # By default the SecretKey is "ca.crt", you can override it by specifying the
+          certCaSecretKey: ""
+          # Client Configuration for One-way TLS to verify server certificate
+          caSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-cluster-cert'
+          # By default the SecretKey is "ca.crt", you can override it by specifying the caSecretKey
+          caSecretKey: "" 
+          # SSL Mode for Postgres connection ( disable, allow, prefer, require, verify-ca, verify-full)
+          sslMode : "prefer"
+          # Whether to validate the hostname in the Postgres certificate
+          hostnameValidation : "true"
+          # Only to let the init container create the database "$postgresDB" and the "$postgresUser" if it does not exist
+
+      config:
+        # The configuration for the Agentic AI Builder microservices to connect to the UNO instance. Do not change the values below unless you know what you are doing.
+        tokenProvider: "STARLETTE"
+        enableAuthentication : "true"
+    authorization:
+      # The authorization configuration for the Agentic AI Builder microservices. to authenticate with the UNO instance
+      # Do not change the values below unless you know what you are doing.
+      certs:
+        HCL_AUTHORIZATION_HTTPS___WAJWT_API: "{{  .unofullname }}-jwt-key"
+        HCL_AUTHORIZATION_HTTPS___WAJWT_APIGATEWAY:  "{{  .unofullname }}-jwt-key"
+        HCL_AUTHORIZATION_HTTPS___WAJWT_MCP:  "{{  .unofullname }}-jwt-key"
+      # oidcServerURL is the URL of the OpenID Connect (OIDC) server. Mandatory parameter.
+      oidcServerURL: "https://uno-keycloak-ssl:8843"
+
+    certificates:
+      # useCustomizedCert specifies if you use custom certificates or certificates generated by cert-manager. Supported values are true and false. If you set it to false, certificates are defined by the deployment process. If you set it to true, provide the required certificates and customize the parameters listed below. 
+      useCustomizedCert: false 
+      # customIssuer is the name of the issuer. This parameter applies if you set useCustomizedCert to false. If not specified, a self-signed issuer is created.
+      customIssuer: false
+      # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to false.
+      caPairSecretName: ca-key-pair
+      # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to false.
+      certSecretName : "uno-agentic-ai-builder-certificate"
+      # duration is the duration of the certificates before they are set to expire. This parameter applies if you set useCustomizedCert to false.
+      duration: 2160h
+      # renewBefore is the time before the certificate expires when the certificate manager service begins attempts to renew the certificate. This parameter applies if you set useCustomizedCert to false.
+      renewBefore: 360h
+      # If you are using a custom issuer, specify the issuer name
+      issuerName: ""
+      # organization is the organization label within the certificates. This parameter applies if you set useCustomizedCert to false.
+      organization: hcl
+
+    serviceAccount:
+      # serviceAccount is the name of the service account used by the Agentic AI Builder microservices.
+      # By default will be used the global serviceAccountName.
+      name: ""
+
+    credentialManager:
+      # Name of the core service
+      name: cm
+      #Image name
+      imageName: hcl-agentic-cm
+      proxyURL: ""
+      # The port on which the core service will be exposed
+      port: 8000
+      # The number of replicas for the core service
+      replicaCount: 1
+      # Resource Configuration
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
+          
+    ams:
+      name: ams
+      #Image name
+      imageName: hcl-agentic-ams
+      # The port on which the core service will be exposed
+      port: 8080
+      proxyURL: ""
+      # The number of replicas for the core service
+      replicaCount: 1
+      # Resource Configuration
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
+
+    runner:
+      name: runner
+      #Image name
+      imageName: hcl-agentic-runner
+      # The port on which the core service will be exposed
+      port: 8080
+      proxyURL: ""
+      # The number of replicas for the core service
+      replicaCount: 2
+      hpa:
+        enabled: false
+        minReplicas: 1
+        maxReplicas: 10
+      # Resource Configuration
+      config:
+        # The base URL of the UNO MCP service.
+        unoMCPBaseURL : ""
+        maxAgents: 5
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
+    uno:
+      hostname: "{{ include \"uno.fullname\" . }}-gateway"
+      port: "8443"
+      proxyURL: ""
+    image:
+      # The registry where the image is hosted
+      repository: hclcr.io/uno-ea
+      # The tag of the images
+      tag: 2.1.4.0-beta1
+      # The Pull Policy for the images
+      imagePullPolicy: Always
+
+    additionalPullSecret : ""

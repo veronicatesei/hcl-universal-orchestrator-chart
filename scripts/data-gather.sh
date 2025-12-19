@@ -1,35 +1,61 @@
 #!/bin/bash
 
-NAMESPACE="$1"
+printUsage() {
+  echo "Usage: $0 [-h | --help] [-n | --namespace <namespace>] [-o | --ocli-path <ocli-path>] [-sd | --skip-defs]"
+  echo "Options:"
+  echo "  -h,  --help          Show this help message"
+  echo "  -n,  --namespace     [Mandatory] Specify the K8s namespace where UNO is deployed"
+  echo "  -o,  --ocli-path     [Optional] Specify the path to OCLI executable to gather definitions. If not provided and not found in PATH, definitions gathering will be skipped."
+  echo "  -sd, --skip-defs     [Optional] Skip gathering definitions from OCLI"
+}
+
+SKIP_DEFS=false
+
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -h|--help) printUsage; exit 0 ;;
+    -n|--namespace) NAMESPACE="$2"; shift ;;
+    -o|--ocli-path) OCLI_PATH="$2"; shift ;;
+    -sd|--skip-defs) SKIP_DEFS=true ;;
+    *) echo "Unknown option: $1"; printUsage; exit 1 ;;
+  esac
+  shift
+done
 
 red()   { echo -e "\e[31m$*\e[0m"; }
+yellow() { echo -e "\e[33m$*\e[0m"; }
+green() { echo -e "\e[32m$*\e[0m"; }
+cyan() { echo -e "\e[36m$*\e[0m"; }
+magenta() { echo -e "\e[35m$*\e[0m"; }
+
+magenta " ========================================== "
+magenta " Universal Orchestrator Data Gather Script"
+magenta " ========================================== "
+echo
+
+# Check if kubectl is installed
+if ! command -v kubectl &> /dev/null
+then
+    red "kubectl could not be found. Please install kubectl to proceed."
+    exit 1
+fi
 
 if [ -z "$NAMESPACE" ]; then
-  red "Please provide the namespace as first argument."
+  red "Please provide the namespace with the -n or --namespace argument."
   exit 1
 fi
 
-OCLI_PATH="$2"
-
-if [ -z "$OCLI_PATH" ]; then
-  red "Please provide the ocli path as second argument."
-  exit 1
-fi
-
-GATEWAY="$3"
-
-if [ -z "$GATEWAY" ]; then
-  echo "Gateway URL not provided. Attempting to fetch from Ingress."
-  REGEX="gateway\.[\d\.-]+\.([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}"
-  GATEWAY=$(kubectl get ingress -n "$NAMESPACE" | grep -o -E "$REGEX")
-  if [ -z "$GATEWAY" ]; then
-    red "No gateway URL found in Ingress. Please provide the gateway URL as third argument."
-    exit 1
+if [ -z "$OCLI_PATH" ] && [ "$SKIP_DEFS" = false ]; then
+  if command -v ocli &> /dev/null; then
+    OCLI_PATH="ocli"
+    cyan "Found OCLI in PATH. It will be used for definitions gathering."
+  else
+    yellow "OCLI path not provided. Definitions gathering will be skipped."
+    SKIP_DEFS=true
   fi
-  METRICS_URL="https://$GATEWAY/q/metrics"
-else
-  METRICS_URL="$GATEWAY/q/metrics"
 fi
+
+cyan "Gathering logs from namespace: $NAMESPACE"
 
 mkdir logs
 
@@ -53,13 +79,24 @@ do
     # Fetch the log file from the container and copy it to log folder
     kubectl cp "$NAMESPACE/$POD":opt/app/stdlist logs/"$CONTAINER_FOLDER"/ -c "$CONTAINER"
     # Fetch the metrics of the container
-    kubectl exec "$POD" -c "$CONTAINER" --namespace "$NAMESPACE" -- curl -sSk "$METRICS_URL" > logs/"$CONTAINER_FOLDER"/metrics.log
+    kubectl exec "$POD" -c "$CONTAINER" --namespace "$NAMESPACE" -- curl -sSk https://localhost:8443/q/metrics > logs/"$CONTAINER_FOLDER"/metrics.log
+    # Fetch the health of the container
+    kubectl exec "$POD" -c "$CONTAINER" --namespace "$NAMESPACE" -- curl -sSk https://localhost:8443/q/health > logs/"$CONTAINER_FOLDER"/health.log
   done
 done
 #Zip the logs
 zip -r data-gather.zip logs
 #Delete the logs folder
 rm -rf logs
+
+cyan "Logs gathering completed."
+
+if [ "$SKIP_DEFS" = true ]; then
+  yellow "Skipping definitions gathering."
+  exit 0
+fi
+
+cyan "Gathering definitions using OCLI at $OCLI_PATH"
 
 mkdir definitions
 #Extract all the Jobs
@@ -83,7 +120,7 @@ mkdir definitions
 #Extract all the API Keys
 "$OCLI_PATH" model extract definitions/allAPIKeys.txt from api=@
 #Extract all the event sources
-"$OCLI_PATH" model extract definitions/allEventSources.txt from eventsource=@
+"$OCLI_PATH" model extract definitions/allEventSources.txt from eventsource=@/@
 #Extract all the resources
 "$OCLI_PATH" model extract definitions/allResources.txt from res=@/@
 #Extract all the human task queues
@@ -96,3 +133,5 @@ mkdir definitions
 zip -r data-gather.zip definitions
 #Delete the definition folder
 rm -rf definitions
+
+cyan "Definitions gathering completed."

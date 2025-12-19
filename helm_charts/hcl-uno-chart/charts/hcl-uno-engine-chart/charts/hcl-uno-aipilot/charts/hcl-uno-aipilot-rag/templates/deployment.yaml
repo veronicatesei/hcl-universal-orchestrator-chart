@@ -1,6 +1,6 @@
 ######################################################################
 # Licensed Materials Property of HCL*
-# (c) Copyright HCL Technologies Ltd. 2024. All rights reserved.
+# (c) Copyright HCL Technologies Ltd. 2025. All rights reserved.
 #
 # * Trademark of HCL Technologies Limited
 ######################################################################
@@ -26,6 +26,40 @@ spec:
 {{- toYaml .Values.podSecurityContext | nindent 8 }}
 {{ include "rag.pull.secret" . | indent 6 }}
 {{ include "rag.serviceAccountName" . | indent 6 }}
+      initContainers:
+        - name: init-wait-for-vector-db
+          image: busybox
+          env:
+{{- include "sltCommon.postgres.env.common" . | nindent 12 }}
+          command: ['sh', '-c', 'until nc -z $POSTGRES_HOST:5432; do echo waiting for $POSTGRES_HOST:5432; sleep 30; done;']
+        - name: init-create-postgres-user
+          image: postgres:latest
+          volumeMounts:
+{{- include "rag.commonssl.volumeMounts.definition" . | nindent 12 }}
+          env:
+{{- include "sltCommon.postgres.env.common" . | nindent 12 }}
+{{- include "sltCommon.postgres.env.password" . | nindent 12 }}
+{{- include "sltCommon.postgres.env.adminpassword" . | nindent 12 }}
+{{- include "sltCommon.init.postgres.certificate.env" . | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              if [ "$(PGPORT=$POSTGRES_PORT PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -tAc "SELECT 1 FROM pg_roles WHERE rolname='$POSTGRES_USER'")" != "1" ]; then
+                PGPORT=$POSTGRES_PORT PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -c "CREATE USER \"$POSTGRES_USER\" WITH PASSWORD '$POSTGRES_PASSWORD';"
+              else
+                echo "User $POSTGRES_USER already exists"
+              fi
+        - name: init-create-db
+          image: postgres:latest
+          volumeMounts:
+{{- include "rag.commonssl.volumeMounts.definition" . | nindent 12 }}
+          env:
+{{- include "sltCommon.postgres.env.common" . | nindent 12 }}
+{{- include "sltCommon.postgres.env.password" . | nindent 12 }}
+{{- include "sltCommon.postgres.env.adminpassword" . | nindent 12 }}
+{{- include "sltCommon.init.postgres.certificate.env" . | nindent 12 }}
+          command: ['sh', '-c', 'for DB in $POSTGRES_DB; do if ! PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql "host=$POSTGRES_HOST user=$POSTGRES_ADMIN_USER" -lqt | cut -d \| -f 1 | grep -qw $DB; then PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql "host=$POSTGRES_HOST user=$POSTGRES_ADMIN_USER" -c "CREATE DATABASE $DB WITH OWNER \"$POSTGRES_USER\" ENCODING=UTF8 TEMPLATE=template0;"; fi; PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql "host=$POSTGRES_HOST user=$POSTGRES_ADMIN_USER dbname=$DB" -c "CREATE EXTENSION IF NOT EXISTS vector;"; done']
       containers:
         - name: "{{ .Chart.Name }}"
           image: {{ include "rag.registry" . }}/{{ .Values.container.image }}:{{ .Values.container.tag }}
@@ -37,11 +71,6 @@ spec:
 {{- include "rag.sofy.env.variables" . | indent 12 }}
             - name: NLTK_DATA
               value: /tmp/nltk_data
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "postgres.password" . }}
-                  key: password
             {{- if (.Values.global.sofySolutionContext) }} 
             - name: OIDC_SERVER_URL
               value : https://sofy-kc.$(SOFY_HOSTNAME)/auth
@@ -72,13 +101,13 @@ spec:
             {{- end }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /opt/apikey/gcp-vertexai-svc.json
-            - name: POSTGRES_HOST
-              value: {{ .Release.Name }}-{{ tpl .Values.vectordb.name . }}
-            - name: POSTGRES_URL
-              value: {{ .Values.config.POSTGRES_URL | default "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):5432" }}
+{{- include "rag.commonssl.env.definition" . | indent 12 }}
+{{- include "sltCommon.postgres.env.common" . | indent 12 }}
+{{- include "sltCommon.postgres.env.password" . | indent 12 }}
           ports:
             - containerPort: {{ .Values.container.port }}
           volumeMounts:
+{{- include "rag.commonssl.volumeMounts.definition" . | nindent 12 }}
             - name: nltk-data-dir
               mountPath: /tmp/nltk_data
             {{- range $key, $value := .Values.authorization.certs  }}
@@ -109,6 +138,7 @@ spec:
               cpu: "{{ .Values.resources.requests.cpu }}"
               memory: "{{ .Values.resources.requests.memory }}"
       volumes:
+{{- include "rag.commonssl.volume.definition" . | nindent 8 }}
         - name: nltk-data-dir
           emptyDir: {}
         - name: certs-volumes

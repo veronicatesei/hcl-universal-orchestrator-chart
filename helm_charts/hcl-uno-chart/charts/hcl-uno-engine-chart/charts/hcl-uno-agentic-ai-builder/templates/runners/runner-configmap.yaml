@@ -1,0 +1,39 @@
+# *******************************************************************************
+# Licensed Materials - Property of HCL
+# (c) Copyright HCL Technologies Ltd. 2024. All Rights Reserved.
+# 
+# Note to U.S. Government Users Restricted Rights:
+# Use, duplication or disclosure restricted by GSA ADP Schedule
+# *******************************************************************************
+
+{{- $root := .  -}}
+{{- $deploymentType := include "agenticbuilder.runner.list" $root | fromJsonArray -}}
+{{- range $deploymentType}}
+{{- $currentDeploymentType := . -}}
+
+{{ $fullname :=  include "agenticbuilder.fullname" $root }}
+{{ $unoFullName := include "uno.fullname" $root }}
+
+apiVersion:  v1
+kind:  ConfigMap
+metadata: 
+  name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-configmap"
+data: 
+  STATE_MANAGER: {{ tpl (default "valkey" $root.Values.runner.config.stateManager) $root | quote }}
+  EXECUTOR_SCHEME: {{ tpl (default "https" $root.Values.runner.config.executorScheme) $root | quote }}
+
+  ENABLE_TELEMETRY: {{ tpl (default "false" $root.Values.telemetry.enableTelemetry) $root | quote }}
+  TELEMETRY_BASE_URL: {{ tpl (default "" $root.Values.telemetry.telemetryBaseUrl) $root | quote }}
+  INFERENCE_ENDPOINT: {{ tpl (default "" $root.Values.telemetry.inferenceEndpoint) $root | quote }}
+  TELEMETRY_SERVICE_NAME: {{ tpl (default "runner" $root.Values.telemetry.telemetryServiceName) $root | quote }}
+  OTEL_SERVICE_NAME: {{ tpl (default "runner" $root.Values.telemetry.telemetryServiceName) $root | quote }}
+  
+  TELEMETRY_EXPORT_INTERVAL_MILLIS: {{ tpl (default "60000" $root.Values.telemetry.telemetryExportIntervalMillis) $root | quote }}
+  #AMS Configuration
+  UNO_MCP_BASE_URL : {{ default (printf "https://%s-gateway:8443/mcp/sse" (include "uno.fullname" $root)) $root.Values.runner.config.unoMCPBaseURL }}
+  MEMORY_TYPE : {{ default "raw" $root.Values.runner.config.memoryType | quote }}
+  EMBEDDING_PROVIDER: {{ default "huggingface" $root.Values.runner.config.embeddingProvider | quote }}
+  EMBEDDING_MODEL : {{ default "sentence-transformers/all-mpnet-base-v2" $root.Values.runner.config.embeddingModel | quote }}
+  EMBEDDING_DIMENSIONS : {{ default "768" $root.Values.runner.config.embeddingDimensions | quote }} 
+---
+{{- end}}

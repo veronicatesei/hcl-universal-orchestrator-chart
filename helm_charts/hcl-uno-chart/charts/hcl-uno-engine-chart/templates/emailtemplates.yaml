@@ -1,0 +1,23 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2019, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
+{{ $fullName := include "fullname" . }}
+
+{{- if .Values.config.multitenant.eMailTenantReadyTemplate -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}-email-templates"
+  labels:
+{{ include "uno.common.label" . | indent 4 }}
+data:
+  # The Tenant Ready email template
+  tenant-ready.html: |-
+{{ .Values.config.multitenant.eMailTenantReadyTemplate | indent 4 }}
+
+---
+{{- end -}}
