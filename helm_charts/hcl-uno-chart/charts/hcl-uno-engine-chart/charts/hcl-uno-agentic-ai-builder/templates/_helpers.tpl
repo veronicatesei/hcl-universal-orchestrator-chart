@@ -522,7 +522,16 @@ initContainers:
 {{- include "agenticbuilder.init.postgres.certificate.env" . | nindent 6 }}
 {{- include "agenticbuilder.env.postgres.adminpassword" . | nindent 6 }}
 {{- include "agenticbuilder.postgres.envs.common" . | nindent 6 }}
-    command: ['sh', '-c', 'if ! PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -lqt | cut -d \| -f 1 | grep -qw $POSTGRES_DB; then PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -c "CREATE DATABASE $POSTGRES_DB WITH OWNER \"$POSTGRES_USER\" ENCODING=UTF8 TEMPLATE=template0;"; else echo "Database $POSTGRES_DB already exists with this user $POSTGRES_USER"; fi']  
+    command:
+      - sh
+      - -c
+      - |
+        if ! PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -lqt | cut -d '|' -f 1 | grep -qw $POSTGRES_DB; then
+          PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_ADMIN_USER -c "CREATE DATABASE $POSTGRES_DB WITH OWNER \"$POSTGRES_USER\" ENCODING=UTF8 TEMPLATE=template0;"
+        else
+          echo "Database $POSTGRES_DB already exists with this user $POSTGRES_USER"
+        fi
+        PGPORT=5432 PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql "host=$POSTGRES_HOST user=$POSTGRES_ADMIN_USER dbname=$POSTGRES_DB" -c "CREATE EXTENSION IF NOT EXISTS vector;"
       {{- end }}
 {{- end -}}
 

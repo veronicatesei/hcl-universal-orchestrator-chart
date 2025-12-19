@@ -27,15 +27,13 @@ global:
   # configPlugins is the ConfigMap containing list of plugin to be installed.
   configPlugins:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
-  pluginImageRepository: hclcr.io/wa
+  pluginImageRepository: hclcr.io/uno-ea
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-workload-automation-plugins:1.0.26
+  pluginImageName: hcl-uno-automation-plugins:2.1.4.0-beta1
   # extraImages is the list of images with tags containing OCLI and agent for download from engine.
   extraImages:
-    - registry: hclcr.io/uno
-      name: hcl-uno-external-pod:2.1.3.0
-    - registry: hclcr.io/wa
-      name: hcl-workload-automation-packages:10.2.6.00.20251212
+    - registry: hclcr.io/uno-ea
+      name: hcl-uno-external-pod:2.1.4.0-beta1
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -247,11 +245,11 @@ uno:
 
     registry:
       # name is the name of your registry.
-      name:  hclcr.io/uno
+      name:  hclcr.io/uno-ea
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 2.1.3.0
+      tag: 2.1.4.0-beta1
     orchestrator:
       # Specifies for how long the Task Run History is retained (in ISO 8601 format, e.g., P400D).
       jobRunHistoryRetentionDuration: P400DT0H
@@ -588,8 +586,8 @@ uno:
  
   hclaipilot:
     image:
-      repository: hclcr.io/uno
-      tag: 2.1.3.0
+      repository: hclcr.io/uno-ea
+      tag: 2.1.4.0-beta1
 
     # Channels Configuration
     # The following configuration is used to enable the AIPilot for the channels. For each channel, you need to provide the required configuration.
@@ -759,8 +757,8 @@ uno:
         maxReplicas: 2  # Maximum number of replicas
 
       container:
-        registry: hclcr.io/uno # Image name
-        tag: 2.1.3.0  # Image tag
+        registry: hclcr.io/uno-ea # Image name
+        tag: 2.1.4.0-beta1  # Image tag
 
       authorization:
         # Is the URL of the OpenID Connect (OIDC) server.
@@ -1077,9 +1075,9 @@ uno:
       proxyURL: ""
     image:
       # The registry where the image is hosted
-      repository: hclcr.io/uno
+      repository: hclcr.io/uno-ea
       # The tag of the images
-      tag: 2.1.3.0
+      tag: 2.1.4.0-beta1
       # The Pull Policy for the images
       imagePullPolicy: Always
 
