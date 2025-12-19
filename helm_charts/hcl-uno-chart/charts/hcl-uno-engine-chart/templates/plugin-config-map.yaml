@@ -14,34 +14,7 @@ metadata:
 {{ include "uno.common.label" . | indent 4 }}
 data:
   plugins.properties: |
-      com.hcl.scheduling.agent.kubernetes
-      com.hcl.scheduling.agent.udeploycode
-      com.hcl.wa.plugin.ansible
-      com.hcl.wa.plugin.automationanywherebotrunner
-      com.hcl.wa.plugin.automationanywherebottrader
-      com.hcl.wa.plugin.awscloudformation
-      com.hcl.wa.plugin.awslambda
-      com.hcl.wa.plugin.awssns
-      com.hcl.wa.plugin.awssqs
-      com.hcl.wa.plugin.azureresourcemanager
-      com.hcl.wa.plugin.azuredatabricks
-      com.hcl.wa.plugin.azurestorage
-      com.hcl.wa.plugin.blueprism
-      com.hcl.wa.plugin.compression
-      com.hcl.wa.plugin.encryption
-      com.hcl.wa.plugin.gcpcloudstorage
-      com.hcl.wa.plugin.gcpcloudfunction
-      com.hcl.wa.plugin.gcpdeploymentmanager
-      com.hcl.wa.plugin.obiagent
-      com.hcl.wa.plugin.odiloadplan
-      com.hcl.wa.plugin.oraclehcmdataloader
-      com.hcl.wa.plugin.oracleucm
-      com.hcl.wa.plugin.saphanaxsengine
-      com.hcl.wa.plugin.sapdataservices
-      com.hcl.waPlugin.chefbootstrap
-      com.hcl.waPlugin.chefrunlist
-      com.hcl.waPlugin.obirunreport
-      com.hcl.waPlugin.odiscenario
+      com.hcl
       com.ibm.scheduling.agent.apachespark
       com.ibm.scheduling.agent.aws
       com.ibm.scheduling.agent.azure
@@ -53,7 +26,6 @@ data:
       com.ibm.scheduling.agent.filetransfer
       com.ibm.scheduling.agent.hadoopfs
       com.ibm.scheduling.agent.hadoopmapreduce
-      com.hcl.scheduling.agent.hcllaunch
       com.ibm.scheduling.agent.java
       com.ibm.scheduling.agent.jobdurationpredictor
       com.ibm.scheduling.agent.jobmanagement
@@ -74,47 +46,9 @@ data:
       com.ibm.scheduling.agent.variabletable
       com.ibm.scheduling.agent.webspheremq
       com.ibm.scheduling.agent.ws
-      com.hcl.wa.plugin.awsbatch
-      com.hcl.wa.plugin.awss3
-      com.hcl.wa.plugin.awss3batchoperation
-      com.hcl.wa.plugin.axwayst
-      com.hcl.wa.plugin.azuredatafactory
-      com.hcl.wa.plugin.gcpcloudbigquery
-      com.hcl.wa.plugin.gcpclouddataflow
-      com.hcl.wa.plugin.softwaredefinedmainframe
-      com.hcl.wa.plugin.uipath
       com.ibm.scheduling.agent.j2ee
-      com.hcl.wa.plugin.azurelogicapps
-      com.hcl.wa.plugin.gcpcloudbatch
-      com.hcl.wa.plugin.gcpubsub
-      com.hcl.wa.plugin.ibmroboticprocessautomation
-      com.hcl.wa.plugin.jdedwards
-      com.hcl.wa.plugin.jira
-      com.hcl.wa.plugin.jsonata
-      com.hcl.wa.plugin.openai
-      com.hcl.wa.plugin.sapibp
-      com.hcl.wa.plugin.servicenow
-      com.hcl.wa.plugin.snowflake
       com.ibm.scheduling.agent.biginsights
       com.ibm.scheduling.agent.jcl
-      com.hcl.wa.plugin.awsglue
-      com.hcl.wa.plugin.awsstepfunctions
-      com.hcl.wa.plugin.axwaytransfercft
-      com.hcl.wa.plugin.azureservicebus
-      com.hcl.wa.plugin.mybiros
-      com.hcl.wa.plugin.sendemail
-      com.hcl.wa.plugin.azurebatch
-      com.hcl.wa.plugin.gcworkflows
-      com.hcl.wa.plugin.watsonxai
-      com.hcl.wa.plugin.gcpcloudrun
-      com.hcl.wa.plugin.gcpvertexai
-      com.hcl.wa.plugin.wait
-      com.hcl.wa.plugin.airflow
-      com.hcl.wa.plugin.amazonbedrockagents
-      com.hcl.wa.plugin.azurequeue
-      com.hcl.wa.plugin.crewai
-      com.hcl.wa.plugin.langgraph
-      com.hcl.wa.plugin.robotiq
 ---
 
 
@@ -126,34 +60,7 @@ metadata:
 {{ include "uno.common.label" . | indent 4 }}
 data:
   plugins.properties: |
-      com.hcl.scheduling.agent.kubernetes
-      com.hcl.scheduling.agent.udeploycode
-      com.hcl.wa.plugin.ansible
-      com.hcl.wa.plugin.automationanywherebotrunner
-      com.hcl.wa.plugin.automationanywherebottrader
-      com.hcl.wa.plugin.awscloudformation
-      com.hcl.wa.plugin.awslambda
-      com.hcl.wa.plugin.awssns
-      com.hcl.wa.plugin.awssqs
-      com.hcl.wa.plugin.azureresourcemanager
-      com.hcl.wa.plugin.azuredatabricks
-      com.hcl.wa.plugin.azurestorage
-      com.hcl.wa.plugin.blueprism
-      com.hcl.wa.plugin.compression
-      com.hcl.wa.plugin.encryption
-      com.hcl.wa.plugin.gcpcloudstorage
-      com.hcl.wa.plugin.gcpcloudfunction
-      com.hcl.wa.plugin.gcpdeploymentmanager
-      com.hcl.wa.plugin.obiagent
-      com.hcl.wa.plugin.odiloadplan
-      com.hcl.wa.plugin.oraclehcmdataloader
-      com.hcl.wa.plugin.oracleucm
-      com.hcl.wa.plugin.saphanaxsengine
-      com.hcl.wa.plugin.sapdataservices
-      com.hcl.waPlugin.chefbootstrap
-      com.hcl.waPlugin.chefrunlist
-      com.hcl.waPlugin.obirunreport
-      com.hcl.waPlugin.odiscenario
+      com.hcl
       com.ibm.scheduling.agent.apachespark
       com.ibm.scheduling.agent.aws
       com.ibm.scheduling.agent.azure
@@ -167,7 +74,6 @@ data:
       com.ibm.scheduling.agent.filetransfer
       com.ibm.scheduling.agent.hadoopfs
       com.ibm.scheduling.agent.hadoopmapreduce
-      com.hcl.scheduling.agent.hcllaunch
       com.ibm.scheduling.agent.j2ee
       com.ibm.scheduling.agent.java
       com.ibm.scheduling.agent.jobdurationpredictor
@@ -189,43 +95,5 @@ data:
       com.ibm.scheduling.agent.variabletable
       com.ibm.scheduling.agent.webspheremq
       com.ibm.scheduling.agent.ws
-      com.hcl.wa.plugin.awsbatch
-      com.hcl.wa.plugin.awss3
-      com.hcl.wa.plugin.awss3batchoperation
-      com.hcl.wa.plugin.axwayst
-      com.hcl.wa.plugin.azuredatafactory
-      com.hcl.wa.plugin.gcpcloudbigquery
-      com.hcl.wa.plugin.gcpclouddataflow
-      com.hcl.wa.plugin.softwaredefinedmainframe
-      com.hcl.wa.plugin.uipath
-      com.hcl.wa.plugin.azurelogicapps
-      com.hcl.wa.plugin.gcpcloudbatch
-      com.hcl.wa.plugin.gcpubsub
-      com.hcl.wa.plugin.ibmroboticprocessautomation
-      com.hcl.wa.plugin.jdedwards
-      com.hcl.wa.plugin.jira
-      com.hcl.wa.plugin.jsonata
-      com.hcl.wa.plugin.openai
-      com.hcl.wa.plugin.sapibp
-      com.hcl.wa.plugin.servicenow
-      com.hcl.wa.plugin.snowflake
       com.ibm.scheduling.agent.biginsights
       com.ibm.scheduling.agent.jcl
-      com.hcl.wa.plugin.awsglue
-      com.hcl.wa.plugin.awsstepfunctions
-      com.hcl.wa.plugin.axwaytransfercft
-      com.hcl.wa.plugin.azureservicebus
-      com.hcl.wa.plugin.mybiros
-      com.hcl.wa.plugin.sendemail
-      com.hcl.wa.plugin.gcworkflows
-      com.hcl.wa.plugin.watsonxai
-      com.hcl.wa.plugin.gcpcloudrun
-      com.hcl.wa.plugin.gcpvertexai
-      com.hcl.wa.plugin.wait
-      com.hcl.wa.plugin.azurebatch
-      com.hcl.wa.plugin.airflow
-      com.hcl.wa.plugin.amazonbedrockagents
-      com.hcl.wa.plugin.azurequeue
-      com.hcl.wa.plugin.crewai
-      com.hcl.wa.plugin.langgraph
-      com.hcl.wa.plugin.robotiq

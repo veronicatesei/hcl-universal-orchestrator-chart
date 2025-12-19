@@ -31,21 +31,14 @@ data:
     tracker_store:
         type: SQL
         dialect: "postgresql"  # the dialect used to interact with the db
-        url: ${POSTGRES_DB}  # (optional) host of the sql db, e.g. "localhost"
+        url: {{ include "sltCommon.postgres.connectionString" . }}
         db: ${POSTGRES_DB_RASA}  # path to your db
         username: ${POSTGRES_USER} # username used for authentication
-        password: ${PASSWORD_TRACKERSTORE} # password used for authentication
+        password: ${POSTGRES_PASSWORD} # password used for authentication
     
     lock_store:
         type:  rasa_custom_components.pg_lock_store.PgLockStore
-        url: ${POSTGRES_DB} # (optional) host of the sql db, e.g. "localhost"
-        db: ${POSTGRES_DB_RASA}   # path to your db
-        username: ${POSTGRES_USER} # username used for authentication
-        password: ${PASSWORD_LOCKSTORE} # password used for authentication
-        port: 5432 # port of your sql instance, usually 5432
-        cafile: /security/postgres/certs/ca.crt
-        certfile: /security/postgres/certs/tls.crt
-        keyfile: /security/postgres/certs/tls.key
+ 
     nlg:
       url: ${PILOT_NLG_URL}/nlg
       cafile: ${ROOT_CA_FOLDER}/cacert.pem

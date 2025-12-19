@@ -1,0 +1,74 @@
+######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021, 2023. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+######################################################################
+{{ $baseImageName := include "baseImageName" . }}
+{{ $saName := include "uno.serviceAccount" . }}
+{{- $root := . -}}
+####################################################################
+# 
+####################################################################
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: uno-agent
+  labels:
+    app: uno-agent
+spec:
+  serviceName: iws-build-unoagent-h
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+  revisionHistoryLimit: 10
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uno-agent
+  template:
+    metadata:
+      name: uno-agent
+      labels:
+        app: uno-agent
+    spec:
+      serviceAccountName: {{ $root.Values.global.serviceAccountName | default $saName }}
+      serviceAccount: {{ $root.Values.global.serviceAccountName | default $saName }}
+{{ include "uno.securityContext" . | indent 6 }}
+      containers:
+        - image: {{ include "uno.repouno" $root }}/{{ $baseImageName }}agent:{{  $root.Values.config.registry.tag }}
+          imagePullPolicy: {{ .Values.config.registry.pullPolicy }}
+          name: uno-agent
+          livenessProbe:
+            exec:
+              command:
+                - /opt/uno_utils/uno_agent_probe.sh
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 4
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - /opt/uno_utils/uno_agent_probe.sh
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 20
+            timeoutSeconds: 5
+          env:
+{{ include "uno.agent.configuration"  . | indent 12 }}
+          volumeMounts:
+{{ include "uno.agent.volume.mounts"  . | indent 12 }}
+      volumes:
+{{ include "uno.agent.volume"  . | indent 8 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: uno-agent
+        labels:
+          app: uno-agent
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.persistence.dataPVC.size | quote }}
+{{ include "uno.agent.volume.claim.template"  . | indent 8 }}

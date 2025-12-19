@@ -56,14 +56,11 @@ spec:
       volumes:
 {{- include "agenticbuilder.hclauthorization.volume" $root | nindent 8 }}
 {{- include "agenticbuilder.additionalCAs.volume" $root | nindent 8 }}
+{{- include "agenticbuilder.otel.volume" $root | nindent 8 }}
+{{- include "agenticbuilder.commonssl.volume.definition" $root | nindent 8 }}
         - name: https-cert
           secret:
             secretName: {{ include "agenticbuilder.cert.name" $root }}
-        {{- if $root.Values.common.apisix.certificateSecret }}
-        - name: apisix-certificate
-          secret:
-            secretName: {{ tpl $root.Values.common.apisix.certificateSecret  $root }}
-        {{- end }}
       containers:
         - name: "{{ $fullname }}-{{ $root.Values.runner.name }}"
 {{- include "agenticbuilder.image" (list $root $root.Values.runner) | nindent 10 }}
@@ -75,26 +72,31 @@ spec:
               name: port-{{ default 8000 $root.Values.runner.port }}
               protocol: TCP
           env:
-{{- include "agenticbuilder.env.valkey.password" $root | nindent 12 }}
-{{- include "agenticbuilder.env.apisix.apikey" $root | nindent 12 }}
             - name: EXECUTOR_PREFIX_KEY
               value: {{ $currentDeploymentType }}
             - name: EXECUTOR_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullname }}-{{ $root.Values.credentialManager.name }}-encryption-key
+                  key: encryption-key
             - name: ROOT_PATH
               value: "/$(EXECUTOR_NAME)"
             - name: EXECUTOR_ADDRESS
               value: "$(EXECUTOR_NAME).{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-headless.{{ $root.Release.Namespace }}.svc.cluster.local:{{ default 8000 $root.Values.runner.port }}"
-{{- include "agenticbuilder.hclauthorization.env" $root | indent 12 }}
+{{- include "agenticbuilder.commonssl.env.definition" $root | nindent 12 }}
+{{- include "agenticbuilder.env.valkey.password" $root | nindent 12 }}
+{{- include "agenticbuilder.env.postgres.password" $root | nindent 12 }}
+{{- include "agenticbuilder.hclauthorization.env" $root | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: {{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-configmap
             - configMapRef:
                 name: {{ $fullname }}-common-configmap
           volumeMounts:
-{{- include "agenticbuilder.hclauthorization.volume.mount" $root | indent 12 }}
             - name: https-cert
               mountPath: "/https"
               readOnly: true
@@ -102,11 +104,9 @@ spec:
               subPath: "ca.crt"
               mountPath: "/ca/ca.crt"
               readOnly: true
+{{- include "agenticbuilder.commonssl.volumeMounts.definition" $root | indent 12 }}
+{{- include "agenticbuilder.hclauthorization.volume.mount" $root | indent 12 }}
 {{- include "agenticbuilder.additionalCAs.volumeMounts" $root | indent 12 }}
-            {{- if $root.Values.common.apisix.certificateSecret }}
-            - name: apisix-certificate
-              mountPath : "/gateway-certs/"
-              readOnly: true
-            {{- end }}
+{{- include "agenticbuilder.otel.volumeMounts" $root | indent 12 }}
 ---
 {{- end}}
