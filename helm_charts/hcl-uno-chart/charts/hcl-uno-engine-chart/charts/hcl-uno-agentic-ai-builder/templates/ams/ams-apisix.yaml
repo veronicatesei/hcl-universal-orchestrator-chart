@@ -1,0 +1,49 @@
+{{ $fullname := include "agenticbuilder.fullname" . }}
+{{- $root := . -}}
+{{- $amsName := printf "%s-%s" $fullname .Values.ams.name  | trunc 80 }}
+
+apiVersion: apisix.apache.org/v2
+kind: ApisixUpstream
+metadata:
+  name: {{ $amsName }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.common.apisix.ingressClassName }}
+spec:
+  loadbalancer:
+    type: roundrobin
+  scheme: https
+  ingressClassName: {{ .Values.common.apisix.ingressClassName }}
+---
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: "{{ $amsName }}-route"
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.common.apisix.ingressClassName }}
+spec:
+  ingressClassName: {{ .Values.common.apisix.ingressClassName }}
+  http:
+  - name: "main-route"
+    match:
+      paths:
+      - "/{{ $amsName }}/*"
+      - "/ams/*"
+    backends:
+    - serviceName: {{ $amsName }}
+      servicePort: {{ .Values.ams.port }}
+    plugins:
+    - name : serverless-pre-function
+      enable: true
+      config:
+        phase: "rewrite"
+        functions:
+          - |
+            return function(_,ctx)
+              ctx.var.rewrited_uri = ctx.var.uri
+              ctx.var.rewrited_uri = string.gsub(ctx.var.rewrited_uri, "/{{ include "agenticbuilder.replace.dash.percentdash" $amsName }}/", "")
+              ctx.var.rewrited_uri = string.gsub(ctx.var.rewrited_uri, "/ams/", "")
+            end
+    - name: proxy-rewrite
+      enable: true
+      config:
+        uri: "/$rewrited_uri"

@@ -137,6 +137,10 @@ spec:
                   optional: false
             - name: UNO_MICROSERVICE_JWT_EXPIRATION_DURATION
               value: "{{  $root.Values.config.jwt.internalExpirationDuration }}"
+{{- if $root.Values.config.multitenant.enabled }}
+            - name: UNO_MONGODB_DATABASE
+              value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.config.multitenant.commonTenantDatabaseName }}"
+{{- else }}
             - name: UNO_MONGODB_DATABASE
 {{- if $root.Values.config.multitenant.enabled }}
               value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.config.multitenant.commonTenantDatabaseName }}"

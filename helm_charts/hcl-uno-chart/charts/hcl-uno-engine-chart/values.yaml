@@ -424,6 +424,12 @@ config:
     additionalCASecrets:
     #  - secretname1
 
+  controller:
+    # maximum duration for which audit logs are retained. After this duration, audit logs are deleted.
+    auditMaxRetentionDuration: P10Y
+    # frequency for the cleanup job that deletes old audit logs.
+    auditCleanupFrequency: P1D
+
   apiKey:
     # lifespanWarningDays specifies how many days before API Key expiration you are notified about it.
     lifespanWarningDays: 5
