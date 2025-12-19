@@ -37,7 +37,7 @@ config:
     # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
     pullPolicy: Always
     # tag is the tag of the image. The default value is latest.
-    tag: 2.1.3.0
+    tag: 2.1.4.0-beta1
   tracing:
     # enabled specifies whether tracing is enabled. Supported value are true and false.
     enabled: false
