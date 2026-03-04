@@ -22,7 +22,11 @@ spec:
   host: 
   to:
     kind: Service
+{{- if eq .Values.global.deploymentType  "aio" }}
+    name: {{ $fullName }}-console-aio
+{{- else }}
     name: {{ $fullName }}-gateway
+{{- end }}
     weight: 100
   port:
     targetPort: https
@@ -46,7 +50,11 @@ spec:
   host: 
   to:
     kind: Service
+{{- if eq .Values.global.deploymentType  "aio" }}
+    name: {{ $fullName }}-console-aio
+{{- else }}
     name: {{ $fullName }}-agentmanager
+{{- end }}
     weight: 100
   port:
     targetPort: https
@@ -70,7 +78,11 @@ spec:
   host: 
   to:
     kind: Service
+{{- if eq .Values.global.deploymentType  "aio" }}
+    name: {{ $fullName }}-console-aio
+{{- else }}
     name: {{ $fullName }}-console
+{{- end }}
     weight: 100
   port:
     targetPort: https

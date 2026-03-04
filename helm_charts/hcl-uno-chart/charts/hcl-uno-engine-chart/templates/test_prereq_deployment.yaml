@@ -52,6 +52,10 @@ spec:
           env:
             - name: UNO_MONGODB_DATABASE
               value: "{{ .Values.database.databaseName }}"
+            - name: QUARKUS_MONGODB_MIN_POOL_SIZE
+              value: "{{ .Values.database.databaseMinPoolSize }}"
+            - name: QUARKUS_MONGODB_MAX_POOL_SIZE
+              value: "{{ .Values.database.databaseMaxPoolSize }}"
 {{ include "common.env.variable" . | indent 12 }}
 {{ include "uno.secret.volumes.mounts" . | indent 10 }}
 {{ include "uno.secret.volumes" . | indent 6 }}

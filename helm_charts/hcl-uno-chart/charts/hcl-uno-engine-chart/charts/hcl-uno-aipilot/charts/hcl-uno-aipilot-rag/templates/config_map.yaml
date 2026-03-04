@@ -9,19 +9,17 @@ kind: ConfigMap
 metadata:
   name: {{ include "rag.configMapName" . }}
 data:
-  LLM: {{ .Values.config.LLM | default "gemini-1.5-flash-001"  | quote }}
+  LLM: {{ .Values.config.LLM | default "gemini-2.5-flash"  | quote }}
   EMBED_MODEL: {{ .Values.config.EMBED_MODEL | default "BGE-SMALL-EN" | quote }}
   RAG_TYPE: {{ .Values.config.RAG_TYPE | default "RERANK" | quote }}
   DOC_VERSION: {{ .Values.config.DOC_VERSION | default "custom" | quote }}
   THREADED: {{ .Values.config.THREADED | default  "False" | quote }}
   PROCESSES: {{ .Values.config.PROCESSES | default "1" | quote }}
   UI_PORT: {{ .Values.config.UI_PORT | default "80" | quote }}
-  POSTGRES_USER: {{ .Values.config.POSTGRES_USER | default "postgres" | quote }}
-  POSTGRES_DB: {{ .Values.config.POSTGRES_DB | default  "vector_db" | quote }}
-  POSTGRES_DB_PORT: {{ .Values.config.POSTGRES_DB_PORT | default "5432" | quote }}
   IS_TEST: {{ .Values.config.IS_TEST | default "False" | quote }}
   GOOGLE_APPLICATION_CREDENTIALS_JSON: {{ .Values.config.GOOGLE_APPLICATION_CREDENTIALS_JSON | default "" | b64enc | quote }}
-  
+  LOG_LEVEL: {{ .Values.config.LOG_LEVEL | default "INFO" | quote }}
+
   {{- if .Values.global.enableUnoAIPilot }}
   HCL_CLOUD_ENDPOINT: {{ .Values.config.HCL_CLOUD_ENDPOINT | default (printf "https://%s-console:8443/ui/genai-proxy/uno/api/v1/ai/genai" (include "uno.fullname" .)) | quote }}
   UNO_GATEWAY_HOST: {{ .Values.config.UNO_GATEWAY_HOST | default (printf "https://%s-gateway" (include "uno.fullname" .)) | quote }}

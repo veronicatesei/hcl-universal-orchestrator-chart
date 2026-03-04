@@ -12,9 +12,19 @@ metadata:
   name: {{ $fullName }}-engines-config
   labels:
 {{ include "uno.common.label" . | indent 4 }}
+{{- if eq .Values.global.deploymentType  "aio" }}
+data:
+  uno.json: |
+      {
+          "name": "UnO",
+          "baseUrl": "https://{{ $fullName }}-console-aio:8443"
+      }     
+{{- else }}
 data:
   uno.json: |
       {
           "name": "UnO",
           "baseUrl": "https://{{ $fullName }}-gateway:8443"
       }     
+{{- end }}
+

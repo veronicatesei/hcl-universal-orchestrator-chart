@@ -1,0 +1,49 @@
+================================================================================
+HCL Universal Orchestrator has been installed!
+================================================================================
+
+{{- if .Values.uno.gatewayApi.enabled }}
+  {{- if not (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1/BackendTLSPolicy") }}
+    {{- if .Values.uno.gatewayApi.skipLibraryCheck }}
+[WARNING]
+BackendTLSPolicy was generated due to 'skipLibraryCheck: true', but the
+'gateway.networking.k8s.io/v1' API was not detected on this cluster.
+The resources may fail to apply unless the Standard Gateway API CRDs v1.4
+or later are installed.
+    {{- else }}
+[NOTICE]
+BackendTLSPolicy was skipped because the 'gateway.networking.k8s.io/v1'
+API is not available on this cluster. Internal traffic will use standard
+unvalidated TLS.
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- if .Values.uno.ingress.enabled }}
+External URLs (via Ingress):
+  Console:        https://{{ .Values.uno.deployment.console.ingressPrefix }}.{{ trimPrefix "." .Values.uno.ingress.baseDomainName }}
+  Gateway:        https://{{ .Values.uno.deployment.gateway.ingressPrefix }}.{{ trimPrefix "." .Values.uno.ingress.baseDomainName }}
+  Agent Manager:  https://{{ .Values.uno.deployment.agentmanager.ingressPrefix }}.{{ trimPrefix "." .Values.uno.ingress.baseDomainName }}
+{{- if .Values.uno.config.multitenant.enabled }}
+  Tenant Manager: https://{{ .Values.uno.deployment.tenantmanager.ingressPrefix }}.{{ trimPrefix "." .Values.uno.ingress.baseDomainName }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.uno.gatewayApi.enabled }}
+External URLs (via Gateway API):
+  Console:        https://{{ .Values.uno.deployment.console.gatewayApiPrefix }}.{{ trimPrefix "." .Values.uno.gatewayApi.baseDomainName }}
+  Gateway:        https://{{ .Values.uno.deployment.gateway.gatewayApiPrefix }}.{{ trimPrefix "." .Values.uno.gatewayApi.baseDomainName }}
+  Agent Manager:  https://{{ .Values.uno.deployment.agentmanager.gatewayApiPrefix }}.{{ trimPrefix "." .Values.uno.gatewayApi.baseDomainName }}
+{{- if .Values.uno.config.multitenant.enabled }}
+  Tenant Manager: https://{{ .Values.uno.deployment.tenantmanager.gatewayApiPrefix }}.{{ trimPrefix "." .Values.uno.gatewayApi.baseDomainName }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.uno.global.sofySolutionContext }}
+External URLs (Sofy Context):
+  Console:        https://waconsole.$(SOFY_HOSTNAME)
+  Gateway:        https://wagateway.$(SOFY_HOSTNAME)
+  Agent Manager:  https://waagentmanager.$(SOFY_HOSTNAME)
+{{- end }}
+
+For more information, please refer to the product documentation.
