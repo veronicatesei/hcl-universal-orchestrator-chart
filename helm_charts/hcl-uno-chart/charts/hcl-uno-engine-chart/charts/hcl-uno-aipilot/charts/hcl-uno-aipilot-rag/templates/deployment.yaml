@@ -12,6 +12,8 @@ metadata:
   name: {{ include "rag.deploymentName" . }}
   labels:
     app: "{{ .Values.app.name }}"
+    app.kubernetes.io/name: "{{ .Values.app.name }}"
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.app.replicas }}
   selector:
@@ -71,13 +73,6 @@ spec:
 {{- include "rag.sofy.env.variables" . | indent 12 }}
             - name: NLTK_DATA
               value: /tmp/nltk_data
-            {{- if (.Values.global.sofySolutionContext) }} 
-            - name: OIDC_SERVER_URL
-              value : https://sofy-kc.$(SOFY_HOSTNAME)/auth
-            {{- else if .Values.authorization.oidcServerURL }}
-            - name: OIDC_SERVER_URL
-              value: {{ tpl .Values.authorization.oidcServerURL .}}
-            {{- end }}
             {{- if .Values.sharedKeySecretName }}
             - name: SHARED_KEY
               valueFrom:

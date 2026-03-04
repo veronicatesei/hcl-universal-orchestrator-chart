@@ -26,7 +26,6 @@ serviceAccountName: {{ tpl .Values.serviceAccount  .}}
 {{- end }}
 {{- end }}
 
-
 {{- define "rag.common.label" -}}
 {{- /*COMMENT - This if is a dirty way to check if it's cloud or not (NEEDS TO BE CHANGED)-  */}}
 {{- if .Values.global.customEnv }}
@@ -125,23 +124,30 @@ imagePullSecrets:
 {{- end -}}
 
 {{- define "rag.sofy.env.variables" -}}
-{{- if .Values.global.sofySolutionContext }}
+{{- if and .Values.global .Values.global.sofySolutionContext }}
 - name : SOFY_HOSTNAME
   valueFrom:
     configMapKeyRef:
         name: {{ .Release.Name }}-domain
         key : HOST
 {{- end }}
+{{- if and .Values.global (.Values.global.sofySolutionContext) }}
+- name: OIDC_SERVER_URL
+  value : https://sofy-kc.$(SOFY_HOSTNAME)/auth
+{{- else if .Values.authorization.oidcServerURL }}
+- name: OIDC_SERVER_URL
+  value: {{ tpl .Values.authorization.oidcServerURL .}}
+{{- end }}
 {{- end -}}
 
 {{- define "rag.registry" -}}
-{{- if eq .Values.global.hclImageRegistry "hclcr.io/sofy" -}}
+{{- if and .Values.global (eq .Values.global.hclImageRegistry "hclcr.io/sofy") -}}
 hclcr.io/uno
-{{- else if eq .Values.global.hclImageRegistry "hclcr.io" -}}
+{{- else if and .Values.global (eq .Values.global.hclImageRegistry "hclcr.io") -}}
 hclcr.io/uno
-{{- else if eq .Values.global.hclImageRegistry "gcr.io/blackjack-209019" -}}
+{{- else if and .Values.global (eq .Values.global.hclImageRegistry "gcr.io/blackjack-209019") -}}
 gcr.io/blackjack-209019/services/uno
-{{- else if .Values.global.hclImageRegistry -}}
+{{- else if and .Values.global .Values.global.hclImageRegistry -}}
 {{ print .Values.global.hclImageRegistry }}
 {{- else -}}
 {{ print .Values.container.registry }}

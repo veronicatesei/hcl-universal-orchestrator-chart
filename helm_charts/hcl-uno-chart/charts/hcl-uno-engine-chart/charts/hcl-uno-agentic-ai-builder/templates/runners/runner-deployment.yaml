@@ -21,6 +21,8 @@ metadata:
   name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
   labels:
     name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+    app.kubernetes.io/name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+    app.kubernetes.io/instance: {{ $.Release.Name | quote }}
 spec:
   serviceName: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-headless"
   replicas: {{ default $root.Values.replicaCount $root.Values.runner.replicaCount }}
@@ -35,6 +37,8 @@ spec:
       {{- end }}
       labels:
         name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+        app.kubernetes.io/name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+        app.kubernetes.io/instance: {{ $.Release.Name | quote }}
     spec:
 {{ include "agenticbuilder.pull.secret" $root | indent 6 }}
 {{ include "agenticbuilder.serviceAccountName" $root | indent 6 }}
@@ -91,6 +95,7 @@ spec:
 {{- include "agenticbuilder.env.valkey.password" $root | nindent 12 }}
 {{- include "agenticbuilder.env.postgres.password" $root | nindent 12 }}
 {{- include "agenticbuilder.hclauthorization.env" $root | nindent 12 }}
+{{- include "agenticbuilder.sofy.env.variables" $root | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: {{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-configmap

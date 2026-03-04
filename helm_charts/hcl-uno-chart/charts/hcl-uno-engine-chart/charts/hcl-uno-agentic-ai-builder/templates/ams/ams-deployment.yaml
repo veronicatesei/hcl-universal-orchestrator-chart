@@ -81,6 +81,7 @@ spec:
                   key: encryption-key
             - name: ROOT_PATH
               value: "/{{ $fullname }}-{{ .Values.ams.name }}"
+{{- include "agenticbuilder.sofy.env.variables" . | nindent 12 }}
 {{- include "agenticbuilder.commonssl.env.definition" . | nindent 12 }}
 {{- include "agenticbuilder.hclauthorization.env" . | nindent 12 }}              
 {{- include "agenticbuilder.env.postgres.password" . | nindent 12 }}

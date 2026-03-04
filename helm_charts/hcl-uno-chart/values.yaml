@@ -29,11 +29,11 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/uno-ea
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-uno-automation-plugins:2.1.4.0-beta1
+  pluginImageName: hcl-uno-automation-plugins:2.1.4.0-beta2
   # extraImages is the list of images with tags containing OCLI and agent for download from engine.
   extraImages:
     - registry: hclcr.io/uno-ea
-      name: hcl-uno-external-pod:2.1.4.0-beta1
+      name: hcl-uno-external-pod:2.1.4.0-beta2
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -249,7 +249,7 @@ uno:
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 2.1.4.0-beta1
+      tag: 2.1.4.0-beta2
     orchestrator:
       # Specifies for how long the Task Run History is retained (in ISO 8601 format, e.g., P400D).
       jobRunHistoryRetentionDuration: P400DT0H
@@ -272,6 +272,13 @@ uno:
       daysRetentionFailPlan: P30DT0H
       # Frequency to remove the past failed jobs
       frequencyFailJobCleanUp: PT1H
+    endpoints:
+      monitor:
+        frequency:
+          # frequency to check what endpoints need to be monitored
+          check: PT30S
+          # minimum frequency that can be specified for monitoring on an endpoint
+          min: PT1M
     console:
       # enableLogout specifies whether the Console logout is enabled. Supported values are true and false.
       enableLogout: false
@@ -309,17 +316,22 @@ uno:
       # Below information are only used if the genai service is internal deployment.
 
       # Gemini model used for AI Pilot. This is also the default model used for AI Agents. It must be a Gemini model.
-      defaultVertexAiModel: gemini-2.0-flash
+      defaultVertexAiModel: gemini-2.5-flash-lite
       # timeout is the timeout for the GenAI service requests.
       timeout:
-      # These models may take upto 5 minutes to reflect in the other services.
+      # These models may take up to 5 minutes to reflect in the other services.
       agentModels:
         # Model names that work with GenAI service for AI Agents from vertex-ai
         vertexAiModels:
-        # Model names that work with GenAI service for AI Agents from open ai
+        # Model names that work with GenAI service for AI Agents from OpenAI
         openAiModels:
         # Model names that work with GenAI service for AI Agents from bedrock
         bedrockModels:
+        # Model names that work with GenAI service for AI Agents from ollama
+        ollamaModels:
+      # The model used for internal agents (e.g. to create workflow). It must be one of the models specified in agentModels. If not specified, the defaultVertexAiModel is used.
+      internalAgentsModel:
+
     engine:
       # allowed_referer specifies the allowed referer for the engine and console in case of Invalid Referer.
       allowed_referer:
@@ -379,9 +391,9 @@ uno:
       customIssuer:
       # customIngressIssuer is the optional name of the certificate issuer that overrides internal issuer with a specific one to be used only for ingress.
       customIngressIssuer:
-      # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to true.
+      # caPairSecretName is the name of the secret where the CA certificate and key pair are stored. If useCustomizedCert is set to false, this secret is created by the deployment process to store the CA certificate and key pair.
       caPairSecretName: ca-key-pair
-      # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to true.
+      # certSecretName is the name of the secret where the internal communication certificates are stored. If useCustomizedCert is set to false, this secret is created by the deployment process, if useCustomizedCert is set to true, you must create this secret with your custom certificates.
       certSecretName: uno-certificate
       # certExtAgtSecretName is the name of the secret of the external agent. This parameter applies if you set useCustomizedCert to true.
       certExtAgtSecretName: uno-certificate-ext-agt
@@ -434,9 +446,6 @@ uno:
     oidc:
       # connectionTimeout is the amount of time on or after which connection to OIDC provider goes in timeout.
       connectionTimeout: PT1M
-      # enabled specifies whether authentication through OpenID Connect (OIDC) server is enabled.
-      # If enabled is set to false, the other properties in this section are ignored.
-      enabled: false
       # useToManageApiKeys specifies whether the OpenID Connect (OIDC) server must be used to manage API keys in case of fail (for example, when authentication information expires).
       # Supported values are true and false.
       useToManageApiKeys: true
@@ -464,6 +473,8 @@ uno:
       authenticationScope: ""
       # The path to the claim in the JWT token that contains the group names for the user
       jwtGroupClaimPath: ""
+      # Is PKCE required for OIDC authentication flows. Supported values are true and false.
+      pkceRequired : false
 
   # bulkhead defines the policy to be used on the gateway endpoint for avoiding bulk requests and block DDOS attacks against these contexts.
   bulkhead:
@@ -473,9 +484,9 @@ uno:
       # waitingTaskQueue defines the maximum number of calls which can be kept waiting in each queue. The value must be greater than 0.
       waitingTaskQueue: 12
   routes:
-    # enabled specifies whether a Openshift route is enabled to route traffic from external sources to the applications in the cluster. Supported values are true and false.
+    # enabled specifies whether an Openshift route is enabled to route traffic from external sources to the applications in the cluster. Supported values are true and false.
     enabled: true
-    #  specifies whether a Openshift route ssl termination . Supported values are passthrough and reencrypt.
+    #  specifies whether an Openshift route ssl termination . Supported values are passthrough and reencrypt.
     termination:
   ingress:
     # enabled specifies whether an ingress is enabled to route traffic from external sources to the applications in the cluster. Supported values are true and false.
@@ -506,6 +517,22 @@ uno:
     #    hosts:
     #      - chart-example.local
 
+  gatewayApi:
+    # enabled specifies whether a Gateway API is enabled to route traffic from external sources to the applications in the cluster. It can be used as an alternative (or in combination) to ingress. Supported values are true and false.
+    enabled: false
+    # The name of the Gateway resource.
+    gatewayName: "external-gateway"
+    # The namespace where the Gateway resource is located.
+    gatewayNamespace: "" # Defaults to release namespace
+    # baseDomainName is the name of the base domain for using the ingress controller. This parameter applies if you set enabled to true.
+    baseDomainName: .gwa.uat.uno
+
+    # Additional annotations to add to the HTTPRoute resources created.
+    annotations: {}
+    # Advanced: override the default parentRefs
+    parentRefs: []
+    # Advanced: add implementation specific backend config
+    backendConfig: {}
 
   deployment:
     global:
@@ -515,7 +542,7 @@ uno:
       minTargetReplicas: 1
       # maxTargetReplicas is the maximum number of target replicas to be deployed for each microservice.
       maxTargetReplicas: 3
-      # traceLevel specifes the trace detail level for trace.log. Supported values are ALL,FINE,INFO.
+      # traceLevel specifies the trace detail level for trace.log. Supported values are ALL,FINE,INFO.
       traceLevel: "INFO"
       autoscaler:
         # cpuAverageUtilization specifies the average usage of CPU which starts the autoscaler.
@@ -536,18 +563,39 @@ uno:
           cpu: "0.3"
           # memory is the minimum amount of memory services require to run.
           memory: "512Mi"
+      # Customize the probes for all microservices. The default settings are designed to give the application enough time to start while ensuring quick recovery in case of failures.
+      probes:
+        startup:
+          enabled: true
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          failureThreshold: 30 # Gives the app 300s (5 mins) to start
+        readiness:
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          failureThreshold: 40
+        liveness:
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          failureThreshold: 3    # Tight threshold for quick recovery
     # The properties listed below apply to single microservices. You can use them to override the global settings defined above for one or more microservices.
     console:
       # ingressPrefix is the prefix of the name of the endpoint of the console microservice.
       ingressPrefix: "console"
+      # gatewayApiPrefix is the prefix of the name of the endpoint of the console microservice when using Gateway API.
+      gatewayApiPrefix: "console"
       #minTargetReplicas: 1
     agentmanager:
       # ingressPrefix is the prefix of the name of the endpoint of the agentmanager microservice.
       ingressPrefix: "agentmanager"
+      # gatewayApiPrefix is the prefix of the name of the endpoint of the agentmanager microservice when using Gateway API.
+      gatewayApiPrefix: "agentmanager"
       #minTargetReplicas: 1
     gateway:
       # ingressPrefix is the prefix of the name of the endpoint of the gateway microservice.
       ingressPrefix: "gateway"
+      # gatewayApiPrefix is the prefix of the name of the endpoint of the gateway microservice when using Gateway API.
+      gatewayApiPrefix: "gateway"
       #minTargetReplicas: 1
     eventmanager:
       #minTargetReplicas: 1
@@ -580,14 +628,20 @@ uno:
     notification:
       #minTargetReplicas: 1
     tenantmanager:
+      # ingressPrefix is the prefix of the name of the endpoint of the tenantmanager microservice.
+      ingressPrefix: "tenantmanager"
+      # gatewayApiPrefix is the prefix of the name of the endpoint of the tenantmanager microservice when using Gateway API.
+      gatewayApiPrefix: "tenantmanager"
+      # min and max replicas for tenant manager must be the same to avoid issues with tenant creation
       minTargetReplicas: 2
       maxTargetReplicas: 2
+      # the database name used by tenant manager
       databaseName: "tenantmanager-db"
  
   hclaipilot:
     image:
       repository: hclcr.io/uno-ea
-      tag: 2.1.4.0-beta1
+      tag: 2.1.4.0-beta2
 
     # Channels Configuration
     # The following configuration is used to enable the AIPilot for the channels. For each channel, you need to provide the required configuration.
@@ -622,7 +676,7 @@ uno:
 
       # Configuration for the Google Translation API
       google:
-        # The Credentials json file for the Google Translation API encoded in base64
+        # The Credentials JSON file for the Google Translation API encoded in base64
         credentials: ""
     postgres:
       postgresUser: aipilot
@@ -680,10 +734,10 @@ uno:
       resources:
         limits:
           cpu: "1"
-          memory: 2500Mi
+          memory: 2867Mi
         requests:
-          cpu: "0.5"
-          memory: 2000Mi
+          cpu: 500m
+          memory: 2355Mi
 
     #NLG Service Deployment Configuration
     pilotNlg:
@@ -758,7 +812,7 @@ uno:
 
       container:
         registry: hclcr.io/uno-ea # Image name
-        tag: 2.1.4.0-beta1  # Image tag
+        tag: 2.1.4.0-beta2  # Image tag
 
       authorization:
         # Is the URL of the OpenID Connect (OIDC) server.
@@ -1064,11 +1118,11 @@ uno:
         maxAgents: 5
       resources:
         limits:
-          cpu: 1000m
-          memory: 2500Mi
+          cpu: 2
+          memory: 2560Mi
         requests:
-          cpu: 300m
-          memory: 500Mi
+          cpu: 500m
+          memory: 1638Mi
     uno:
       hostname: "{{ include \"uno.fullname\" . }}-gateway"
       port: "8443"
@@ -1077,8 +1131,41 @@ uno:
       # The registry where the image is hosted
       repository: hclcr.io/uno-ea
       # The tag of the images
-      tag: 2.1.4.0-beta1
+      tag: 2.1.4.0-beta2
       # The Pull Policy for the images
       imagePullPolicy: Always
 
     additionalPullSecret : ""
+
+pgdb:
+  crVersion: "v1"
+  image: "docker.io/percona/percona-postgresql-operator:2.7.0-ppg17.5.2-postgres"
+  port: 5432
+  postgresVersion: 17
+  pause: false
+  unmanaged: false
+  instanceName: "agentic-postgres"
+  replicas: 1
+  affinityLabel: "postgres"
+  topologyKey: "kubernetes.io/hostname"
+  storageSize: "5Gi"
+  
+  users:
+    - name: postgres
+      options: "SUPERUSER"
+
+  resources:
+    requests:
+      memory: "600Mi"
+      cpu: "500m"
+    limits:
+      memory: "1024Mi"
+      cpu: "1000m"
+
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        pg_hba:
+        - hostssl all all all md5 
+        - hostssl all all all scram-sha-256
+        - hostssl all all all cert

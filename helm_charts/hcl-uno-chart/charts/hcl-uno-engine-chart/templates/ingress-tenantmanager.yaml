@@ -42,10 +42,10 @@ spec:
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   tls:
     - hosts:
-      - "tenantmanager{{.Values.ingress.baseDomainName }}"
+      - "{{.Values.deployment.tenantmanager.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
       secretName: {{ $fullName }}-uno-tls-tenantmanager-secret
   rules:
-    - host: tenantmanager{{.Values.ingress.baseDomainName }}
+    - host: "{{.Values.deployment.tenantmanager.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
       http:
         paths:
           - path: /

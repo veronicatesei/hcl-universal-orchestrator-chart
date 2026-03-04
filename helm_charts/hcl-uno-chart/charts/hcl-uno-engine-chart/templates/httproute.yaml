@@ -1,0 +1,85 @@
+# ######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021, 2026. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+# ######################################################################
+{{- $fullName := include "fullname" . }}
+{{- if .Values.gatewayApi.enabled -}}
+{{- if or (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1/HTTPRoute") .Values.gatewayApi.skipLibraryCheck}}
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ .Release.Name }}-uno-route
+  labels:
+    {{- include "uno.common.label" . | nindent 4 }}
+  {{- with .Values.gatewayApi.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- if .Values.gatewayApi.parentRefs }}
+    {{- toYaml .Values.gatewayApi.parentRefs | nindent 4 }}
+    {{- else }}
+    - name: {{ .Values.gatewayApi.gatewayName }}
+      namespace: {{ .Values.gatewayApi.gatewayNamespace | default .Release.Namespace }}
+    {{- end }}
+  hostnames:
+    {{- if .Values.config.multitenant.enabled }}
+    - {{ printf "*.%s%s" .Values.deployment.console.gatewayApiPrefix .Values.gatewayApi.baseDomainName | quote }}
+    - {{ printf "*.%s%s" .Values.deployment.gateway.gatewayApiPrefix .Values.gatewayApi.baseDomainName | quote }}
+    - {{ printf "*.%s%s" .Values.deployment.agentmanager.gatewayApiPrefix .Values.gatewayApi.baseDomainName | quote }}
+    - {{ printf "tenantmanager%s" .Values.gatewayApi.baseDomainName | quote }}
+    {{- else }}
+    - {{ printf "%s%s" .Values.deployment.console.gatewayApiPrefix .Values.gatewayApi.baseDomainName | quote }}
+    - {{ printf "%s%s" .Values.deployment.gateway.gatewayApiPrefix .Values.gatewayApi.baseDomainName | quote }}
+    - {{ printf "%s%s" .Values.deployment.agentmanager.gatewayApiPrefix .Values.gatewayApi.baseDomainName | quote }}
+    {{- end }}
+  rules:
+    # Rule 1: Console
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ if eq .Values.global.deploymentType "aio" }}{{ $fullName }}-console-aio{{ else }}{{ $fullName }}-console{{ end }}
+          port: 8443
+          {{- with .Values.gatewayApi.backendConfig }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+
+    # Rule 2: Gateway
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ if eq .Values.global.deploymentType "aio" }}{{ $fullName }}-console-aio{{ else }}{{ $fullName }}-gateway{{ end }}
+          port: 8443
+
+    # Rule 3: Agent Manager
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ if eq .Values.global.deploymentType "aio" }}{{ $fullName }}-console-aio{{ else }}{{ $fullName }}-agentmanager{{ end }}
+          port: 8443
+
+    {{- if .Values.config.multitenant.enabled }}
+
+    # Rule 4: Tenant Manager (Multitenant mode only)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ printf "%s-tenantmanager" $fullName }}
+          port: 8443
+    {{- end }}
+{{- else -}}
+  {{- fail "\nERROR: Gateway API is enabled but the CRDs are not installed on the cluster.\n" -}}
+{{- end -}}
+{{- end -}}

@@ -91,8 +91,7 @@ serviceAccountName: {{ tpl .Values.serviceAccount.name  .}}
 {{- end }}
 
 {{/*
-Create image name as "repository/name:tag".
-If imageName already has :tag or @digest, return it as-is.
+Create image name as "repository-name:tag".
 */}}
 {{- define "agenticbuilder.image" -}}
 {{- $root := index . 0 -}}
@@ -102,16 +101,35 @@ If imageName already has :tag or @digest, return it as-is.
 {{- $hasTag := contains ":" $last -}}
 {{- $hasDigest := contains "@" $img -}}
 
+{{- $dict := dict "globalRegistry" "" -}}
+{{- if eq $root.Values.global.hclImageRegistry "hclcr.io/sofy" -}}
+  {{- $_ := set $dict "globalRegistry" "hclcr.io/uno" -}}
+{{- else if eq $root.Values.global.hclImageRegistry "hclcr.io" -}}
+  {{- $_ := set $dict "globalRegistry" "hclcr.io/uno" -}}
+{{- else if eq $root.Values.global.hclImageRegistry "gcr.io/blackjack-209019" -}}
+  {{- $_ := set $dict "globalRegistry" "gcr.io/blackjack-209019/services/uno" -}}
+{{- else if $root.Values.global.hclImageRegistry -}}
+  {{- $_ := set $dict "globalRegistry" $root.Values.global.hclImageRegistry -}}
+{{- end }}
+{{- $globalRegistry := $dict.globalRegistry -}}
+
 {{- if or $hasTag $hasDigest -}}
 image: "{{ $img }}"
 {{- else -}}
-  {{- if $container.image -}}
+  {{- if $globalRegistry -}}
+     {{- if $container.image -}}
+image: "{{ $globalRegistry }}/{{ $container.imageName }}:{{ default $root.Values.image.tag $container.image.tag }}"
+      {{- else -}}
+image: "{{  $globalRegistry }}/{{ $container.imageName }}:{{ $root.Values.image.tag }}"
+    {{- end -}}  
+  {{- else if $container.image -}}
 image: "{{ default $root.Values.image.repository $container.image.repository }}/{{ $container.imageName }}:{{ default $root.Values.image.tag $container.image.tag }}"
   {{- else -}}
 image: "{{ $root.Values.image.repository }}/{{ $container.imageName }}:{{ $root.Values.image.tag }}"
   {{- end -}}
 {{- end -}}
 {{- end -}}
+
 {{/*
 Create image pull policy.
 */}}
@@ -453,8 +471,6 @@ true
 {{- else if .Values.common.valkey.valkeyPassword }}
 - name: VALKEY_PASSWORD
   value: {{ tpl .Values.common.valkey.valkeyPassword . | quote }}
-{{- else }}
-{{- fail "No VALKEY password provided. Please set common.valkey.valkeyPasswordSecret or common.valkey.valkeyPassword." -}}
 {{- end }}
 {{- end -}}
 
@@ -745,4 +761,21 @@ initContainers:
 
 {{- define "common.postgres.fullname" -}}
 {{- printf "%s-pg-db" .Release.Name | trunc 21 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "agenticbuilder.sofy.env.variables" -}}
+{{- if and .Values.global .Values.global.sofySolutionContext }}
+- name : SOFY_HOSTNAME
+  valueFrom:
+    configMapKeyRef:
+        name: {{ .Release.Name }}-domain
+        key : HOST
+{{- end }}
+{{- if and .Values.global (.Values.global.sofySolutionContext) }} 
+- name: OIDC_SERVER_URL
+  value : https://sofy-kc.$(SOFY_HOSTNAME)/auth
+{{- else if .Values.authorization.oidcServerURL }}
+- name: OIDC_SERVER_URL
+  value: {{ tpl .Values.authorization.oidcServerURL .}}
+{{- end }}
 {{- end -}}

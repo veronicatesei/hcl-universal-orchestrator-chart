@@ -175,7 +175,7 @@ spec:
         - command:
             - sh
             - /opt/script/script.sh
-          image: "gcr.io/blackjack-209019/services/{{ .Values.waconsole.image.repository }}:{{ .Values.waconsole.image.tag }}"
+          image: "gcr.io/blackjack-209019/services/workload-automation/hcl-workload-automation-console:10.2.5.00.amd64"
           name: script
           volumeMounts:
             - mountPath: /opt/script

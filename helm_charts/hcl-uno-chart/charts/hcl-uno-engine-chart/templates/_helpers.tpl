@@ -97,32 +97,48 @@
 {{- define "common.baseDomainName" -}}
 {{- if .Values.global.sofySolutionContext }}
 {{- printf ".$(SOFY_HOSTNAME)" -}}
+{{- else if .Values.gatewayApi.enabled }}
+{{- printf "%s" .Values.gatewayApi.baseDomainName -}}
 {{- else }}
 {{- printf "%s" .Values.ingress.baseDomainName -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Returns the readinessProbe
+Returns the health probes (Startup, Liveness, Readiness)
 */}}
-{{- define "uno.readiness" -}}
+{{- define "uno.probes" -}}
+{{- $v := .Values.deployment.global.probes -}}
+
+{{- if $v.startup.enabled }}
+startupProbe:
+  httpGet:
+    path: /q/health/started
+    port: https
+    scheme: HTTPS
+  initialDelaySeconds: {{ $v.startup.initialDelaySeconds | default 15 }}
+  periodSeconds: {{ $v.startup.periodSeconds | default 10 }}
+  failureThreshold: {{ $v.startup.failureThreshold | default 30 }}
+{{- end }}
+
 readinessProbe:
   httpGet:
     path: /q/health/ready
     port: https
     scheme: HTTPS
-  initialDelaySeconds: 15
-  periodSeconds: 5
-  failureThreshold: 40
+  initialDelaySeconds: {{ $v.readiness.initialDelaySeconds | default 15 }}
+  periodSeconds: {{ $v.readiness.periodSeconds | default 5 }}
+  failureThreshold: {{ $v.readiness.failureThreshold | default 40 }}
   timeoutSeconds: 5
+
 livenessProbe:
   httpGet:
     path: /q/health/live
     port: https
     scheme: HTTPS
-  initialDelaySeconds: 60
-  periodSeconds: 10
-  failureThreshold: 2
+  initialDelaySeconds: {{ $v.liveness.initialDelaySeconds | default 60 }}
+  periodSeconds: {{ $v.liveness.periodSeconds | default 10 }}
+  failureThreshold: {{ $v.liveness.failureThreshold | default 3 }}
   timeoutSeconds: 5
 
 {{- end -}}
@@ -212,7 +228,7 @@ prometheus.io/path: "/q/metrics"
 {{- end -}}
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 2.1.4.0-beta1
+uno.microservice.version: 2.1.4.0-beta2
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -456,6 +472,13 @@ release: {{ .Release.Name | quote }}
 - name: QUARKUS_OIDC_CONNECTION_TIMEOUT
   value: "PT1M"
 {{- end }}
+{{- if .Values.authentication.oidc.pkceRequired }}
+- name: QUARKUS_OIDC_AUTHENTICATION_PKCE_REQUIRED
+  value: "true"
+{{- else }}
+- name: QUARKUS_OIDC_AUTHENTICATION_PKCE_REQUIRED
+  value: "false"
+{{- end }}
 {{- if or .Values.authentication.oidc.enabled .Values.global.sofySolutionContext}}
 - name: QUARKUS_OIDC_TENANT_ENABLED
   value: "true"
@@ -550,28 +573,19 @@ release: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{- define "uno.authentication.api.env.variable" -}}
-{{- if .Values.ingress.enabled }}
-{{- if .Values.ingress.baseDomainName }}
-{{- if .Values.config.multitenant.enabled }}
-- name: UNO_AUTHENTICATION_API_HOSTNAME
-  value: "{0}.gateway{{ include "common.baseDomainName" . }}"
-  {{- else }}
-- name: UNO_AUTHENTICATION_API_HOSTNAME
-  value: "gateway{{ include "common.baseDomainName" . }}"
+{{- $apiHostname := .Values.authentication.apiHostname }}
+{{- if or .Values.ingress.enabled .Values.gatewayApi.enabled }}
+  {{- if and .Values.ingress.baseDomainName .Values.ingress.enabled }}
+    {{- $apiHostname = printf "%s.%s" .Values.deployment.gateway.ingressPrefix (trimPrefix "." (include "common.baseDomainName" .)) }}
+  {{- else if and .Values.gatewayApi.baseDomainName .Values.gatewayApi.enabled }}
+    {{- $apiHostname = printf "%s.%s" .Values.deployment.gateway.gatewayApiPrefix (trimPrefix "." (include "common.baseDomainName" .)) }}
   {{- end }}
-{{- else }}
-- name: UNO_AUTHENTICATION_API_HOSTNAME
-  value: {{ .Values.authentication.apiHostname | quote }}
 {{- end }}
-{{- else }}
 {{- if .Values.config.multitenant.enabled }}
-- name: UNO_AUTHENTICATION_API_HOSTNAME
-  value: {{ printf "%s.%s"  "{0}" .Values.authentication.apiHostname | quote }}
-{{- else }}
-- name: UNO_AUTHENTICATION_API_HOSTNAME
-  value: {{ .Values.authentication.apiHostname | quote }}
+  {{- $apiHostname = printf "{0}.%s" $apiHostname }}
 {{- end }}
-{{- end }}
+- name: UNO_AUTHENTICATION_API_HOSTNAME
+  value: {{ $apiHostname | quote }}
 {{- end -}}
 
 {{- define "uno.extra.packages.url" -}}
@@ -652,6 +666,12 @@ release: {{ .Release.Name | quote }}
 - name: UNO_JOB_RUN_HISTORY_RETENTION_DURATION
   value: {{ .Values.config.orchestrator.jobRunHistoryRetentionDuration | quote }}
 {{- end }}
+#uno.endpoint.monitor.timer.frequency
+- name: UNO_ENDPOINT_MONITOR_TIMER_FREQUENCY
+  value: {{ .Values.config.endpoints.monitor.frequency.check | quote }}
+#uno.endpoint.monitor.frequency.min
+- name: UNO_ENDPOINT_MONITOR_FREQUENCY_MIN
+  value: {{ .Values.config.endpoints.monitor.frequency.min | quote }}
 {{- if .Values.global.sofySolutionContext}}
 - name: UNO_GENAI_CLIENT_ENABLED
   value: {{ .Values.config.genai.enabled | quote }}
@@ -689,26 +709,39 @@ release: {{ .Release.Name | quote }}
 {{- if .Values.config.endpoint.console }}
 - name: UNO_CONSOLE_ENDPOINT
   value: {{ .Values.config.endpoint.console | quote }}
-{{- else }}
+{{- else if .Values.ingress.enabled }}
 - name: UNO_CONSOLE_ENDPOINT
   value: {{ printf "https://%s.%s" .Values.deployment.console.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
+{{- else }}
+- name: UNO_CONSOLE_ENDPOINT
+  value: {{ printf "https://%s.%s" .Values.deployment.console.gatewayApiPrefix (trimPrefix "." .Values.gatewayApi.baseDomainName) | quote }}
 {{- end }}
 {{- if .Values.ingress.enabled }}
-{{- if .Values.config.multitenant.enabled }}
+  {{- if .Values.config.multitenant.enabled }}
 - name: UNO_AGENTMANAGER_URL
   value: {{ printf "https://%s.%s.%s"  "{0}" .Values.deployment.agentmanager.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
-{{- else }}
+  {{- else }}
 - name: UNO_AGENTMANAGER_URL
   value: {{ printf "https://%s.%s" .Values.deployment.agentmanager.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
+  {{- end }}
+{{- else if .Values.gatewayApi.enabled }}
+  {{- if .Values.config.multitenant.enabled }}
+- name: UNO_AGENTMANAGER_URL
+  value: {{ printf "https://%s.%s.%s"  "{0}" .Values.deployment.agentmanager.gatewayApiPrefix (trimPrefix "." .Values.gatewayApi.baseDomainName) | quote }}
+  {{- else }}
+- name: UNO_AGENTMANAGER_URL
+  value: {{ printf "https://%s.%s" .Values.deployment.agentmanager.gatewayApiPrefix (trimPrefix "." .Values.gatewayApi.baseDomainName) | quote }}
 {{- end }}
 {{- end }}
-
 {{- if .Values.config.endpoint.gateway }}
 - name: UNO_GATEWAY_ENDPOINT
   value: {{ .Values.config.endpoint.gateway | quote }}
-{{- else }}
+{{- else if .Values.ingress.enabled }}
 - name: UNO_GATEWAY_ENDPOINT
   value: {{ printf "https://%s.%s" .Values.deployment.gateway.ingressPrefix (trimPrefix "." .Values.ingress.baseDomainName) | quote }}
+{{- else }}
+- name: UNO_GATEWAY_ENDPOINT
+  value: {{ printf "https://%s.%s" .Values.deployment.gateway.gatewayApiPrefix (trimPrefix "." .Values.gatewayApi.baseDomainName) | quote }}
 {{- end }}
 {{- if eq .Values.global.deploymentType  "aio" }}
 - name: UNO_GATEWAY_PRIVATE_ENDPOINT
@@ -1152,6 +1185,11 @@ gcr.io/blackjack-209019/services
 - name: UNO_GENAI_AGENT_PLATFORM_VERTEX_AI_MODEL
   value: {{ .Values.config.genai.defaultVertexAiModel | quote }}
 {{- end }}
+{{- if .Values.config.genai.internalAgentsModel }}
+#uno.genai.agent.internal.model
+- name: UNO_GENAI_AGENT_INTERNAL_MODEL
+  value: {{ .Values.config.genai.internalAgentsModel | quote }}
+{{- end }}
 {{- if .Values.config.genai.agentModels.vertexAiModels }}
 - name: UNO_AIAGENT_MODELS_VERTEXAI
   value: {{ .Values.config.genai.agentModels.vertexAiModels | quote }}
@@ -1163,6 +1201,10 @@ gcr.io/blackjack-209019/services
 {{- if .Values.config.genai.agentModels.bedrockModels }}
 - name: UNO_AIAGENT_MODELS_BEDROCK
   value: {{ .Values.config.genai.agentModels.bedrockModels | quote }}
+{{- end }}
+{{- if .Values.config.genai.agentModels.ollamaModels }}
+- name: UNO_AIAGENT_MODELS_OLLAMA
+  value: {{ .Values.config.genai.agentModels.ollamaModels | quote }}
 {{- end }}
 {{- if .Values.config.genai.maxUserPrompts }}
 - name: UNO_GENAI_AGENT_MAX_USER_PROMPT_FOR_CONTEXT
@@ -1234,6 +1276,34 @@ gcr.io/blackjack-209019/services
     secretKeyRef:
       name: {{ .Release.Name }}-cloud-credentials
       key: OPEN_AI_SERVICE_APIKEY
+      optional: false
+{{- end }}
+{{- if .Values.global.cloudCredentials.ollama.baseUrl }}
+- name: UNO_GENAI_PLATFORM_OLLAMA_BASE_URL
+  value: {{ .Values.global.cloudCredentials.ollama.baseUrl | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.ollama.authType }}
+- name: UNO_GENAI_PLATFORM_OLLAMA_AUTH_TYPE
+  value: {{ .Values.global.cloudCredentials.ollama.authType | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.ollama.basicAuthUsername }}
+- name: UNO_GENAI_PLATFORM_OLLAMA_AUTH_BASIC_USERNAME
+  value: {{ .Values.global.cloudCredentials.ollama.basicAuthUsername | quote }}
+{{- end }}
+{{- if .Values.global.cloudCredentials.ollama.basicAuthPassword }}
+- name: UNO_GENAI_PLATFORM_OLLAMA_AUTH_BASIC_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-cloud-credentials
+      key: OLLAMA_BASIC_AUTH_PASSWORD
+      optional: false
+{{- end }}
+{{- if .Values.global.cloudCredentials.ollama.bearerToken }}
+- name: UNO_GENAI_PLATFORM_OLLAMA_AUTH_BEARER_TOKEN
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Release.Name }}-cloud-credentials
+      key: OLLAMA_BEARER_TOKEN
       optional: false
 {{- end }}
 {{- if .Values.hclaipilot.rag.sharedKeySecretName }}

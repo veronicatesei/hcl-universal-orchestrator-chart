@@ -108,7 +108,7 @@ spec:
           imagePullPolicy: {{  $root.Values.config.registry.pullPolicy }}
 {{ include "uno.containerSecurityContext"  $root | indent 10 }}
 
-{{ include "uno.readiness" $root | indent 10 }}
+{{ include "uno.probes" $root | indent 10 }}
           ports:
             - name: https
               containerPort: 8443
@@ -137,10 +137,6 @@ spec:
                   optional: false
             - name: UNO_MICROSERVICE_JWT_EXPIRATION_DURATION
               value: "{{  $root.Values.config.jwt.internalExpirationDuration }}"
-{{- if $root.Values.config.multitenant.enabled }}
-            - name: UNO_MONGODB_DATABASE
-              value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.config.multitenant.commonTenantDatabaseName }}"
-{{- else }}
             - name: UNO_MONGODB_DATABASE
 {{- if $root.Values.config.multitenant.enabled }}
               value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.config.multitenant.commonTenantDatabaseName }}"
