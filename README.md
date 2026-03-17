@@ -114,7 +114,7 @@ Before you begin the deployment process, ensure your environment meets the follo
  - Kubernetes cluster v 1.32 or later
  - Helm v 4.0.0 or later
  - Messaging system: Apache Kafka v 3.9.1 or later OR Redpanda v 25.1.12 or later 
- - Database: MongoDB v 8 or later OR Azure Cosmos DB for MongoDB (vCore) OR DocumentDB v 5 Instance-base cluster for AWS deployment.
+ - Database: MongoDB v 8 or later OR Azure Cosmos DB for MongoDB (vCore) OR AWS DocumentDB v 5 (Note: Support for the DocumentDB platform is strictly limited to Instance-based clusters only)
  - Enablement of an OIDC provider.
 
 **For Agentic AI Builder**
@@ -241,7 +241,9 @@ The license parameter determines whether the license agreement is accepted or no
 
 - Configuring the database section in the values.yaml file
 
-The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in the database deployment configuration.
+The values of the following parameters are placeholders used as an example. When assigning values to these parameters in your values.yaml file, make sure that they reflect the values used in your specific database deployment configuration.
+
+For a standard MongoDB deployment:
 
     uno.database.url: mongodb://hcl-uno-db-mongodb.db.svc.cluster.local:27017
     uno.database.type: mongodb
@@ -250,7 +252,14 @@ The values of the following parameters are placeholders used as an example. When
     uno.database.password: mongopassword
     uno.database.tls: false
     uno.database.tlsInsecure: false
-   
+
+For an AWS DocumentDB (Instance-based cluster) deployment: If you are deploying on AWS and using DocumentDB, you must use the specific connection URL format provided on the DocumentDB connectivity page.
+
+    uno.database.url: mongodb://<insert_your_user>:<insertYourPassword>@docdb-uno.cluster.docdb.amazonaws.com:<your_port>/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false
+    uno.database.type: mongodb
+    uno.database.databaseName: uno
+
+   Important: Because the DocumentDB connection URL requires TLS (tls=true) and references a certificate file (tlsCAFile=global-bundle.pem), you must download the global-bundle.pem file from the DocumentDB connectivity page and create a Kubernetes secret in your namespace containing this certificate before deploying the chart.
 
 - Configuring the kafka section in the values.yaml file
 
