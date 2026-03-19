@@ -622,6 +622,8 @@ To use custom certificates:
         
 If you define custom certificates, you are in charge of keeping them up to date, therefore, ensure you check their duration and plan to rotate them as necessary. To rotate custom certificates, delete the previous secret and upload a new secret, containing new certificates. The pod restarts automatically and the new certificates are applied.
 
+**Note:** Deploying HCL Universal Orchestrator with custom certificates might cause errors if you do not set the DNS aliases correctly. To avoid this, ensure you set the **disableHostnameVerification** attribute in the **values.yaml** to `true`.
+
 When using custom certificates make sure to update the following fields:
 		
 			uno.hclaipilot.certificates.useCustomizedCert: true
