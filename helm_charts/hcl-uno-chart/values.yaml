@@ -101,6 +101,8 @@ uno:
     username: 
     # password is the password of the database user. Mandatory parameter.
     password:
+    # Define the specific database for MongoDb. This is used when authenticating with a non-admin database user.
+    authenticationDatabase:
     # tls specifies whether TLS is enabled. Supported values are true and false.
     tls: false
     # tlsInsecure specifies whether certificate validation must be skipped. Supported values are true and false.
