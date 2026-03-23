@@ -327,6 +327,8 @@ The values of the following parameters are placeholders used as an example. When
    
 **TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
 
+**Note:** If the system restarts or behaves unexpectedly, check the logs to identify the cause. Follow the recovery steps for that specific event to restore the system.
+
 The following are some useful Helm commands:
 
 * To list all of the Repo releases: 
@@ -341,7 +343,6 @@ The following are some useful Helm commands:
 
         helm uninstall <uno_release_name> -n <uno_namespace>
 
-**Note:** If the system restarts or behaves unexpectedly, check the logs to identify the cause. Follow the recovery steps for that specific event to restore the system.
 
 ### Configuring optional product components
 
