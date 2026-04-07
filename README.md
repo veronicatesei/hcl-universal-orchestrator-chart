@@ -493,8 +493,8 @@ To ensure the integrity and authenticity of the downloaded files, we use GPG (GN
 
 The Orchestration CLI and HCL UnO agent packages are signed with our private key. A corresponding .asc signature file accompanies the downloadable file. You can extract the file and use the public key to decrypt and verify the files.
 
-Method 1: Using GPG (Generic File Verification)
- 1.  Import the HCL Public GPG key using the following command:
+Method 1: Using GPG (Generic File Verification) for .gpg files
+ 1.  Import the HCL Universal Orchestrator public key using the following command:
 
     ```bash
     gpg --import path-to-gpg-public-key
@@ -530,12 +530,14 @@ Method 1: Using GPG (Generic File Verification)
 
 For more information on verifying a file with gpg keys, see [GnuPG documentation](https://www.gnupg.org/gph/en/manual.html). 
 
-Method 2: Using RPM (System Package Verification)
- 1. Import the GPG public key:
+Method 2: Using RPM (System Package Verification) for .rpm files
+ 1. Import the HCL Universal Orchestrator public key
+ 
     ```bash
     sudo rpm --import <path-to-gpg-public-key>
     ```
- 2. Verify the package:
+ 2. Verify the OCLI file's signature using the following command:
+ 
     ```bash
     rpm -K <path-to-OCLI-file>
     ```
