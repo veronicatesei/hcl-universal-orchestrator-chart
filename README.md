@@ -489,7 +489,7 @@ The following checks were performed on each of these signatures:
 
 ### Security and verification for OCLI and UnO agent binaries 
 
-To ensure the integrity and authenticity of the downloaded files, we use GPG (GNU Privacy Guard) encryption. You must have the GPG tool installed on your system to decrypt and verify the files. 
+To ensure the integrity and authenticity of the downloaded files, we use GPG (GNU Privacy Guard) and RPM  encryptions. You must have either the GPG tool or RPM tool installed in your system to decrypt and verify the files.
 
 The Orchestration CLI and HCL UnO agent packages are signed with our private key. A corresponding .asc signature file accompanies the downloadable file. You can extract the file and use the public key to decrypt and verify the files.
 
