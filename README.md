@@ -14,7 +14,7 @@ To respond to the growing request to make automation opportunities more accessib
 
 HCL Universal Orchestrator is a complete, modern solution to orchestrate calendar-based and event-driven tasks, business and IT processes. It enables organizations to gain complete visibility and control over attended or unattended workflows. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
-For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.3/index.html).
+For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.4/index.html).
 
 ## Details
 
@@ -119,14 +119,14 @@ Before you begin the deployment process, ensure your environment meets the follo
 
 **For Agentic AI Builder**
  - Valkey (Redis-compatible): Used as the in-memory data store. Acts as a drop-in replacement for Redis.
- - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/v2.1.3/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
+ - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/v2.1.4/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
 
 
 **Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance. 
 
 
  **For UnO AI Pilot**
- - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/v2.1.3/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
+ - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/v2.1.4/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
 
  **Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance.
 
@@ -327,6 +327,8 @@ The values of the following parameters are placeholders used as an example. When
    
 **TIP:** Use a short name or acronym when specifying this value to ensure it is readable.
 
+**Note:** If the system restarts or behaves unexpectedly, check the logs to identify the cause. Follow the recovery steps for that specific event to restore the system.
+
 The following are some useful Helm commands:
 
 * To list all of the Repo releases: 
@@ -340,6 +342,7 @@ The following are some useful Helm commands:
 * To delete the Helm release: 
 
         helm uninstall <uno_release_name> -n <uno_namespace>
+
 
 ### Configuring optional product components
 
@@ -388,7 +391,7 @@ On multitenant environments, you can edit the display name used for email notifi
 **AI Agents**
 
 You can create an AI agent using three different agent types: External MCP, Basic, and Agentic AI Builder. For more information, see [Managing agent types in the AI agent
-](https://help.hcl-software.com/UnO/v2.1.3/Orchestrating/to_manage_agent_types.html).
+](https://help.hcl-software.com/UnO/v2.1.4/Orchestrating/to_manage_agent_types.html).
 
 **Generative workflows and knowledge base**
 
@@ -434,7 +437,7 @@ You can configure different justification levels by setting the related paramete
      uno.config.engine.justificationTicketNumberRequire: true
      uno.config.engine.justificationDescriptionRequired: true
 
-For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1.3/Deployment/justifications.html).
+For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1.4/Deployment/justifications.html).
 
 **Encryption**
 
@@ -473,9 +476,9 @@ Where:
 This is an output example:  
   
 ```
-cosign verify --key HCL_Universal_Orchestrator_key.pub hclcr.io/uno/hcl-uno-audit:2.1.3.0  
+cosign verify --key HCL_Universal_Orchestrator_key.pub hclcr.io/uno/hcl-uno-audit:2.1.4.0  
   
-Verification for hclcr.io/uno/hcl-uno-audit:2.1.3.0 --  
+Verification for hclcr.io/uno/hcl-uno-audit:2.1.4.0 --  
 The following checks were performed on each of these signatures:  
 - The cosign claims were validated  
 - The signatures were verified against the specified public key  
@@ -486,13 +489,12 @@ The following checks were performed on each of these signatures:
 
 ### Security and verification for OCLI and UnO agent binaries 
 
-To ensure the integrity and authenticity of the downloaded files, we use GPG (GNU Privacy Guard) encryption. You must have the GPG tool installed on your system to decrypt and verify the files. 
+To ensure the integrity and authenticity of the downloaded files, we use GPG (GNU Privacy Guard) and RPM  encryptions. You must have either the GPG tool or RPM tool installed in your system to decrypt and verify the files.
 
 The Orchestration CLI and HCL UnO agent packages are signed with our private key. A corresponding .asc signature file accompanies the downloadable file. You can extract the file and use the public key to decrypt and verify the files.
 
-Importing the GPG Public Key
-
-1.  Import the HCL public GPG key using the following command:
+Method 1: Using GPG (Generic File Verification) for .gpg files
+ 1.  Import the HCL Universal Orchestrator public key using the following command:
 
     ```bash
     gpg --import path-to-gpg-public-key
@@ -507,9 +509,7 @@ Importing the GPG Public Key
     gpg:                 imported: 1
     ```
 
-Verifying the OCLI File
-
-2.  Verify the OCLI file's signature using the following command:
+ 2.  Verify the OCLI file's signature using the following command:
 
     ```bash
     gpg --verify path-to-OCLI-file
@@ -530,6 +530,17 @@ Verifying the OCLI File
 
 For more information on verifying a file with gpg keys, see [GnuPG documentation](https://www.gnupg.org/gph/en/manual.html). 
 
+Method 2: Using RPM (System Package Verification) for .rpm files
+ 1. Import the HCL Universal Orchestrator public key
+ 
+    ```bash
+    sudo rpm --import <path-to-gpg-public-key>
+    ```
+ 2. Verify the OCLI file's signature using the following command:
+ 
+    ```bash
+    rpm -K <path-to-OCLI-file>
+    ```
 When you decrypt the files with the public key and if the signature is valid, you can see a message indicating the file is correctly signed and the key ID matches with the public key. If the signature is invalid, you can see an error message, means the file is corrupted. 
 
 By verifying the file, you can ensure that it is not tampered during the download and can confirm the file is genuinely valid. You can download the public key from [here](https://github.com/HCL-TECH-SOFTWARE/hcl-universal-orchestrator-chart/blob/main/HCL_Universal_Orchestrator_public_key.gpg).
@@ -646,7 +657,7 @@ HCL Universal Orchestrator uses Grafana to display performance data related to t
 
 The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<uno_namespace> <uno_release_name>**:
 
-For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcl-software.com/UnO/v2.1.3/Monitoring/awsrgmonprom.html).
+For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcl-software.com/UnO/v2.1.4/Monitoring/awsrgmonprom.html).
   
   ### Setting the Grafana service
 Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Prometheus](https://github.com/helm/charts/tree/master/stable/prometheus).
@@ -708,7 +719,7 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 
 ## Documentation
 
-To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.3/index.html).
+To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.4/index.html).
 
 
 
