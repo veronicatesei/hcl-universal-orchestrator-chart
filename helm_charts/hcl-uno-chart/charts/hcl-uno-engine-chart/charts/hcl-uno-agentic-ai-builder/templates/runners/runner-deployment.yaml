@@ -21,6 +21,8 @@ metadata:
   name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
   labels:
     name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+    app.kubernetes.io/name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+    app.kubernetes.io/instance: {{ $.Release.Name | quote }}
 spec:
   serviceName: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-headless"
   replicas: {{ default $root.Values.replicaCount $root.Values.runner.replicaCount }}
@@ -35,6 +37,8 @@ spec:
       {{- end }}
       labels:
         name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+        app.kubernetes.io/name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
+        app.kubernetes.io/instance: {{ $.Release.Name | quote }}
     spec:
 {{ include "agenticbuilder.pull.secret" $root | indent 6 }}
 {{ include "agenticbuilder.serviceAccountName" $root | indent 6 }}
@@ -58,6 +62,7 @@ spec:
 {{- include "agenticbuilder.additionalCAs.volume" $root | nindent 8 }}
 {{- include "agenticbuilder.otel.volume" $root | nindent 8 }}
 {{- include "agenticbuilder.commonssl.volume.definition" $root | nindent 8 }}
+{{- include "agenticbuilder.jwt.volume" $root | nindent 8 }}
         - name: https-cert
           secret:
             secretName: {{ include "agenticbuilder.cert.name" $root }}
@@ -91,6 +96,7 @@ spec:
 {{- include "agenticbuilder.env.valkey.password" $root | nindent 12 }}
 {{- include "agenticbuilder.env.postgres.password" $root | nindent 12 }}
 {{- include "agenticbuilder.hclauthorization.env" $root | nindent 12 }}
+{{- include "agenticbuilder.sofy.env.variables" $root | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: {{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-configmap
@@ -108,5 +114,6 @@ spec:
 {{- include "agenticbuilder.hclauthorization.volume.mount" $root | indent 12 }}
 {{- include "agenticbuilder.additionalCAs.volumeMounts" $root | indent 12 }}
 {{- include "agenticbuilder.otel.volumeMounts" $root | indent 12 }}
+{{- include "agenticbuilder.jwt.volumeMounts" $root | indent 12 }}
 ---
 {{- end}}

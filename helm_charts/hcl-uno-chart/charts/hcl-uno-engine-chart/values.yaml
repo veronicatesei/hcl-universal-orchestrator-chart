@@ -16,13 +16,13 @@ global:
   # configPlugins is the ConfigMap containing list of plugin to be installed.
   configPlugins: 
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
-  pluginImageRepository: hclcr.io/wa
+  pluginImageRepository: hclcr.io/uno
   # pluginImageName is the name of the image with tags for Automation Hub integrations.
-  pluginImageName: hcl-workload-automation-plugins:1.0.26
+  pluginImageName: hcl-uno-automation-plugins:2.1.4.0
   # extraImages is the list of images with tags containing OCLI and agent for download from engine.
   extraImages:
     - registry: hclcr.io/uno
-      name: hcl-uno-external-pod:2.1.3.0
+      name: hcl-uno-external-pod:2.1.4.0
   customLabels:
     - name: "environment"
       value: "prod"
@@ -69,6 +69,17 @@ global:
       genaiUri: /chat/completions
       # apiKey is the OpenAI API key to access the GenAI service. Replace the value with your OpenAI API key.
       apiKey:
+    ollama:
+      # baseUrl is the base URL of the Ollama service. Replace the value with your Ollama server URL.
+      baseUrl: http://localhost:11434
+      # authType is the authentication type for Ollama. Supported values are: none, basic, bearer.
+      authType: none
+      # basicAuthUsername is the username for basic authentication (used when authType=basic).
+      basicAuthUsername:
+      # basicAuthPassword is the password for basic authentication (used when authType=basic).
+      basicAuthPassword:
+      # bearerToken is the bearer token for authentication (used when authType=bearer).
+      bearerToken:
 # nameOverride changes the resources names. By default, the release name is used.
 nameOverride: ""
 
@@ -83,6 +94,8 @@ database:
   username: 
   # password is the password of the database user. Mandatory parameter.
   password:
+  # authenticationDatabase is the database to authenticate against. It is used only for MongoDB and the default value is "admin".
+  authenticationDatabase: 
   # tls specifies whether TLS is enabled. Supported values are true and false.
   tls: false
   # tlsInsecure specifies whether certificate validation must be skipped. Supported values are true and false.
@@ -144,6 +157,8 @@ config:
     enabled: false
     # commonTenantDatabaseName is the name of the database used for common tenant data.
     commonTenantDatabaseName: multitenant-common
+    # Optional whitelabel string to customize the tenant manager UI header
+    whitelabel:
     # tenantDbPrefix is the prefix used for tenant databases.
     tenantDbPrefix: uno-tenant-
     trial:
@@ -171,12 +186,16 @@ config:
     # token value per AI Agent call
     # 1 token = 8 ai agent calls
     tokenPerAIAgentCall: 0.125
-    # for internal use only
-    tenantMetricsEnabled: false
+    # Exposes metrics in a multi-tenant environment. When disabled, dashboards cannot display tenant-specific metrics. Supported values are 'true' and 'false'.
+    tenantMetricsEnabled: true
     # the support email address or http(s) link to include in the tenant notification emails for trials. Optional.
     trialSupportLink: mailto:support@example.com
     # the support email address or http(s) link to include in the tenant notification emails for subscribed tenants. Optional.
     subscribedSupportLink: https://support.example.com
+    # Sends a notification email when a trial tenant is created. Optional.
+    eMailSendForTrial: true
+    # Sends a notification email when a subscribed tenant is created. Optional.
+    eMailSendForSubscribed: true
     # the name to include in the "from" field of the tenant notification emails. Optional.
     eMailSender: UnO SaaS
     # Custom subject for the email sent as notifications when a tenant is created. Optional.
@@ -203,6 +222,10 @@ config:
       #   </div>
       # </body>
       # </html>
+    # specified whether to also notify other recipients (for example, sales team) when a tenant is created or promoted. Supported values are true and false.
+    eMailOtherRecipientsEnabled: false
+    # comma separated list of email address to be notified when a tenant is created or promoted, used only if eMailOtherRecipientsEnabled is set to true.
+    eMailOtherRecipients: # mail@example.com,mail2@otherrecipient.com
     # For internal use only
     marketplace:
       # HCLSoftware is the configuration for the HCL Software marketplace.
@@ -213,6 +236,10 @@ config:
           username:
           password:
           topic:
+          groupId:
+          # Discard all messages created before startDate (in ISO 8601 format YYYY-MM-DDThh:mm:ssZ).
+          # The default value is null (no message discarded)
+          startDate:
         schemaRegistry:
           url:
           username:
@@ -235,6 +262,18 @@ config:
           clientId:
           # Client secret to access MHS services
           clientSecret:
+        Unica:
+          journey:
+            # Unique entry source code. Can be non-prod or prod one.
+            entrySourceCode:
+            # Url of the token endpoint for Unica Journey API
+            tokenUrl:
+            # Url of the Unica Journey API to send data of the trials created from marketplace (trial record pushing)
+            dataUrl:
+            # client id to generate an auth token from tokenUrl valid for calling dataUrl API
+            clientId:
+            # k8S secret name that contains client secret to generate an auth token from tokenUrl valid for calling dataUrl API
+            clientSecret:
         # license multiplier, used to calculate the license quantity with respect to the quantity coming from marketplace
         licenseMultiplier: 1
     # cert-manager certificate Issuer for tenant manager if not specified it uses the default one
@@ -248,6 +287,18 @@ config:
       groupIds:
       # - SaaSAdmins
       # A list of user ID regex patterns to further filter user IDs.
+      # This is used in conjunction to groupIds.
+      # If at least a filter is specified, Users that has at least one group in groupIds will also need to have a user ID matching at least one of the filters.
+      userIdFilters:
+      # - .*@example.com
+    viewers:
+      # List of user IDs that are authorized as tenant viewers
+      userIds:
+      # - unoSaaSViewer@example.com
+      # List of group IDs that are authorized as tenant viewers
+      groupIds:
+      # - SaaSViewers
+      # A list of user ID regex patterns to further filter user IDs. 
       # This is used in conjunction to groupIds.
       # If at least a filter is specified, Users that has at least one group in groupIds will also need to have a user ID matching at least one of the filters.
       userIdFilters:
@@ -268,7 +319,7 @@ config:
     # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
     pullPolicy: Always
     # tag is the tag of the image. The default value is latest.
-    tag: 2.1.3.0
+    tag: 2.1.4.0
   orchestrator:
     # Specifies for how long the Task Run History is retained (in ISO 8601 format, e.g., P400D).
     jobRunHistoryRetentionDuration: P400DT0H
@@ -291,6 +342,17 @@ config:
     daysRetentionFailPlan: P30DT0H
     # Frequency to remove the past failed jobs
     frequencyFailJobCleanUp: PT1H
+  executor:
+    # how long tasks executed from the CLOUD executor (and related job logs) are retained in DB. This applies to tasks in final status.
+    # minimum value is 7 days (lower value will be ignored)
+    taskRetentionDays: P15D
+  endpoints:
+    monitor:
+      frequency:
+        # frequency to check what endpoints need to be monitored
+        check: PT30S
+        # minimum frequency that can be specified for monitoring on an endpoint
+        min: PT1M
   console:
     # enableLogout specifies whether the Console logout is enabled. Supported values are true and false.
     enableLogout: false
@@ -328,10 +390,10 @@ config:
 
     # Below information are only used if the genai service is internal deployment.
     # Gemini model used for AI Pilot. This is also the default model used for AI Agents. It must be a Gemini model.
-    defaultVertexAiModel: gemini-2.0-flash
+    defaultVertexAiModel: gemini-2.5-flash-lite
     # timeout is the timeout for the GenAI service requests.
     timeout:
-    # These models may take upto 5 minutes to reflect in the other services.
+    # These models may take up to 5 minutes to reflect in the other services.
 
     agentModels:
       # Model names that work with GenAI service for AI Agents from vertex-ai
@@ -340,6 +402,10 @@ config:
       openAiModels:
       # Model names that work with GenAI service for AI Agents from bedrock
       bedrockModels:
+      # Model names that work with GenAI service for AI Agents from ollama
+      ollamaModels:
+    # The model used for internal agents (e.g. to create workflow). It must be one of the models specified in agentModels. If not specified, the defaultVertexAiModel is used.
+    internalAgentsModel:
 
   engine:
     # allowed_referer specifies the allowed referer for the engine and console in case of Invalid Referer.
@@ -380,6 +446,8 @@ config:
     console: #https://console.example.com
     # endpoint where the gateway is exposed.
     gateway: #https://gateway.example.com
+    # endpoint where the agentmanager is exposed. For non multi-tenant deployment only.
+    agentmanager: #https://agentmanager.example.com
 
   encryption:
     # The password or key to encrypt data, such as passwords, agent database, and kafka messages.
@@ -404,9 +472,9 @@ config:
     customIssuer:
     # customIngressIssuer is the optional name of the certificate issuer that overrides internal issuer with a specific one to be used only for ingress.
     customIngressIssuer:
-    # caPairSecretName is the name of the pair secret. This parameter applies if you set useCustomizedCert to true.
+    # caPairSecretName is the name of the secret where the CA certificate and key pair are stored. If useCustomizedCert is set to false, this secret is created by the deployment process to store the CA certificate and key pair.
     caPairSecretName: ca-key-pair
-    # certSecretName is the name of the secret. This parameter applies if you set useCustomizedCert to true.
+    # certSecretName is the name of the secret where the internal communication certificates are stored. If useCustomizedCert is set to false, this secret is created by the deployment process, if useCustomizedCert is set to true, you must create this secret with your custom certificates.
     certSecretName: uno-certificate
     # certExtAgtSecretName is the name of the secret of the external agent. This parameter applies if you set useCustomizedCert to true.
     certExtAgtSecretName: uno-certificate-ext-agt
@@ -431,6 +499,8 @@ config:
     apikeyPersonalExpirationDuration: P365D
     # apikeyServiceExpirationDuration is the amount of time on or after which the Service API Keys expire. It is calculated starting from API Key creation.
     apikeyServiceExpirationDuration: P365D
+    # apikeyCrossDependenciesExpirationDuration is the amount of time on or after which the Cross Dependencies API Keys expire. It is calculated starting from API Key creation.
+    apikeyCrossDependenciesExpirationDuration: P365D
     # groupsCacheExpirationDuration is the amount of time on or after which users must login again to the authentication provider to use Personal API Keys.
     groupsCacheExpirationDuration: P30D
     # cleanupFrequencyForPending indicates how often the IAA service checks in the database for API Keys whose token has not been created after the cleanupFrequencyForPending timeout has expired.
@@ -462,7 +532,7 @@ authentication:
     connectionTimeout: PT1M
     # enabled specifies whether authentication through OpenID Connect (OIDC) server is enabled. 
     # If enabled is set to false, the other properties in this section are ignored.
-    enabled: false
+    enabled: true
     # useToManageApiKeys specifies whether the OpenID Connect (OIDC) server must be used to manage API keys in case of fail (for example, when authentication information expires).
     # Supported values are true and false. 
     useToManageApiKeys: true
@@ -490,7 +560,8 @@ authentication:
     authenticationScope : ""
     # The path to the claim in the JWT token that contains the group names for the user
     jwtGroupClaimPath : ""
-
+    # Is PKCE required for OIDC authentication flows. Supported values are true and false.
+    pkceRequired : false
 # bulkhead defines the policy to be used on the gateway endpoint for avoiding bulk requests and block DDOS attacks against these contexts.
 bulkhead:
   request:
@@ -500,10 +571,11 @@ bulkhead:
     waitingTaskQueue: 12
 
 routes:
-  # enabled specifies whether a Openshift route is enabled to route traffic from external sources to the applications in the cluster. Supported values are true and false.
+  # enabled specifies whether an Openshift route is enabled to route traffic from external sources to the applications in the cluster. Supported values are true and false.
   enabled: true
-  #  specifies whether a Openshift route ssl termination . Supported values are passthrough and reencrypt.
+  #  specifies whether an Openshift route ssl termination . Supported values are passthrough and reencrypt.
   termination:
+
 ingress:
   # enabled specifies whether an ingress is enabled to route traffic from external sources to the applications in the cluster. Supported values are true and false.
   enabled: true
@@ -533,6 +605,22 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+gatewayApi:
+  # enabled specifies whether a Gateway API is enabled to route traffic from external sources to the applications in the cluster. It can be used as an alternative (or in combination) to ingress. Supported values are true and false.
+  enabled: false
+  # The name of the Gateway resource.
+  gatewayName: "external-gateway"
+  # The namespace where the Gateway resource is located.
+  gatewayNamespace: "" # Defaults to release namespace
+  # baseDomainName is the name of the base domain for using the ingress controller. This parameter applies if you set enabled to true.
+  baseDomainName: .gwa.uat.uno
+
+  # Additional annotations to add to the HTTPRoute resources created.
+  annotations: {}
+  # Advanced: override the default parentRefs
+  parentRefs: []
+  # Advanced: add implementation specific backend config
+  backendConfig: {}
 
 deployment:
   global:
@@ -542,7 +630,7 @@ deployment:
     minTargetReplicas: 1
     # maxTargetReplicas is the maximum number of target replicas to be deployed for each microservice.
     maxTargetReplicas: 3
-    # traceLevel specifes the trace detail level for trace.log. Supported values are ALL,FINE,INFO.
+    # traceLevel specifies the trace detail level for trace.log. Supported values are ALL,FINE,INFO.
     traceLevel: "INFO"
     autoscaler:
       # cpuAverageUtilization specifies the average usage of CPU which starts the autoscaler.
@@ -563,18 +651,41 @@ deployment:
         cpu: "0.3"
         # memory is the minimum amount of memory services require to run.
         memory: "512Mi"
+    # Customize the probes for all microservices. The default settings are designed to give the application enough time to start while ensuring quick recovery in case of failures.
+    probes:
+      startup:
+        enabled: true
+        initialDelaySeconds: 15
+        periodSeconds: 10
+        failureThreshold: 30 # Gives the app 300s (5 mins) to start
+      readiness:
+        initialDelaySeconds: 15
+        periodSeconds: 5
+        failureThreshold: 40
+        timeoutSeconds: 5
+      liveness:
+        initialDelaySeconds: 60
+        periodSeconds: 10
+        failureThreshold: 3    # Tight threshold for quick recovery
+        timeoutSeconds: 5
   # The properties listed below apply to single microservices. You can use them to override the global settings defined above for one or more microservices.
   console:
     # ingressPrefix is the prefix of the name of the endpoint of the console microservice.
     ingressPrefix: "console"
+    # gatewayApiPrefix is the prefix of the name of the endpoint of the console microservice when using Gateway API.
+    gatewayApiPrefix: "console"
     #minTargetReplicas: 1
   agentmanager:
     # ingressPrefix is the prefix of the name of the endpoint of the agentmanager microservice.
     ingressPrefix: "agentmanager"
+    # gatewayApiPrefix is the prefix of the name of the endpoint of the agentmanager microservice when using Gateway API.
+    gatewayApiPrefix: "agentmanager"
     #minTargetReplicas: 1
   gateway:
     # ingressPrefix is the prefix of the name of the endpoint of the gateway microservice.
     ingressPrefix: "gateway"
+    # gatewayApiPrefix is the prefix of the name of the endpoint of the gateway microservice when using Gateway API.
+    gatewayApiPrefix: "gateway"
     #minTargetReplicas: 1
   eventmanager:
     #minTargetReplicas: 1
@@ -619,8 +730,14 @@ deployment:
   notification:
     #minTargetReplicas: 1
   tenantmanager:
+    # ingressPrefix is the prefix of the name of the endpoint of the tenantmanager microservice.
+    ingressPrefix: "tenantmanager"
+    # gatewayApiPrefix is the prefix of the name of the endpoint of the tenantmanager microservice when using Gateway API.
+    gatewayApiPrefix: "tenantmanager"
+    # min and max replicas for tenant manager must be the same to avoid issues with tenant creation
     minTargetReplicas: 2
     maxTargetReplicas: 2
+    # the database name used by tenant manager
     databaseName: "tenantmanager-db"
 agenticAIBuilder:
   telemetry:
@@ -875,22 +992,26 @@ agenticAIBuilder:
       # The base URL of the UNO MCP service.
       unoMCPBaseURL : ""
       maxAgents: 5
-    resources:
-      limits:
-        cpu: 1000m
-        memory: 2500Mi
-      requests:
-        cpu: 300m
-        memory: 500Mi
+      resources:
+        limits:
+          cpu: 2
+          memory: 2560Mi
+        requests:
+          cpu: 500m
+          memory: 1638Mi
   uno:
     hostname: "{{ include \"uno.fullname\" . }}-gateway"
+    port: "8443"
+    proxyURL: ""
+  iaa:
+    hostname: "{{ include \"uno.fullname\" . }}-iaa"
     port: "8443"
     proxyURL: ""
   image:
     # The registry where the image is hosted
     repository: hclcr.io/uno
     # The tag of the images
-    tag: 2.1.3.0
+    tag: 2.1.4.0
     # The Pull Policy for the images
     imagePullPolicy: Always
 
@@ -899,7 +1020,7 @@ agenticAIBuilder:
 hclaipilot:  
   image:
     repository: hclcr.io/uno
-    tag: 2.1.3.0
+    tag: 2.1.4.0
   
   channels:
     slackToken: ""
@@ -1001,10 +1122,10 @@ hclaipilot:
     resources:
       limits:
         cpu: "1"
-        memory: 2500Mi
+        memory: 2867Mi
       requests:
-        cpu: "0.5"
-        memory: 2000Mi
+        cpu: 500m
+        memory: 2355Mi
 
   pilotNlg:
     # replicaCount is the number of replicas for the pilot nlg service.
@@ -1061,7 +1182,7 @@ hclaipilot:
 
     container:
       registry: hclcr.io/uno # Image name
-      tag: 2.1.3.0  # Image tag
+      tag: 2.1.4.0  # Image tag
     authorization:
       # The URL of the OpenID Connect (OIDC) server for the RAG service to authenticate the jwt token
       oidcServerURL: "https://uno-keycloak-ssl:8843"

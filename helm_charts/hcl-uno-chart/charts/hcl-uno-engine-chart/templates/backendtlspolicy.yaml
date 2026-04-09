@@ -1,0 +1,50 @@
+# ######################################################################
+# Licensed Materials Property of HCL*
+# (c) Copyright HCL Technologies Ltd. 2021, 2026. All rights reserved.
+#
+# * Trademark of HCL Technologies Limited
+# ######################################################################
+{{- $fullName := include "fullname" . -}}
+
+{{- if .Values.gatewayApi.enabled -}}
+{{- if or (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1/BackendTLSPolicy") .Values.gatewayApi.skipLibraryCheck -}}
+
+{{- /* Define the list of service base names based on deployment type */ -}}
+{{- $services := list -}}
+{{- if eq .Values.global.deploymentType "aio" -}}
+  {{- $services = list "console-aio" -}}
+{{- else -}}
+  {{- $services = list "console" "gateway" "agentmanager" -}}
+{{- end -}}
+
+{{- if .Values.config.multitenant.enabled -}}
+  {{- $services = append $services "tenantmanager" -}}
+{{- end -}}
+
+{{- range $svcName := $services }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: {{ printf "%s-%s-tls" $.Release.Name $svcName }}
+  labels:
+    {{- include "uno.common.label" $ | nindent 4 }}
+spec:
+  targetRefs:
+    - group: ""
+      kind: Service
+      name: {{ printf "%s-%s" $fullName $svcName }}
+  validation:
+    caCertificateRefs:
+      - group: ""
+        kind: Secret
+        name: {{ $.Values.config.certificates.certSecretName | default (printf "%s-tls-secret" $fullName) }}
+    # Using the service base name as the hostname for SAN verification.
+    # In AIO mode, "console-aio" acts as the hostname for the combined service.
+    hostname: {{ $svcName | quote }}
+{{- end }}
+{{- else -}}
+# WARNING: gateway.networking.k8s.io/v1alpha2/BackendTLSPolicy is not available on this cluster. 
+# Skipping Backend TLS configuration to prevent installation failure.
+{{- end -}}
+{{- end -}}

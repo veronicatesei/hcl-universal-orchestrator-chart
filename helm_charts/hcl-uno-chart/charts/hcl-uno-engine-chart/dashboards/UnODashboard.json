@@ -5851,7 +5851,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "avg by (namespace, pod) (\n  container_memory_usage_bytes{container!=\"\", pod=~\"$Release-.*\", namespace=~\"$Namespace\", pod=~\"$pod\"}\n)",
+              "expr": "avg by (namespace, pod) (\n  container_memory_working_set_bytes{container!=\"\", pod=~\"$Release-.*\", namespace=~\"$Namespace\", pod=~\"$pod\"}\n)",
               "hide": false,
               "legendFormat": "used by {{pod}}",
               "range": true,
@@ -5966,7 +5966,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "avg by (namespace, pod, container) (\n  kube_pod_container_resource_limits{resource=\"memory\", container!=\"\", pod=~\"$Release-.*\", namespace=~\"$Namespace\", pod=~\"$pod\"}\n) - on(pod, namespace, container) avg by (namespace, pod, container) (\n  container_memory_usage_bytes{container!=\"\", namespace=~\"$Namespace\", pod=~\"$pod\"}\n)",
+              "expr": "avg by (namespace, pod, container) (\n  kube_pod_container_resource_limits{resource=\"memory\", container!=\"\", pod=~\"$Release-.*\", namespace=~\"$Namespace\", pod=~\"$pod\"}\n) - on(pod, namespace, container) avg by (namespace, pod, container) (\n  container_memory_working_set_bytes{container!=\"\", namespace=~\"$Namespace\", pod=~\"$pod\"}\n)",
               "hide": false,
               "legendFormat": "available for {{pod}} on {{container}} {{namespace}}",
               "range": true,

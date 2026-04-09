@@ -108,7 +108,7 @@ spec:
           imagePullPolicy: {{  $root.Values.config.registry.pullPolicy }}
 {{ include "uno.containerSecurityContext"  $root | indent 10 }}
 
-{{ include "uno.readiness" $root | indent 10 }}
+{{ include "uno.probes" $root | indent 10 }}
           ports:
             - name: https
               containerPort: 8443
@@ -170,6 +170,8 @@ spec:
               value: "{{ $root.Values.config.apiKey.apikeyServiceExpirationDuration }}"
             - name: UNO_GROUPS_CACHE_EXPIRATION_DURATION
               value: "{{ $root.Values.config.apiKey.groupsCacheExpirationDuration }}"
+            - name: UNO_MICROSERVICE_APIKEY_CROSSDEPENDENCIES_EXPIRATION_DURATION
+              value: "{{ $root.Values.config.apiKey.apikeyCrossDependenciesExpirationDuration }}"
 {{- end}}
 {{- if or (eq $k "agentmanager") (eq $k "console-aio") }}
 {{ include "uno.plugins.max.size" $root | indent 12 }}
@@ -221,6 +223,10 @@ spec:
               value: wss://{{ $fullName }}-agentic-{{ $root.Values.agenticAIBuilder.runner.name }}-prod:{{ $root.Values.agenticAIBuilder.runner.port }}
             - name: UNO_AGENTIC_AI_RUNNER_TEST_WSS_URL
               value: wss://{{ $fullName }}-agentic-{{ $root.Values.agenticAIBuilder.runner.name }}-test:{{ $root.Values.agenticAIBuilder.runner.port }}
+{{- end}}
+{{- if and ($root.Values.global.enableAgenticAIBuilder) (eq $k "iaa") }}
+            - name: EXTERNAL_MP_JWT__AGENTIC_AI_BUILDER_SYSTEM__VERIFY_PUBLICKEY_LOCATION
+              value: /security/certs/agenticbuilder/tls.crt
 {{- end}}
 {{- if or (eq $k "gateway") (eq $k "console-aio")  }}
 {{- if or ((($root.Values).global).enableConsole) ($dwcsecretname) }}
