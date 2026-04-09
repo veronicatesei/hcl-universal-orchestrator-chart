@@ -51,27 +51,50 @@ Write-Host "Gathering logs from namespace: $Namespace" -ForegroundColor Cyan
 mkdir logs
 
 # Fetch the list of pods in the specified namespace
-$PODS = kubectl get pods --namespace $Namespace --no-headers -o custom-columns=":metadata.name"
+$PODS = kubectl get pods --namespace $Namespace --no-headers -o custom-columns=":metadata.name" -l prometheus
 
 # Iterate over each pod
 Foreach ($POD IN $PODS) {
-  # Fetch the list of containers within the pod
-  $CONTAINERS = kubectl get pods "$POD" --namespace "$Namespace" --no-headers -o jsonpath='{.spec.containers[*].name}'
+  # Fetch the list of containers within the pod and split into an array
+  $containersRaw = kubectl get pods "$POD" --namespace "$Namespace" --no-headers -o jsonpath='{.spec.containers[*].name}'
+  $CONTAINERS = $containersRaw -split '\s+'
+
   # Iterate over each container in the pod
   Foreach ($CONTAINER IN $CONTAINERS) {
+    # Skip empty container names
+    if ([string]::IsNullOrWhiteSpace($CONTAINER)) { continue }
+
+    # For audit pods, skip audit-log-sidecar container
+    if ($POD -like "*audit*" -and $CONTAINER -eq "audit-log-sidecar") { continue }
+
     # Generate a unique filename for each log file
     $CONTAINER_FOLDER=$POD + "_" + $CONTAINER
     mkdir logs/"$CONTAINER_FOLDER"
-    # Fetch the log file from the container and copy it to log folder
-    kubectl cp  $Namespace/$POD":/opt/app/stdlist" logs/"$CONTAINER_FOLDER"/ -c "$CONTAINER"
+
+    # If this is the error-log-sidecar in an audit pod, copy only errors.json
+    if ($POD -like "*audit*" -and $CONTAINER -eq "error-log-sidecar") {
+        kubectl cp "${Namespace}/${POD}:/opt/app/audit/errors.json" "logs/$CONTAINER_FOLDER/errors.json" -c "$CONTAINER"
+    }
+    else{
+        # Fetch the log file from the container and copy it to log folder
+        kubectl cp  $Namespace/$POD":/opt/app/stdlist" logs/"$CONTAINER_FOLDER"/ -c "$CONTAINER"
+    }
     # Fetch the metrics of the container
     kubectl exec "$POD" -c "$CONTAINER" --namespace "$Namespace" -- curl -sSk https://localhost:8443/q/metrics > logs/"$CONTAINER_FOLDER"/metrics.log
     # Fetch the health of the container
     kubectl exec "$POD" -c "$CONTAINER" --namespace "$Namespace" -- curl -sSk https://localhost:8443/q/health > logs/"$CONTAINER_FOLDER"/health.log
   }
 }
+Write-Host "Finished gathering logs from all pods and containers in namespace $Namespace." -ForegroundColor Cyan
+Write-Host "Compressing logs into data-gather.zip file." -ForegroundColor Cyan
 #Zip the logs
-Compress-Archive -Path logs -DestinationPath data-gather.zip -Force
+try {
+    Compress-Archive -Path logs -DestinationPath data-gather.zip -Force
+    Write-Host "Created data-gather.zip containing collected logs." -ForegroundColor Green
+} catch {
+    Write-Host "Error occurred while compressing logs: $_" -ForegroundColor Red
+    exit 1
+}
 #Delete the logs folder
 Remove-Item logs -Recurse
 
@@ -114,11 +137,23 @@ mkdir definitions
 & $OcliPath model extract definitions/allHumanTaskQueues.txt from htq=@/@
 #Extract all AI Agents
 & $OcliPath model extract definitions/allAIAgents.txt from aiagent=@/@
+#Extract all Endpoints
+& $OcliPath model extract definitions/allEndpoints.txt from endpoints=@/@
+#Extract all the run cycle groups
+& $OcliPath model extract definitions/allRunCycleGroups.txt from rcg=@/@
 
+Write-Host "Finished gathering definitions using OCLI." -ForegroundColor Cyan
+Write-Host "Adding extracted definitions to data-gather.zip file..." -ForegroundColor Cyan
 #Zip the definitions
-Compress-Archive -Path definitions -Update -DestinationPath data-gather.zip
-
-#Delete the definition folder
-Remove-Item definitions -Recurse
-
-Write-Host "Definitions gathering completed." -ForegroundColor Cyan
+try {
+    Compress-Archive -Path definitions -Update -DestinationPath data-gather.zip
+    Write-Host "Added extracted definitions to data-gather.zip file." -ForegroundColor Green
+    Write-Host "Definitions gathering completed." -ForegroundColor Cyan
+    #Delete the definition folder
+    Remove-Item definitions -Recurse
+} catch {
+    Write-Host "Failed to update data-gather.zip with definitions." -ForegroundColor Red
+    #Delete the definition folder
+    Remove-Item definitions -Recurse
+    exit 1
+}

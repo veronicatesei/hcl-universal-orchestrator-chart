@@ -60,7 +60,7 @@ cyan "Gathering logs from namespace: $NAMESPACE"
 mkdir logs
 
 # Fetch the list of pods in the specified namespace
-PODS=$(kubectl get pods --namespace "$NAMESPACE" --no-headers -o custom-columns=":metadata.name")
+PODS=$(kubectl get pods --namespace "$NAMESPACE" --no-headers -o custom-columns=":metadata.name") -l prometheus
 
 # Iterate over each pod
 for POD in $PODS
@@ -73,8 +73,20 @@ do
   # Iterate over each container in the pod
   for CONTAINER in $CONTAINERS
   do
-    # Generate a unique filename for each log file
+    # Skip audit-log-sidecar
+    if [[ "$POD" == *audit* && "$CONTAINER" == "audit-log-sidecar" ]]; then
+      continue
+    fi
+
     CONTAINER_FOLDER="${POD}_${CONTAINER}"
+    mkdir -p logs/"$CONTAINER_FOLDER"
+
+    # Copy logs
+    if [[ "$POD" == *audit* && "$CONTAINER" == "error-log-sidecar" ]]; then
+      kubectl cp "$NAMESPACE/$POD":opt/app/audit/errors.json logs/"$CONTAINER_FOLDER"/errors.json -c "$CONTAINER"
+    else
+      kubectl cp "$NAMESPACE/$POD":opt/app/stdlist logs/"$CONTAINER_FOLDER"/ -c "$CONTAINER"
+    fi
 
     # Fetch the log file from the container and copy it to log folder
     kubectl cp "$NAMESPACE/$POD":opt/app/stdlist logs/"$CONTAINER_FOLDER"/ -c "$CONTAINER"
@@ -84,8 +96,17 @@ do
     kubectl exec "$POD" -c "$CONTAINER" --namespace "$NAMESPACE" -- curl -sSk https://localhost:8443/q/health > logs/"$CONTAINER_FOLDER"/health.log
   done
 done
+cyan "Finished gathering logs from all pods and containers in namespace $NAMESPACE."
+cyan "Compressing logs into data-gather.zip file."
 #Zip the logs
 zip -r data-gather.zip logs
+exitCode=$?
+if [ $exitCode -ne 0 ]; then
+  red "Failed to create data-gather.zip. Please check if zip is installed and try again."
+  exit 1
+else
+  green "Created data-gather.zip containing collected logs."
+fi
 #Delete the logs folder
 rm -rf logs
 
@@ -127,10 +148,22 @@ mkdir definitions
 "$OCLI_PATH" model extract definitions/allHumanTaskQueues.txt from htq=@/@
 #Extract all AI Agents
 "$OCLI_PATH" model extract definitions/allAIAgents.txt from aiagent=@/@
+#Extract all Endpoints
+"$OCLI_PATH" model extract definitions/allEndpoints.txt from endpoints=@/@
+#Extract all the run cycle groups
+"$OCLI_PATH" model extract definitions/allRunCycleGroups.txt from rcg=@/@
 
-
+cyan "Finished gathering definitions using OCLI."
+cyan "Adding extracted definitions to data-gather.zip file..."
 #Zip the definitions
 zip -r data-gather.zip definitions
+updateZipCode=$?
+if [ $updateZipCode -ne 0 ]; then
+  red "Failed to update data-gather.zip with definitions."
+  exit $updateZipCode
+else
+  green "Added extracted definitions to data-gather.zip file."
+fi
 #Delete the definition folder
 rm -rf definitions
 
