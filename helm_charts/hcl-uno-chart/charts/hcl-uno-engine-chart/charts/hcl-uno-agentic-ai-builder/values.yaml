@@ -231,12 +231,17 @@ runner:
 
   resources:
     limits:
-      cpu: 1000m
-      memory: 2500Mi
+      cpu: 2
+      memory: 2560Mi
     requests:
-      cpu: 300m
-      memory: 500Mi
+      cpu: 500m
+      memory: 1638Mi
 uno:
+  hostname: ""
+  port: ""
+  proxyURL: ""
+
+iaa:
   hostname: ""
   port: ""
   proxyURL: ""
@@ -302,9 +307,9 @@ authorization:
 # Configuration for the images used in the deployment
 image:
   # The registry where the image is hosted
-  repository: hclcr.io/slt/agenticbuilder
+  repository: hclcr.io/uno
   # The tag/version of the images
-  tag: 2.1.3.0
+  tag: 2.1.4.0
   # The Pull Policy for the images
   imagePullPolicy: Always
 
@@ -348,6 +353,14 @@ pgdb:
   users:
     - name: postgres
       options: "SUPERUSER"
+
+  resources:
+    requests:
+      memory: "600Mi"
+      cpu: "500m"
+    limits:
+      memory: "1024Mi"
+      cpu: "1000m"
 
   patroni:
     dynamicConfiguration:

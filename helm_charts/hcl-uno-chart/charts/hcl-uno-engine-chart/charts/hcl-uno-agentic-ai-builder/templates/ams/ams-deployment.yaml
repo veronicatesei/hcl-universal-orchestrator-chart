@@ -53,7 +53,8 @@ spec:
       volumes:
 {{- include "agenticbuilder.additionalCAs.volume" . | nindent 8 }}
 {{- include "agenticbuilder.hclauthorization.volume" . | nindent 8  }}
-{{- include "agenticbuilder.commonssl.volume.definition" . | nindent 8 }}
+{{- include "agenticbuilder.commonssl.volume.definition" . | nindent 8 }} 
+{{- include "agenticbuilder.jwt.volume" . | nindent 8 }} 
         - name: https-cert
           secret:
             secretName: {{ include "agenticbuilder.cert.name" . }}
@@ -81,6 +82,7 @@ spec:
                   key: encryption-key
             - name: ROOT_PATH
               value: "/{{ $fullname }}-{{ .Values.ams.name }}"
+{{- include "agenticbuilder.sofy.env.variables" . | nindent 12 }}
 {{- include "agenticbuilder.commonssl.env.definition" . | nindent 12 }}
 {{- include "agenticbuilder.hclauthorization.env" . | nindent 12 }}              
 {{- include "agenticbuilder.env.postgres.password" . | nindent 12 }}
@@ -88,6 +90,7 @@ spec:
 {{- include "agenticbuilder.commonssl.volumeMounts.definition" . | indent 12 }}
 {{- include "agenticbuilder.hclauthorization.volume.mount" . | indent 12 }}
 {{- include "agenticbuilder.additionalCAs.volumeMounts" . | indent 12 }}
+{{- include "agenticbuilder.jwt.volumeMounts" . | indent 12 }}
             - name: https-cert
               mountPath: "/https"
               readOnly: true

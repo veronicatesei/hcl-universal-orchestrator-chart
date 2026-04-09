@@ -68,11 +68,11 @@ pilotCore:
   # Resource Configuration
   resources:
     limits:
-      cpu: 1000m
-      memory: 2500Mi
+      cpu: "1"
+      memory: 2867Mi
     requests:
       cpu: 500m
-      memory: 2000Mi
+      memory: 2355Mi
 
 # Configuration for the NLG service
 pilotNlg:
@@ -349,6 +349,14 @@ pgdb:
   affinityLabel: "postgres"
   topologyKey: "kubernetes.io/hostname"
   storageSize: "5Gi"
+
+  resources:
+    requests:
+      memory: "600Mi"
+      cpu: "500m"
+    limits:
+      memory: "1024Mi"
+      cpu: "1000m"
   
   users:
     - name: postgres

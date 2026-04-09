@@ -49,13 +49,29 @@ data:
     CREDENTIAL_MANAGER_SCHEMA: {{ tpl (default "https" .Values.common.rest.scheme) . | quote }}
     CREDENTIAL_MANAGER_SSL_VERIFY : {{ tpl (default "true" .Values.common.rest.ssl.enabled) . | quote }}
 
+    RUNNER_PROD_HOSTNAME : {{ tpl (printf "%s-%s-prod" (include "agenticbuilder.fullname" .) .Values.runner.name) . | quote }}
+    RUNNER_PROD_PORT : {{ tpl (toString .Values.runner.port) . | quote }}
+    RUNNER_PROD_PROXY_URL : {{default "" (tpl .Values.runner.proxyURL .) | quote }}
+    RUNNER_PROD_TIMEOUT: {{ tpl (default "30" .Values.common.rest.timeout) . | quote }}
+    RUNNER_PROD_HOSTNAME_VALIDATION : {{ tpl (default "true" .Values.common.rest.ssl.hostnameValidation) . | quote }}
+    RUNNER_PROD_SCHEMA : {{ tpl (default "https" .Values.common.rest.scheme) . | quote }}
+    RUNNER_PROD_SSL_VERIFY : {{ tpl (default "true" .Values.common.rest.ssl.enabled) . | quote }}
+
     UNO_HOSTNAME: {{ tpl .Values.uno.hostname . | quote }}
     UNO_PORT: {{ default "8443" (tpl (toString .Values.uno.port) .) | quote }}
     UNO_PROXY_URL: {{ default "" (tpl .Values.uno.proxyURL .) | quote }}
     UNO_TIMEOUT: {{ tpl (default "30" .Values.common.rest.timeout) . | quote }}
     UNO_HOSTNAME_VALIDATION: {{ tpl (default "true" .Values.common.rest.ssl.hostnameValidation) . | quote }}
     UNO_SCHEMA: {{ tpl (default "https" .Values.common.rest.scheme) . | quote }}
-    CREDENTIAL_MANAGER_SSL_VERIFY : {{ tpl (default "true" .Values.common.rest.ssl.enabled) . | quote }}
+    UNO_SSL_VERIFY : {{ tpl (default "true" .Values.common.rest.ssl.enabled) . | quote }}
+
+    IAA_HOSTNAME: {{ tpl .Values.iaa.hostname . | quote }}
+    IAA_PORT: {{ default "8443" (tpl (toString .Values.iaa.port) .) | quote }}
+    IAA_PROXY_URL: {{ default "" (tpl .Values.iaa.proxyURL .) | quote }}
+    IAA_TIMEOUT: {{ tpl (default "30" .Values.common.rest.timeout) . | quote }}
+    IAA_HOSTNAME_VALIDATION: {{ tpl (default "true" .Values.common.rest.ssl.hostnameValidation) . | quote }}
+    IAA_SCHEMA: {{ tpl (default "https" .Values.common.rest.scheme) . | quote }}
+    IAA_SSL_VERIFY : {{ tpl (default "true" .Values.common.rest.ssl.enabled) . | quote }}
 
     # SSL Configuration
     TRUSTSTORE_CA_FOLDER_PATH: "/ca"
@@ -92,3 +108,6 @@ data:
     ENABLE_AUTHENTICATION: {{ tpl (default "true" .Values.common.config.enableAuthentication) . | quote }}
     OIDC_SERVER_URL: {{ tpl .Values.authorization.oidcServerURL . | quote }}
     KEYCLOAK_REALM: {{ tpl .Values.common.config.keycloakRealm . | quote }}
+    JWT_PRIVATE_KEY_PATH : "/jwt/agenticbuilder/tls.key"
+    HCL_AUTHORIZATION_AGENTIC_AI_BUILDER_SYSTEM: "/jwt/agenticbuilder/tls.crt"
+    CALLBACK_URL: https://{{ $fullname }}-{{ .Values.ams.name }}:{{ default "8080" (tpl (toString .Values.ams.port) .) }}/key-resolution

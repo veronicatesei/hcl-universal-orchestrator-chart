@@ -73,11 +73,11 @@ probe:
 # Resource limits and requests
 resources:
   limits:
-    cpu: "1"  # CPU limit
-    memory: "2G"  # Memory limit
+    cpu: 1  # CPU limit
+    memory: 1024Mi  # Memory limit
   requests:
-    cpu: "200m"  # CPU request
-    memory: "256Mi"  # Memory request
+    cpu: 500m  # CPU request
+    memory: 700Mi  # Memory request
 hpa:
   name: "rag-service"  # HPA name
   deploymentName: "rag-service"  # Name of the deployment to scale
@@ -170,6 +170,14 @@ pgdb:
   topologyKey: "kubernetes.io/hostname"
   storageSize: "5Gi"
   
+  resources:
+    requests:
+      memory: "600Mi"
+      cpu: "500m"
+    limits:
+      memory: "1024Mi"
+      cpu: "1000m"
+
   users:
     - name: postgres
       options: "SUPERUSER"
