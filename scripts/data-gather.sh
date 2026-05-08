@@ -60,7 +60,7 @@ cyan "Gathering logs from namespace: $NAMESPACE"
 mkdir logs
 
 # Fetch the list of pods in the specified namespace
-PODS=$(kubectl get pods --namespace "$NAMESPACE" --no-headers -o custom-columns=":metadata.name") -l prometheus
+PODS=$(kubectl get pods --namespace "$NAMESPACE" --no-headers -o custom-columns=":metadata.name" -l prometheus)
 
 # Iterate over each pod
 for POD in $PODS
