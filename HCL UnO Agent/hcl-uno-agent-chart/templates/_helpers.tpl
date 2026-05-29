@@ -35,7 +35,7 @@ gcr.io/blackjack-209019/services/uno
 {{- end -}}
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 2.1.3.0
+uno.microservice.version: 2.1.5.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -163,6 +163,8 @@ release: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{- define "uno.agent.volume.mounts" -}}
+- name: stdlist-volume
+  mountPath: /opt/app/stdlist
 - name: uno-agent
   mountPath: /opt/app/dataDir/
   subPath: dataDir
@@ -172,6 +174,9 @@ release: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{- define "uno.agent.volume" -}}
+{{- /* Always mount stdlist emptyDir for retaining dumps */ -}}
+- name: stdlist-volume
+  emptyDir: {}
 {{- if ne (len .Values.persistence.extraVolumes) 0 }}
 {{ toYaml .Values.persistence.extraVolumes}}
 {{- end }}
