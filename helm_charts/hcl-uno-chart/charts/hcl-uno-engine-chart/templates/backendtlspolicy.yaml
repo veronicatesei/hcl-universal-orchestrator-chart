@@ -17,7 +17,7 @@
   {{- $services = list "console" "gateway" "agentmanager" -}}
 {{- end -}}
 
-{{- if .Values.config.multitenant.enabled -}}
+{{- if eq "true" (include "uno.enableMultitenant" .) -}}
   {{- $services = append $services "tenantmanager" -}}
 {{- end -}}
 

@@ -1,0 +1,22 @@
+{{- $root := . -}}
+{{- if include "agenticbuilder.pdb.enabled" (list $root $root.Values.runner.podDisruptionBudget) -}}
+{{- $deploymentType := include "agenticbuilder.runner.list" $root | fromJsonArray -}}
+{{- range $deploymentType}}
+{{- $currentDeploymentType := . -}}
+{{- $fullname := include "agenticbuilder.fullname" $root -}}
+{{- $runnerName := printf "%s-%s-%s" $fullname $root.Values.runner.name $currentDeploymentType -}}
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $runnerName }}-pdb
+  labels:
+    {{- include "agenticbuilder.labels" $root | nindent 4 }}
+spec:
+  maxUnavailable: {{ coalesce $root.Values.runner.podDisruptionBudget.maxUnavailable $root.Values.common.podDisruptionBudget.maxUnavailable "33%" | quote }}
+  selector:
+    matchLabels:
+      name: {{ $runnerName }}
+---
+{{- end -}}
+{{- end -}}

@@ -46,7 +46,7 @@
 {{- $myList =  append $myList "pilot-notification" -}}
 {{- end -}}
 
-{{- if .Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" .) }}
 {{- $myList =  append $myList "tenantmanager" -}}
 {{- end -}}
 
@@ -59,12 +59,26 @@
 {{ toJson $myList }}
 {{- end -}}
 
+{{- define "uno.microservices.externalservices.list" -}}
+{{- $fullName := include "fullname" . -}}
+{{- $myList := list -}}
+{{- if .Values.global.enableAgenticAIBuilder -}}
+{{- $myList = append $myList (printf "https://%s-agentic-%s-headless:%s" $fullName .Values.agenticAIBuilder.ams.name (toString .Values.agenticAIBuilder.ams.port)) -}}
+{{- end -}}
+{{ toJson $myList }}
+
+{{- end -}}
+
 {{- define "uno.microservices.services.urls" -}}
 {{- $fullName := include "fullname" . -}}
 {{- $myList := include "uno.microservices.list" . | fromJsonArray -}}
+{{- $externalList := include "uno.microservices.externalservices.list" . | fromJsonArray -}}
 {{- $names := list -}}
 {{- range $myList }}
   {{- $names = append $names (printf "https://%s-%s-headless:8443" $fullName .) -}}
+{{- end }}
+{{- range $externalList }}
+  {{- $names = append $names . -}}
 {{- end }}
 {{- join "," $names -}}
 {{- end -}}
@@ -102,6 +116,25 @@
 {{- else }}
 {{- printf "%s" .Values.ingress.baseDomainName -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Resolves whether multitenant mode is enabled using either:
+- .Values.config.multitenant.enabled
+- .Values.global.enableMultitenant
+
+Usage:
+{{- if eq "true" (include "uno.enableMultitenant" .) }}
+...
+{{- end }}
+*/}}
+{{- define "uno.enableMultitenant" -}}
+{{- $config := .Values.config | default dict -}}
+{{- $multitenant := $config.multitenant | default dict -}}
+{{- $global := .Values.global | default dict -}}
+{{- $configEnabled := eq (toString ($multitenant.enabled | default false)) "true" -}}
+{{- $globalEnabled := eq (toString ($global.enableMultitenant | default false)) "true" -}}
+{{- or $configEnabled $globalEnabled -}}
 {{- end -}}
 
 {{/*
@@ -228,7 +261,7 @@ prometheus.io/path: "/q/metrics"
 {{- end -}}
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 2.1.4.0
+uno.microservice.version: 2.1.5.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -370,6 +403,9 @@ release: {{ .Release.Name | quote }}
 # uno.tenantmanager.marketplace.kafka.topic
 - name: UNO_TENANTMANAGER_MARKETPLACE_KAFKA_TOPIC
   value: {{ .Values.config.multitenant.marketplace.HCLSoftware.kafka.topic | quote }}
+# uno.tenantmanager.marketplace.kafka.provisioningActivityTopic
+- name: UNO_TENANTMANAGER_MARKETPLACE_KAFKA_PROVISIONINGACTIVITYTOPIC
+  value: {{ .Values.config.multitenant.marketplace.HCLSoftware.kafka.provisioningActivityTopic | quote }}
 # uno.tenantmanager.marketplace.kafka.user
 - name: UNO_TENANTMANAGER_MARKETPLACE_KAFKA_USER
   value: {{ .Values.config.multitenant.marketplace.HCLSoftware.kafka.username | quote }}
@@ -482,6 +518,16 @@ release: {{ .Release.Name | quote }}
   value: {{ .Values.config.console.port | default $consolePublicPort | quote}}
 {{- end }}
 {{- end -}}
+
+{{- define "uno.multitenant.lastLoginForMailNotificationsDuration" -}}
+{{- if .Values.config.multitenant.lastLoginForMailNotificationsDuration }}
+- name: UNO_ACTIVE_USERS_LAST_LOGIN_DURATION
+  value: {{ .Values.config.multitenant.lastLoginForMailNotificationsDuration | quote }}
+{{- else }}
+- name: UNO_ACTIVE_USERS_LAST_LOGIN_DURATION
+  value: "P30D"
+{{- end }}
+{{- end }}
 
 {{- define "uno.apikey.cleanup.variable" -}}
 {{- if .Values.config.apiKey.cleanupFrequencyForPending }}
@@ -634,7 +680,7 @@ release: {{ .Release.Name | quote }}
     {{- $apiHostname = printf "%s.%s" .Values.deployment.gateway.gatewayApiPrefix (trimPrefix "." (include "common.baseDomainName" .)) }}
   {{- end }}
 {{- end }}
-{{- if .Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" .) }}
   {{- $apiHostname = printf "{0}.%s" $apiHostname }}
 {{- end }}
 - name: UNO_AUTHENTICATION_API_HOSTNAME
@@ -660,11 +706,11 @@ release: {{ .Release.Name | quote }}
 {{- end }}
 - name: UNO_PLUGINS_MANAGEPLUGINS_ENABLED
   value: {{ .Values.config.plugins.managePluginsEnabled | quote }}
-{{- if .Values.config.engine.allowed_referer }}
+{{- if (.Values.config.engine).allowed_referer }}
 - name: UNO_ALLOWED_REFERER
   value: {{ .Values.config.engine.allowed_referer | quote }}
 {{- end }}
-{{- if .Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" .) }}
 - name: QUARKUS_PROFILE
   value: multitenant
 - name: UNO_MULTI_TENANT_BASE_DOMAIN_NAME
@@ -714,6 +760,11 @@ release: {{ .Release.Name | quote }}
 {{- if .Values.config.orchestrator.humanTaskCancelWindowSeconds }}
 - name: UNO_HUMAN_TASK_CANCEL_TIMEOUT_SECONDS
   value: {{ .Values.config.orchestrator.humanTaskCancelWindowSeconds | quote }}
+{{- end }}
+{{- if .Values.config.orchestrator.countConsumedJobsFrequency }}
+# uno.license.count-consumed-jobs.frequency
+- name: UNO_LICENSE_COUNT_CONSUMED_JOBS_FREQUENCY
+  value: {{ .Values.config.orchestrator.countConsumedJobsFrequency | quote }}
 {{- end }}
 {{- if .Values.config.orchestrator.jobRunHistoryRetentionDuration }}
 - name: UNO_JOB_RUN_HISTORY_RETENTION_DURATION
@@ -1041,6 +1092,11 @@ release: {{ .Release.Name | quote }}
         name: {{ .Release.Name }}-uno-secret
         key: ENCRYPTION_KEY
         optional: false
+- name: PRODUCT_DEPLOYMENT_ID
+  valueFrom:
+    configMapKeyRef:
+      name: "{{ $fullName }}-uno-deployment-config"
+      key: PRODUCT_DEPLOYMENT_ID
 {{- end -}}
 
 {{- define "common.custom.env.variable" -}}
@@ -1082,6 +1138,8 @@ volumes:
     emptyDir: {}
   - name: plugindir
     emptyDir: {}
+  - name: stdlist-volume
+    emptyDir: {}
   - name: cert-volume
     secret:
       defaultMode: 0664
@@ -1100,7 +1158,7 @@ volumes:
   - name: {{ $fullName }}-agenticbuilder-jwt-cert-volume
     secret:
       defaultMode: 0644
-      secretName: {{ $fullName }}-agentic-agenticbuilder-jwt-secret
+      secretName: {{ $fullName }}-agentic-ab-jwt
       items:
       - key: tls.crt
         path: tls.crt
@@ -1147,6 +1205,8 @@ volumeMounts:
     mountPath: /security/certs
   - name: jwt-volume
     mountPath: /security/jwt
+  - name: stdlist-volume
+    mountPath: /opt/app/stdlist
   - name: ext-agent-cert-volume
     mountPath: /security/ext_agt_depot
 {{- if $dwcsecretname }}
@@ -1214,11 +1274,11 @@ gcr.io/blackjack-209019/services/uno
 
 {{- define "uno.pluginImageRepository" -}}
 {{- if eq .Values.global.hclImageRegistry "hclcr.io/sofy" -}}
-hclcr.io/wa
+hclcr.io/uno
 {{- else if eq .Values.global.hclImageRegistry "hclcr.io" -}}
-hclcr.io/wa
+hclcr.io/uno
 {{- else if eq .Values.global.hclImageRegistry "gcr.io/blackjack-209019" -}}
-gcr.io/blackjack-209019/services
+gcr.io/blackjack-209019/services/uno
 {{- else if  .Values.global.hclImageRegistry  -}}
 {{ print .Values.global.hclImageRegistry }}
 {{- else -}}

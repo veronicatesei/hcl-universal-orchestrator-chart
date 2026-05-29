@@ -64,6 +64,9 @@ spec:
       annotations:
 {{ include "uno.prometheus.annotation"  $root | indent 8 }}
 {{ toYaml $root.Values.global.customPodAnnotations | indent 8}}
+{{- if eq $k "tenantmanager" }}
+        checksum/deployment-config: {{ (printf "%s:%s" $root.Values.agenticAIBuilder.image.repository $root.Values.agenticAIBuilder.image.tag) | sha256sum }}
+{{- end }}
     spec:
       affinity:
 {{- if $root.Values.global.nodeAffinityRequired }}
@@ -138,7 +141,7 @@ spec:
             - name: UNO_MICROSERVICE_JWT_EXPIRATION_DURATION
               value: "{{  $root.Values.config.jwt.internalExpirationDuration }}"
             - name: UNO_MONGODB_DATABASE
-{{- if $root.Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" $root) }}
               value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.config.multitenant.commonTenantDatabaseName }}"
 {{- else }}
               value: "{{  (index $root.Values.deployment $k ).databaseName | default $root.Values.database.databaseName }}"
@@ -162,6 +165,7 @@ spec:
 {{ include "uno.console.env.variable" $root | indent 12 }}
 {{ include "uno.oidc.enabled.variable" $root | indent 12 }}
 {{ include "uno.authentication.api.env.variable" $root | indent 12 }}
+{{ include "uno.multitenant.lastLoginForMailNotificationsDuration" $root | indent 12 }}
 {{ include "uno.apikey.cleanup.variable" $root | indent 12 }}
 {{ include "uno.apikey.warning.variable" $root | indent 12 }}
             - name: UNO_MICROSERVICE_APIKEY_PERSONAL_EXPIRATION_DURATION
@@ -200,6 +204,8 @@ spec:
 {{- if eq $k "gateway"  }}
             - name: EXTERNAL_MP_JWT__HTTPS___PILOT_CORE_5005__VERIFY_PUBLICKEY_LOCATION
               value: https://{{ $root.Release.Name }}-core:5005/jwks
+            - name: UNO_MCP_RESPONSE_TIMEOUT_SECONDS
+              value: "{{ $root.Values.config.mcpServer.responseTimeoutSeconds }}"
 {{- end}}
 {{- if or (eq $k "console") (eq $k "console-aio") }}
             - name: EXTERNAL_MP_JWT__HTTPS___PILOT_CORE_5005__VERIFY_PUBLICKEY_LOCATION
@@ -211,6 +217,8 @@ spec:
 {{- end}}
 {{- end}}
 {{- if $root.Values.global.enableAgenticAIBuilder }}
+            - name: UNO_AGENTIC_AI_BUILDER_ENABLED
+              value: "true"
             - name : UNO_AGENTIC_AI_AMS_SERVICE_URL
               value: https://{{ $fullName }}-agentic-{{ $root.Values.agenticAIBuilder.ams.name }}:{{ $root.Values.agenticAIBuilder.ams.port }}
             - name : UNO_AGENTIC_AI_RUNNER_PROD_SERVICE_URL

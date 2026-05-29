@@ -352,7 +352,7 @@ pgdb:
 
   resources:
     requests:
-      memory: "600Mi"
+      memory: "850Mi"
       cpu: "500m"
     limits:
       memory: "1024Mi"

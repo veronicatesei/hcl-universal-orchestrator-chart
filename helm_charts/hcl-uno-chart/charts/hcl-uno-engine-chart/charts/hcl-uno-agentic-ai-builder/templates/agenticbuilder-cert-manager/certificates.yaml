@@ -51,6 +51,7 @@ spec:
 {{- $myList := include "agenticbuilder.microservices.list" . | fromJsonArray -}}
 {{- range $myList }}
   - {{ $fullname }}-{{ . }}
+  - {{ $fullname }}-{{ . }}-headless
 {{- end }}
   - "ams"
   - "credential-manager"
@@ -59,6 +60,7 @@ spec:
 {{- $currentDeploymentType := . }}
   - "runner-{{ $currentDeploymentType }}"
   - {{ $fullname }}-runner-{{ $currentDeploymentType }}
+  - {{ $fullname }}-runner-{{ $currentDeploymentType }}-headless
 {{- end }}
 {{- if or ( .Capabilities.APIVersions.Has "cert-manager.io/v1alpha2") ( .Capabilities.APIVersions.Has "cert-manager.io/v1")  }}
   privateKey:

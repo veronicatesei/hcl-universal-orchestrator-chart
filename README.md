@@ -14,7 +14,7 @@ To respond to the growing request to make automation opportunities more accessib
 
 HCL Universal Orchestrator is a complete, modern solution to orchestrate calendar-based and event-driven tasks, business and IT processes. It enables organizations to gain complete visibility and control over attended or unattended workflows. From a single point of control, it supports multiple platforms and provides advanced integration with enterprise applications including ERP, Business Analytics, File Transfer, Big Data, and Cloud applications.
 
-For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.4/index.html).
+For more information about HCL Universal Orchestrator, see the product documentation library in [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/ContinuousDelivery/index.html).
 
 ## Details
 
@@ -119,14 +119,14 @@ Before you begin the deployment process, ensure your environment meets the follo
 
 **For Agentic AI Builder**
  - Valkey (Redis-compatible): Used as the in-memory data store. Acts as a drop-in replacement for Redis.
- - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/v2.1.4/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
+ - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/ContinuousDelivery/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
 
 
 **Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance. 
 
 
  **For UnO AI Pilot**
- - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/v2.1.4/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
+ - Percona pgvector: Serves as the primary relational database for storing application data. This prerequisite is optional. The `global.postgres.usePercona` parameter enables the automatic installation of the database. By default, the `global.postgres.usePercona` parameter is set to true. For more information, see [Installing Required Dependencies (Valkey and PostgreSQL) https://help.hcl-software.com/UnO/ContinuousDelivery/UnO%20Agentic%20AI%20Builder/agenticai__installation213.html] 
 
  **Note:** If you want to deploy both the Agentic AI Builder and the AI Pilot, you only need one Percona pgvector instance.
 
@@ -139,6 +139,13 @@ Before you begin the deployment process, ensure your environment meets the follo
    - Create your own custom certificates
    - Insert the certificates inside the correct Kubernetes secrets
    - Make sure that the names of the Kubernetes secrets match the names specified in the `values.yaml`deployment file
+
+ - Using a private image registry
+  Hosting HCL Universal Orchestrator images in an internal registry ensures complete control over image management, without depending on external network connectivity.
+  To use your own registry, complete the following steps before you deploy Universal Orchestrator:
+  1. **Pull the images**: Download all HCL Universal Orchestrator microservice images from the registry.
+  2. **Push to your own registry**: Upload the downloaded images to your internal image registry.
+  3. **Update the configuration**: Modify the **values.yaml** file to update the repository paths. Ensure that the image pointers refer to your private registry instead of the HCL Universal Orchestrator registry.
 
 **Optional**
 -   Grafana and Prometheus for monitoring dashboard
@@ -391,7 +398,7 @@ On multitenant environments, you can edit the display name used for email notifi
 **AI Agents**
 
 You can create an AI agent using three different agent types: External MCP, Basic, and Agentic AI Builder. For more information, see [Managing agent types in the AI agent
-](https://help.hcl-software.com/UnO/v2.1.4/Orchestrating/to_manage_agent_types.html).
+](https://help.hcl-software.com/UnO/ContinuousDelivery/Orchestrating/to_manage_agent_types.html).
 
 **Generative workflows and knowledge base**
 
@@ -437,7 +444,7 @@ You can configure different justification levels by setting the related paramete
      uno.config.engine.justificationTicketNumberRequire: true
      uno.config.engine.justificationDescriptionRequired: true
 
-For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/v2.1.4/Deployment/justifications.html).
+For more information about justifications, see [Keeping track of changes in your environment](https://help.hcl-software.com/UnO/ContinuousDelivery/Deployment/justifications.html).
 
 **Encryption**
 
@@ -476,9 +483,9 @@ Where:
 This is an output example:  
   
 ```
-cosign verify --key HCL_Universal_Orchestrator_key.pub hclcr.io/uno/hcl-uno-audit:2.1.4.0  
+cosign verify --key HCL_Universal_Orchestrator_key.pub hclcr.io/uno/hcl-uno-audit:2.1.5.0  
   
-Verification for hclcr.io/uno/hcl-uno-audit:2.1.4.0 --  
+Verification for hclcr.io/uno/hcl-uno-audit:2.1.5.0 --  
 The following checks were performed on each of these signatures:  
 - The cosign claims were validated  
 - The signatures were verified against the specified public key  
@@ -657,7 +664,7 @@ HCL Universal Orchestrator uses Grafana to display performance data related to t
 
 The following metrics are collected and available to be visualized in the preconfigured Grafana dashboard. The dashboard is named **<uno_namespace> <uno_release_name>**:
 
-For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcl-software.com/UnO/v2.1.4/Monitoring/awsrgmonprom.html).
+For a list of metrics exposed by HCL Universal Orchestrator, see [Exposing metrics to monitor your workload](https://help.hcl-software.com/UnO/ContinuousDelivery/Monitoring/awsrgmonprom.html).
   
   ### Setting the Grafana service
 Before you set the Grafana service, ensure that you have already installed Grafana and Prometheus on your cluster. For information about deploying Grafana see [Install Grafana](https://github.com/helm/charts/blob/master/stable/grafana/README.md). For information about deploying the open-source Prometheus project see [Download Prometheus](https://github.com/helm/charts/tree/master/stable/prometheus).
@@ -719,7 +726,7 @@ To ensure a user can import, export, or delete the custom knowledge base, they m
 
 ## Documentation
 
-To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/v2.1.4/index.html).
+To access the complete product documentation library for HCL Universal Orchestrator, see [HCL Universal Orchestrator documentation](https://help.hcl-software.com/UnO/ContinuousDelivery/index.html).
 
 
 
