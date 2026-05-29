@@ -19,7 +19,9 @@ metadata:
   labels:
     {{- include "agenticbuilder.labels" . | nindent 4 }}
 spec:
-  replicas: {{ default .Values.replicaCount .Values.ams.replicaCount }}
+  {{- if not (include "agenticbuilder.autoscaler.enabled" (list $root .Values.ams.autoscaler)) }}
+  replicas: {{ coalesce .Values.ams.autoscaler.minTargetReplicas .Values.common.autoscaler.minTargetReplicas 1 }}
+  {{- end }}
   selector:
     matchLabels:
 {{ include "agenticbuilder.selectorLabels.backend" (list $root .Values.ams) | indent 6 }}
@@ -63,7 +65,7 @@ spec:
         - name: "{{ $fullname }}-{{ .Values.ams.name }}"
 {{- include "agenticbuilder.image" (list . .Values.ams) | nindent 10 }}
 {{- include "agenticbuilder.imagePullPolicy" (list . .Values.ams) | nindent 10 }}          
-{{- include "agenticbuilder.resources" .Values.ams | nindent 10 }}
+{{- include "agenticbuilder.resources" (list $root "ams" .Values.ams) | nindent 10 }}
           args: ["--ssl-keyfile" ,"/https/tls.key" ,"--ssl-certfile" ,"/https/tls.crt"]
           ports:
             - containerPort: {{ default 8080 .Values.ams.port }}
@@ -75,6 +77,15 @@ spec:
             - configMapRef:
                 name: {{ $fullname }}-common-configmap
           env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PRODUCT_DEPLOYMENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ $unofullname }}-uno-deployment-config"
+                  key: PRODUCT_DEPLOYMENT_ID
             - name: ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
@@ -86,6 +97,7 @@ spec:
 {{- include "agenticbuilder.commonssl.env.definition" . | nindent 12 }}
 {{- include "agenticbuilder.hclauthorization.env" . | nindent 12 }}              
 {{- include "agenticbuilder.env.postgres.password" . | nindent 12 }}
+{{- include "agenticbuilder.k8s.metadata.env" . | nindent 12 }}
           volumeMounts:
 {{- include "agenticbuilder.commonssl.volumeMounts.definition" . | indent 12 }}
 {{- include "agenticbuilder.hclauthorization.volume.mount" . | indent 12 }}

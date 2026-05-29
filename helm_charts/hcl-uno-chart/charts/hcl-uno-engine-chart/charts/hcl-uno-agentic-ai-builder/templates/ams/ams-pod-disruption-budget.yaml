@@ -1,0 +1,15 @@
+{{- if include "agenticbuilder.pdb.enabled" (list . .Values.ams.podDisruptionBudget) -}}
+{{ $fullname := include "agenticbuilder.fullname" . }}
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $fullname }}-{{ .Values.ams.name }}-pdb
+  labels:
+    {{- include "agenticbuilder.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: {{ coalesce .Values.ams.podDisruptionBudget.maxUnavailable .Values.common.podDisruptionBudget.maxUnavailable "33%" | quote }}
+  selector:
+    matchLabels:
+{{ include "agenticbuilder.selectorLabels.backend" (list . .Values.ams) | indent 6 }}
+{{- end }}

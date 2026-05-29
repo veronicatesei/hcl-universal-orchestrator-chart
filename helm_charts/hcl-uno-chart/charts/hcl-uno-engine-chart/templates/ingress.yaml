@@ -43,7 +43,7 @@ spec:
   tls:
     - hosts:
     
-{{- if .Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" .) }}
       # Format: <tenantname>.{{ .Values.deployment.console.ingressPrefix }}{{ .Values.ingress.baseDomainName }}
       - "*.{{.Values.deployment.console.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
       # Format: <tenantname>.{{ .Values.deployment.gateway.ingressPrefix }}{{ .Values.ingress.baseDomainName }}
@@ -57,7 +57,7 @@ spec:
 {{- end }}
       secretName: {{ $fullName }}-uno-tls-secret
   rules:
-{{- if .Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" .) }}
     - host: "*.{{.Values.deployment.console.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
 {{- else }}
     - host: {{.Values.deployment.console.ingressPrefix }}{{.Values.ingress.baseDomainName }}
@@ -75,7 +75,7 @@ spec:
 {{- end }}
                 port:
                   number: 8443
-{{- if .Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" .) }}
     - host: "*.{{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
 {{- else }}
     - host: {{.Values.deployment.gateway.ingressPrefix }}{{.Values.ingress.baseDomainName }}
@@ -93,7 +93,7 @@ spec:
 {{- end }}
                 port: 
                   number: 8443
-{{- if .Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" .) }}
     - host: "*.{{.Values.deployment.agentmanager.ingressPrefix }}{{.Values.ingress.baseDomainName }}"
 {{- else }}
     - host: {{.Values.deployment.agentmanager.ingressPrefix }}{{.Values.ingress.baseDomainName }}

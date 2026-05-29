@@ -22,3 +22,18 @@ spec:
       port: {{ default 8080 .Values.ams.port }}
       targetPort: port-{{ default 8080 .Values.ams.port }}
   type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $fullname }}-{{ .Values.ams.name }}-headless"
+  labels:
+{{ include "agenticbuilder.selectorLabels.backend" (list $root .Values.ams) | indent 4 }}
+spec:
+  clusterIP: None
+  selector: {{- include "agenticbuilder.selectorLabels.backend" (list $root .Values.ams) | nindent 4 }}
+  ports:
+    - name: port-{{ default 8080 .Values.ams.port }}
+      protocol: TCP
+      port: {{ default 8080 .Values.ams.port }}
+      targetPort: port-{{ default 8080 .Values.ams.port }}

@@ -18,6 +18,8 @@ global:
   enableUnoAIPilot: false
   # enable Agentic AI Builder enables and disables the Agentic AI Builder deployment. Supported values are true and false.
   enableAgenticAIBuilder: false
+  # Enables multitenant support within the UnO instance and the Agentic AI Builder. Supported values are true and false.
+  enableMultitenant: false
   # debug enables and disables the debugging mode. Supported values are true and false.
   debug: false
   # language specifies the language to be used.
@@ -29,13 +31,13 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/uno
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-uno-automation-plugins:2.1.4.0
+  pluginImageName: hcl-uno-automation-plugins:2.1.5.0
   # extraImages is the list of images with tags containing OCLI and agent for download from engine.
   extraImages:
     - registry: hclcr.io/uno
-      name: hcl-uno-external-pod:2.1.4.0
+      name: hcl-uno-external-pod:2.1.5.0
     - registry: hclcr.io/wa
-      name: hcl-workload-automation-packages:10.2.6.00.20251212
+      name: hcl-workload-automation-packages:10.2.7.00.20260424.amd64
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
   customPluginImageName:
   # serviceAccountName is the name of a custom service account to be used for deployments, for example to deploy HCL Workload Automation.
@@ -170,8 +172,6 @@ uno:
         retentionDays: P400D
     # multitenant configuration
     multitenant:
-      # Enables multitenant support. Supported values are true and false.
-      enabled: false
       # commonTenantDatabaseName is the name of the database used for common tenant data.
       commonTenantDatabaseName: multitenant-common
       # Optional whitelabel string to customize the tenant manager UI header
@@ -205,6 +205,8 @@ uno:
       tokenPerAIAgentCall: 0.125
       # Exposes metrics in a multi-tenant environment. When disabled, dashboards cannot display tenant-specific metrics. Supported values are 'true' and 'false'.
       tenantMetricsEnabled: true
+      # the amount of time from last login on or after which users will not receive notification emails.
+      lastLoginForMailNotificationsDuration: P30D
       # the support email address or http(s) link to include in the tenant notification emails for trials. Optional.
       trialSupportLink: mailto:support@example.com
       # the support email address or http(s) link to include in the tenant notification emails for subscribed tenants. Optional.
@@ -288,7 +290,7 @@ uno:
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 2.1.4.0
+      tag: 2.1.5.0
     orchestrator:
       # Specifies for how long the Task Run History is retained (in ISO 8601 format, e.g., P400D).
       jobRunHistoryRetentionDuration: P400DT0H
@@ -296,6 +298,9 @@ uno:
       maxNestingLevel: 50
       # the time windows, in seconds, that permits the user to cancel the completion of a human task
       humanTaskCancelWindowSeconds: 20
+    mcpServer:
+      # response timeout in seconds for MCP requests
+      responseTimeoutSeconds: 300
     planning:
       # max number of days to generate not active instance
       notActiveWindowMax: P9DT0H
@@ -690,7 +695,7 @@ uno:
   hclaipilot:
     image:
       repository: hclcr.io/uno
-      tag: 2.1.4.0
+      tag: 2.1.5.0
 
     # Channels Configuration
     # The following configuration is used to enable the AIPilot for the channels. For each channel, you need to provide the required configuration.
@@ -748,6 +753,8 @@ uno:
       #postgresPasswordSecretKey: "password"
       # Only to let the init container create the database "$postgresDB" if it does not exist
       initDatabases: true
+      # The database to be used for the admin session, it should be a database that always exists in Postgres, such as "postgres" or "template1"
+      postgresAdminSessionDB: "postgres"
       postgresAdminUserSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
       postgresAdminUserSecretKey: "user"
       postgresAdminPasswordSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
@@ -853,7 +860,7 @@ uno:
           memory: "1024Mi"  # Memory limit
         requests:
           cpu: "0.2"  # CPU request
-          memory: "256Mi"  # Memory request
+          memory: "950Mi"  # Memory request
 
       hpa:
         minReplicas: 1  # Minimum number of replicas
@@ -861,7 +868,7 @@ uno:
 
       container:
         registry: hclcr.io/uno # Image name
-        tag: 2.1.4.0  # Image tag
+        tag: 2.1.5.0  # Image tag
 
       authorization:
         # Is the URL of the OpenID Connect (OIDC) server.
@@ -918,6 +925,7 @@ uno:
           hostnameValidation : "true"
     
   agenticAIBuilder:
+
     telemetry:
       # To enable telemetry
       enableTelemetry: "false"
@@ -947,6 +955,36 @@ uno:
       telemetryExporterTimeoutMillis: "10000"
 
     common:
+      autoscaler:
+        enabled: false
+        # minTargetReplicas defines the minimum number of pod replicas for each service.
+        # IMPORTANT: This value is used as:
+        #   1. The default/static replica count when HPA is disabled (no autoscaling)
+        #   2. The minimum replica count when HPA is enabled (HPA won't scale below this)
+        # The deployment replicas field is set to this value by default.
+        # To override per service, set minTargetReplicas in the service-specific section (e.g., ams.autoscaler.minTargetReplicas)
+        minTargetReplicas: 1
+        # maxTargetReplicas defines the maximum number of pod replicas for each service.
+        # Used only when HPA is enabled. When HPA is disabled, replicas stay at minTargetReplicas (static).
+        # To override per service, set maxTargetReplicas in the service-specific section (e.g., ams.autoscaler.maxTargetReplicas)
+        maxTargetReplicas: 3
+        # cpuAverageUtilization triggers autoscaler when average CPU usage exceeds this percentage.
+        # Only applies when HPA is enabled.
+        cpuAverageUtilization: 200
+      # Pod Disruption Budget Configuration
+      podDisruptionBudget:
+        # enabled specifies whether a PodDisruptionBudget is enabled. Supported values are true and false.
+        enabled: false
+        # maxUnavailable is the maximum number, or percentage, of unavailable pods during the disruption.
+        maxUnavailable: "33%"
+      # Resource Configuration for all services, can be overridden at the service level
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2500Mi
+        requests:
+          cpu: 300m
+          memory: 500Mi
       truststore:
         agenticAdditionalCASecrets: 
           - "uno-certificate"
@@ -992,6 +1030,16 @@ uno:
         valkeyDb: "0"
         # Username To be used to connect to Valkey service.
         valkeyUser:
+        # IAM Authentication Configuration for Valkey connection
+        valkeyIAMAuthenticationEnabled: "false"
+        # GCP Service Account to be used for IAM Authentication, only used if valkeyIAMAuthenticationEnabled is set to "true"
+        valkeyIAMServiceAccount: ""
+        # The scopes to be used for IAM Authentication, only used if valkeyIAMAuthenticationEnabled is set to "true"
+        valkeyIAMScopes: "https://www.googleapis.com/auth/cloud-platform"
+        #Prefix used to namespace all the keys in Valkey, you can use it to avoid key collisions with other applications using the same Valkey instance. This is especially useful when valkeyClusterModeEnabled is set to "true" to avoid collisions between different clusters using the same Valkey instance. 
+        valkeyApplicationPrefix: "agenticbuilder"
+        #To enable the client connection to Valkey to use the Valkey Cluster mode, set valkeyClusterModeEnabled to "true". When valkeyClusterModeEnabled is set to "true", the client will connect to the Valkey cluster using the valkeyClusterPrefix as the prefix for the cluster nodes
+        valkeyClusterModeEnabled: "false"
         #SSL Configuration for Valkey connection
         ssl:
           enabled: "false"
@@ -1044,6 +1092,8 @@ uno:
         #### Those settings are for Creating The user and the database if not present ####
         # Those values will not be used by the application, only in the initContainer for the initialization of the DB #
         initDatabases: true
+        # Database used by the admin connection during init containers. It must already exist.
+        postgresAdminSessionDB: "postgres"
         postgresAdminUserSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
         postgresAdminUserSecretKey: "user"
         postgresAdminPasswordSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
@@ -1074,6 +1124,8 @@ uno:
           # Only to let the init container create the database "$postgresDB" and the "$postgresUser" if it does not exist
 
       config:
+        # Set the log level for the Agentic AI Builder microservices. Supported values are DEBUG, INFO, WARN, ERROR. The default value is INFO.
+        logLevel: "INFO"
         # The configuration for the Agentic AI Builder microservices to connect to the UNO instance. Do not change the values below unless you know what you are doing.
         tokenProvider: "STARLETTE"
         enableAuthentication : "true"
@@ -1118,16 +1170,22 @@ uno:
       proxyURL: ""
       # The port on which the core service will be exposed
       port: 8000
-      # The number of replicas for the core service
-      replicaCount: 1
-      # Resource Configuration
-      resources:
-        limits:
-          cpu: 1000m
-          memory: 2500Mi
-        requests:
-          cpu: 300m
-          memory: 500Mi
+      # Autoscaler Configuration
+      autoscaler:
+        # Optional override. If null, uses common.autoscaler.enabled.
+        enabled: null
+        # Optional override. If null, uses common.autoscaler.minTargetReplicas.
+        minTargetReplicas: null
+        # Optional override. If null, uses common.autoscaler.maxTargetReplicas.
+        maxTargetReplicas: null
+        # Optional override. If null, uses common.autoscaler.cpuAverageUtilization.
+        cpuAverageUtilization: null
+      podDisruptionBudget:
+        # Optional override. If null, uses common.podDisruptionBudget.enabled.
+        enabled: null
+        # Optional override. If null, uses common.podDisruptionBudget.maxUnavailable.
+        maxUnavailable: null
+      resources: null
           
     ams:
       name: ams
@@ -1136,8 +1194,21 @@ uno:
       # The port on which the core service will be exposed
       port: 8080
       proxyURL: ""
-      # The number of replicas for the core service
-      replicaCount: 1
+      # Autoscaler Configuration
+      autoscaler:
+        # Optional override. If null, uses common.autoscaler.enabled.
+        enabled: null
+        # Optional override. If null, uses common.autoscaler.minTargetReplicas.
+        minTargetReplicas: null
+        # Optional override. If null, uses common.autoscaler.maxTargetReplicas.
+        maxTargetReplicas: null
+        # Optional override. If null, uses common.autoscaler.cpuAverageUtilization.
+        cpuAverageUtilization: null
+      podDisruptionBudget:
+        # Optional override. If null, uses common.podDisruptionBudget.enabled.
+        enabled: null
+        # Optional override. If null, uses common.podDisruptionBudget.maxUnavailable.
+        maxUnavailable: null
       # Resource Configuration
       resources:
         limits:
@@ -1145,7 +1216,7 @@ uno:
           memory: 2500Mi
         requests:
           cpu: 300m
-          memory: 500Mi
+          memory: 1200Mi
 
     runner:
       name: runner
@@ -1154,17 +1225,28 @@ uno:
       # The port on which the core service will be exposed
       port: 8080
       proxyURL: ""
-      # The number of replicas for the core service
-      replicaCount: 2
-      hpa:
-        enabled: false
-        minReplicas: 1
-        maxReplicas: 10
+      # Autoscaler Configuration
+      autoscaler:
+        # Optional override. If null, uses common.autoscaler.enabled.
+        enabled: null
+        # Optional override. If null, uses common.autoscaler.minTargetReplicas.
+        # Runner has minTargetReplicas: 2 to ensure at least 2 running instances.
+        minTargetReplicas: 2
+        # Optional override. If null, uses common.autoscaler.maxTargetReplicas.
+        maxTargetReplicas: null
+        # Optional override. If null, uses common.autoscaler.cpuAverageUtilization.
+        cpuAverageUtilization: null
+      podDisruptionBudget:
+        # Optional override. If null, uses common.podDisruptionBudget.enabled.
+        enabled: null
+        # Optional override. If null, uses common.podDisruptionBudget.maxUnavailable.
+        maxUnavailable: null
       # Resource Configuration
       config:
         # The base URL of the UNO MCP service.
         unoMCPBaseURL : ""
         maxAgents: 5
+      #Custom resource configuration for the runner service.
       resources:
         limits:
           cpu: 2
@@ -1180,7 +1262,7 @@ uno:
       # The registry where the image is hosted
       repository: hclcr.io/uno
       # The tag of the images
-      tag: 2.1.4.0
+      tag: 2.1.5.0
       # The Pull Policy for the images
       imagePullPolicy: Always
 
@@ -1205,7 +1287,7 @@ pgdb:
 
   resources:
     requests:
-      memory: "600Mi"
+      memory: "850Mi"
       cpu: "500m"
     limits:
       memory: "1024Mi"

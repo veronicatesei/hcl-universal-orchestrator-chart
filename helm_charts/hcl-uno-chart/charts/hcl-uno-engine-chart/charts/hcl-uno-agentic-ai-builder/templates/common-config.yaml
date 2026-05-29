@@ -7,6 +7,7 @@
 # *******************************************************************************
 {{ $fullname := include "agenticbuilder.fullname" . }}
 {{ $unoFullName := include "uno.fullname" . }}
+{{- $enableMultitenancy := include "agenticbuilder.multitenancy.enabled" . -}}
 
 apiVersion:  v1
 kind:  ConfigMap
@@ -32,6 +33,11 @@ data:
     VALKEY_DB: {{ tpl (default "0" .Values.common.valkey.valkeyDb) . | quote }}
     VALKEY_SSL_VERIFY: {{ tpl (default "true" .Values.common.valkey.ssl.enabled) . | quote }}
     VALKEY_SSL_VERIFY_HOSTNAME: {{ tpl (default "true" .Values.common.valkey.ssl.hostnameValidation) . | quote }}
+    VALKEY_IAM_ENABLED : {{ tpl (default "false" .Values.common.valkey.valkeyIAMAuthenticationEnabled) . | quote }}
+    VALKEY_IAM_SERVICE_ACCOUNT:  {{ tpl .Values.common.valkey.valkeyIAMServiceAccount . | quote }}
+    VALKEY_IAM_SCOPES : {{ tpl (default "https://www.googleapis.com/auth/cloud-platform" .Values.common.valkey.valkeyIAMScopes) . | quote }}
+    VALKEY_CLUSTER_ENABLED: {{ tpl (default "false" .Values.common.valkey.valkeyClusterModeEnabled) . | quote }}
+    VALKEY_APPLICATION_PREFIX: {{ tpl (default "agenticbuilder" .Values.common.valkey.valkeyApplicationPrefix) . | quote }}
     # Rest Client Common Configuration
     AMS_HOSTNAME : {{ tpl (printf "%s-%s" (include "agenticbuilder.fullname" .) .Values.ams.name) . | quote }}
     AMS_PORT : {{ tpl (toString .Values.ams.port) . | quote }}
@@ -103,11 +109,14 @@ data:
     {{- end }}
     OTEL_EXPORTER_OTLP_HEADERS: {{ tpl .Values.telemetry.telemetryExporterHeaders . | quote }}
     OTEL_EXPORTER_OTLP_TIMEOUT: {{ tpl .Values.telemetry.telemetryExporterTimeoutMillis . | quote }}
-    
-    # Authorization Configuration 
+    LOG_LEVEL: {{ tpl (default "INFO" .Values.common.config.logLevel) . | quote }}
+    # Authorization Configuration
+    ENABLE_MULTITENANCY: {{ tpl (printf "%v" $enableMultitenancy) . | quote }}
     ENABLE_AUTHENTICATION: {{ tpl (default "true" .Values.common.config.enableAuthentication) . | quote }}
     OIDC_SERVER_URL: {{ tpl .Values.authorization.oidcServerURL . | quote }}
     KEYCLOAK_REALM: {{ tpl .Values.common.config.keycloakRealm . | quote }}
     JWT_PRIVATE_KEY_PATH : "/jwt/agenticbuilder/tls.key"
     HCL_AUTHORIZATION_AGENTIC_AI_BUILDER_SYSTEM: "/jwt/agenticbuilder/tls.crt"
     CALLBACK_URL: https://{{ $fullname }}-{{ .Values.ams.name }}:{{ default "8080" (tpl (toString .Values.ams.port) .) }}/key-resolution
+    UNOGENAIURL: {{ printf "https://%s-console:8443/ui/genai-proxy/uno/api/v1/ai/agent" (include "uno.fullname" .)  }}
+    TELEMETRY_PREFIX: "application_agenticbuilder_"

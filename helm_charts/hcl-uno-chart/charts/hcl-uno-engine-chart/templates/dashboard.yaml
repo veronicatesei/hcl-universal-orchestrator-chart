@@ -18,7 +18,7 @@ data:
   k8s-{{ $uniqueId }}-dashboard.json: |-
 {{ .Files.Get "dashboards/UnODashboard.json" | replace "%RELEASE%" .Release.Name | replace "%NAMESPACE%" .Release.Namespace | indent 4 }}
 
-{{if .Values.config.multitenant.enabled}}
+{{ if eq "true" (include "uno.enableMultitenant" .) }}
   # The UnO multitenant dashboard
   k8s-{{ $uniqueId }}-tenants.json: |-
 {{ .Files.Get "dashboards/UnOMultitenant_start.fragment" | replace "%RELEASE%" .Release.Name | replace "%NAMESPACE%" .Release.Namespace | indent 4 }}

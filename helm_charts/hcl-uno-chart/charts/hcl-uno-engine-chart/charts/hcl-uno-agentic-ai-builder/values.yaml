@@ -6,18 +6,46 @@
 # Use, duplication or disclosure restricted by GSA ADP Schedule
 # *******************************************************************************
 
-replicaCount: 1
-
 global:
   uno:
     engineHost: ""
     enginePort: ""
-  
+  enableMultitenant: "false"
   hclImagePullSecret: entitledregistry
 
 #Version Tracking
 track: dev
 common:
+  autoscaler:
+    enabled: false
+    # minTargetReplicas defines the minimum number of pod replicas for each service.
+    # IMPORTANT: This value is used as:
+    #   1. The default/static replica count when HPA is disabled (no autoscaling)
+    #   2. The minimum replica count when HPA is enabled (HPA won't scale below this)
+    # The deployment replicas field is set to this value by default.
+    # To override per service, set minTargetReplicas in the service-specific section (e.g., ams.autoscaler.minTargetReplicas)
+    minTargetReplicas: 1
+    # maxTargetReplicas defines the maximum number of pod replicas for each service.
+    # Used only when HPA is enabled. When HPA is disabled, replicas stay at minTargetReplicas (static).
+    # To override per service, set maxTargetReplicas in the service-specific section (e.g., ams.autoscaler.maxTargetReplicas)
+    maxTargetReplicas: 3
+    # cpuAverageUtilization triggers autoscaler when average CPU usage exceeds this percentage.
+    # Only applies when HPA is enabled.
+    cpuAverageUtilization: 200
+  # Pod Disruption Budget Configuration
+  podDisruptionBudget:
+    # enabled specifies whether a PodDisruptionBudget is enabled. Supported values are true and false.
+    enabled: false
+    # maxUnavailable is the maximum number, or percentage, of unavailable pods during the disruption.
+    maxUnavailable: "33%"
+  # Resource Configuration for all services, can be overridden at the service level
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2500Mi
+    requests:
+      cpu: 300m
+      memory: 500Mi
   valkey:
     valkeyPasswordSecret : "valkey-password-secret"
     valkeyPasswordSecretKey: "password"
@@ -26,6 +54,11 @@ common:
     valkeyPort: "6379"
     valkeyDb: "0"
     valkeyUser:
+    valkeyIAMAuthenticationEnabled: "false"
+    valkeyIAMServiceAccount: ""
+    valkeyIAMScopes: "https://www.googleapis.com/auth/cloud-platform"
+    valkeyClusterModeEnabled: "false"
+    valkeyApplicationPrefix: "agenticbuilder"
     ssl:
       enabled: "false"
       # Client Configuration for Mutual TLS
@@ -71,10 +104,12 @@ common:
     options: ""
     # Client Required Authentication for Postgres connection ( scram-sha-256, md5, password, gss, sspi, ident, peer, ldap, none)
     requiredAuthentication : "scram-sha-256"
-
     #### Those settings are for Creating The user and the database if not present ####
     # Those values will not be used by the application, only in the initContainer for the initialization of the DB #
     initDatabases: true
+    # Database used by the admin connection during init containers.
+    # Keep this pointed to an existing administrative database.
+    postgresAdminSessionDB: "postgres"
     postgresAdminUserSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
     postgresAdminUserSecretKey: "user"
     postgresAdminPasswordSecretName: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-pguser-postgres'
@@ -138,6 +173,8 @@ common:
       # Whether to validate the hostname in the server certificate
       hostnameValidation : "true"
   config:
+    #Set the log level for the application, supported values are "DEBUG", "INFO", "WARN", "ERROR"
+    logLevel: "INFO"
     enableAuthentication : "false"
     tokenProvider: ""
     tokenProviderOIDCServerURL:  ""
@@ -166,8 +203,22 @@ ams:
   proxyURL: ""
   # Deployment strategy
   port: 8080
-  # The number of replicas for the core service
-  replicaCount: 1
+  autoscaler:
+    # Optional override. If null, common.autoscaler.enabled is used.
+    enabled: null
+    # Optional override for minimum replica count. If null, uses common.autoscaler.minTargetReplicas.
+    # This is the static replica count when HPA is disabled, or minimum when HPA is enabled.
+    minTargetReplicas: null
+    # Optional override for maximum replica count. If null, uses common.autoscaler.maxTargetReplicas.
+    # Only used when HPA is enabled.
+    maxTargetReplicas: null
+    # Optional override for CPU threshold. If null, uses common.autoscaler.cpuAverageUtilization.
+    cpuAverageUtilization: null
+  podDisruptionBudget:
+    # Optional override. If empty, common.podDisruptionBudget.enabled is used.
+    enabled: null
+    # Optional override. If empty, common.podDisruptionBudget.maxUnavailable is used.
+    maxUnavailable: null
   # Resource Configuration
   config:
     exportedSchemasFolder :
@@ -177,7 +228,7 @@ ams:
       memory: 2500Mi
     requests:
       cpu: 300m
-      memory: 500Mi
+      memory: 1200Mi
 
 credentialManager:
   # Name of the core service
@@ -190,18 +241,27 @@ credentialManager:
     type: Recreate
   # The port on which the core service will be exposed
   port: 8000
-  # The number of replicas for the core service
-  replicaCount: 1
+  autoscaler:
+    # Optional override. If null, common.autoscaler.enabled is used.
+    enabled: null
+    # Optional override for minimum replica count. If null, uses common.autoscaler.minTargetReplicas.
+    # This is the static replica count when HPA is disabled, or minimum when HPA is enabled.
+    minTargetReplicas: null
+    # Optional override for maximum replica count. If null, uses common.autoscaler.maxTargetReplicas.
+    # Only used when HPA is enabled.
+    maxTargetReplicas: null
+    # Optional override for CPU threshold. If null, uses common.autoscaler.cpuAverageUtilization.
+    cpuAverageUtilization: null
+  podDisruptionBudget:
+    # Optional override. If empty, common.podDisruptionBudget.enabled is used.
+    enabled: null
+    # Optional override. If empty, common.podDisruptionBudget.maxUnavailable is used.
+    maxUnavailable: null
   # Resource Configuration
   config:
     exportedSchemasFolder :
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 2500Mi
-    requests:
-      cpu: 300m
-      memory: 500Mi
+  # Optional override. If empty, common.resources is used.
+  resources: null
 
 runner:
   name: runner
@@ -210,14 +270,26 @@ runner:
   proxyURL: ""
   # The port on which the core service will be exposed
   port: 8080
-  # The number of replicas for the core service
-  replicaCount: 2
-  hpa:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 10
+  autoscaler:
+    # Optional override. If null, common.autoscaler.enabled is used.
+    enabled: null
+    # Optional override for minimum replica count. If null, uses common.autoscaler.minTargetReplicas.
+    # Runner has minTargetReplicas: 2 to ensure at least 2 running instances.
+    # This is the static replica count when HPA is disabled, or minimum when HPA is enabled.
+    minTargetReplicas: 2
+    # Optional override for maximum replica count. If null, uses common.autoscaler.maxTargetReplicas.
+    # Only used when HPA is enabled.
+    maxTargetReplicas: null
+    # Optional override for CPU threshold. If null, uses common.autoscaler.cpuAverageUtilization.
+    cpuAverageUtilization: null
+  podDisruptionBudget:
+    # Optional override. If empty, common.podDisruptionBudget.enabled is used.
+    enabled: null
+    # Optional override. If empty, common.podDisruptionBudget.maxUnavailable is used.
+    maxUnavailable: null
   # Resource Configuration
   config:
+    a2aPublicBaseUrl: ""
     stateManager: "valkey"
     executorScheme : "https"
     maxAgents: 5
@@ -309,7 +381,7 @@ image:
   # The registry where the image is hosted
   repository: hclcr.io/uno
   # The tag/version of the images
-  tag: 2.1.4.0
+  tag: 2.1.5.0
   # The Pull Policy for the images
   imagePullPolicy: Always
 
@@ -356,7 +428,7 @@ pgdb:
 
   resources:
     requests:
-      memory: "600Mi"
+      memory: "850Mi"
       cpu: "500m"
     limits:
       memory: "1024Mi"

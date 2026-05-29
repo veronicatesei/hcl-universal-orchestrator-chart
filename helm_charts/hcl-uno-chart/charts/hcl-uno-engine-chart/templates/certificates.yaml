@@ -63,7 +63,7 @@ spec:
 {{- end -}}
 {{- range $myList}}
   - {{ $fullName }}-{{ . }}
-{{- if $root.Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" $root) }}
   - {{ printf "%s-%s-headless" $fullName . }}
 {{- end }}
 {{- end -}}

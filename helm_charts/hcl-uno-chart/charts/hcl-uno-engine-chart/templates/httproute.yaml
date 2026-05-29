@@ -27,7 +27,7 @@ spec:
       namespace: {{ .Values.gatewayApi.gatewayNamespace | default .Release.Namespace }}
     {{- end }}
   hostnames:
-    {{- if .Values.config.multitenant.enabled }}
+    {{- if eq "true" (include "uno.enableMultitenant" .) }}
     # Format: <tenantname>.{{ .Values.deployment.console.gatewayApiPrefix }}{{ .Values.gatewayApi.baseDomainName }}
     - {{ printf "*.%s%s" .Values.deployment.console.gatewayApiPrefix .Values.gatewayApi.baseDomainName | quote }}
     # Format: <tenantname>.{{ .Values.deployment.gateway.gatewayApiPrefix }}{{ .Values.gatewayApi.baseDomainName }}
@@ -71,7 +71,7 @@ spec:
         - name: {{ if eq .Values.global.deploymentType "aio" }}{{ $fullName }}-console-aio{{ else }}{{ $fullName }}-agentmanager{{ end }}
           port: 8443
 
-    {{- if .Values.config.multitenant.enabled }}
+    {{- if eq "true" (include "uno.enableMultitenant" .) }}
 
     # Rule 4: Tenant Manager (Multitenant mode only)
     - matches:

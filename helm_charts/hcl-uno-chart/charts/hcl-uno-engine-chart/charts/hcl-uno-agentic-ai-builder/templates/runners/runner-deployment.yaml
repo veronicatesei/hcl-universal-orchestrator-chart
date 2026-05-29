@@ -25,7 +25,9 @@ metadata:
     app.kubernetes.io/instance: {{ $.Release.Name | quote }}
 spec:
   serviceName: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-headless"
-  replicas: {{ default $root.Values.replicaCount $root.Values.runner.replicaCount }}
+  {{- if not (include "agenticbuilder.autoscaler.enabled" (list $root $root.Values.runner.autoscaler)) }}
+  replicas: {{ coalesce $root.Values.runner.autoscaler.minTargetReplicas $root.Values.common.autoscaler.minTargetReplicas 1 }}
+  {{- end }}
   selector:
     matchLabels:
       name: "{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}"
@@ -70,13 +72,22 @@ spec:
         - name: "{{ $fullname }}-{{ $root.Values.runner.name }}"
 {{- include "agenticbuilder.image" (list $root $root.Values.runner) | nindent 10 }}
 {{- include "agenticbuilder.imagePullPolicy" (list $root $root.Values.runner) | nindent 10 }}          
-{{- include "agenticbuilder.resources" $root.Values.runner | nindent 10 }}
+{{- include "agenticbuilder.resources" (list $root "runner" $root.Values.runner) | nindent 10 }}
           args: ["--ssl-keyfile" ,"/https/tls.key" ,"--ssl-certfile" ,"/https/tls.crt"]
           ports:
             - containerPort: {{ default 8000 $root.Values.runner.port }}
               name: port-{{ default 8000 $root.Values.runner.port }}
               protocol: TCP
           env:
+            - name: PRODUCT_DEPLOYMENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ $unoFullName }}-uno-deployment-config"
+                  key: PRODUCT_DEPLOYMENT_ID
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: EXECUTOR_PREFIX_KEY
               value: {{ $currentDeploymentType }}
             - name: EXECUTOR_NAME
@@ -97,6 +108,7 @@ spec:
 {{- include "agenticbuilder.env.postgres.password" $root | nindent 12 }}
 {{- include "agenticbuilder.hclauthorization.env" $root | nindent 12 }}
 {{- include "agenticbuilder.sofy.env.variables" $root | nindent 12 }}
+{{- include "agenticbuilder.k8s.metadata.env" $root | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: {{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-configmap

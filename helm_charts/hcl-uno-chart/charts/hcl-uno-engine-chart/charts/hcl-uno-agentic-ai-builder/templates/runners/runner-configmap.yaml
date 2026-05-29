@@ -34,6 +34,7 @@ data:
   MEMORY_TYPE : {{ default "raw" $root.Values.runner.config.memoryType | quote }}
   EMBEDDING_PROVIDER: {{ default "huggingface" $root.Values.runner.config.embeddingProvider | quote }}
   EMBEDDING_MODEL : {{ default "sentence-transformers/all-mpnet-base-v2" $root.Values.runner.config.embeddingModel | quote }}
-  EMBEDDING_DIMENSIONS : {{ default "768" $root.Values.runner.config.embeddingDimensions | quote }} 
+  EMBEDDING_DIMENSIONS : {{ default "768" $root.Values.runner.config.embeddingDimensions | quote }}
+  A2A_PUBLIC_BASE_URL: {{ tpl (default (printf "%s://%s-%s-%s.%s.svc.cluster.local:%v/%s" (default "https" $root.Values.runner.config.executorScheme) $fullname $root.Values.runner.name $currentDeploymentType $root.Release.Namespace (default 8000 $root.Values.runner.port) $currentDeploymentType) $root.Values.runner.config.a2aPublicBaseUrl) $root | quote }}
 ---
 {{- end}}

@@ -8,7 +8,7 @@
 {{ $certIssuer := include "uno.cert.ingressControllerIssuer" . }}
 
 {{- if .Values.ingress.enabled }}
-{{- if .Values.config.multitenant.enabled }}
+{{- if eq "true" (include "uno.enableMultitenant" .) }}
 
 
 apiVersion: networking.k8s.io/v1
