@@ -637,6 +637,8 @@ If you define custom certificates, you are in charge of keeping them up to date,
 
 When using custom certificates make sure to update the following fields:
 		
+			authenticationDatabase: true
+			
 			uno.hclaipilot.certificates.useCustomizedCert: true
 			uno.hclaipilot.certificates.caPairSecretName: <the secret name of the CA you want to use to sign the certificate created by default>
 			uno.hclaipilot.certificates.certSecretName: <the name of the custom certificate you want to use>
