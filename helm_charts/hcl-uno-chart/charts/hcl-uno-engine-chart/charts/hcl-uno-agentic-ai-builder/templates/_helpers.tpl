@@ -497,7 +497,15 @@ true
 {{- end -}}
 
 {{- define "agenticbuilder.env.postgres.password" -}}
+{{- if or ( .Values.common.postgres.postgresPassword) (and ( .Values.common.postgres.postgresPasswordSecretName) ( .Values.common.postgres.postgresPasswordSecretKey)) }}
 {{ include "agenticbuilder.env.valueOrSecret" (list . "POSTGRES_PASSWORD" "common.postgres.postgresPassword") }}
+{{- else }}
+- name: POSTGRES_PASSWORD
+  valueFrom: 
+    secretKeyRef:
+      name: {{ printf "%s-postgres-password" .Release.Name | trunc 63 | trimSuffix "-" }}
+      key: postgres-password
+{{- end }}
 {{ include "agenticbuilder.postgres.database.url.env" . }}
 {{- end -}}
 
@@ -580,7 +588,7 @@ imagePullSecrets:
 {{- if .Values.common.postgres.initDatabases -}}
 initContainers:
   - name: init-wait-for-postgres
-    image: busybox
+    image: {{ tpl .Values.image.init.busybox . | default "busybox:latest" | quote }}
     env:
       - name: POSTGRES_HOST
         value: {{ tpl .Values.common.postgres.postgresService . | quote }}
@@ -588,7 +596,7 @@ initContainers:
         value: {{ tpl .Values.common.postgres.postgresPort . | quote }}
     command: ['sh', '-c', 'until nc -z "$POSTGRES_HOST" "$POSTGRES_PORT"; do echo waiting for $POSTGRES_HOST:$POSTGRES_PORT; sleep 30; done;']
   - name: init-create-postgres-user
-    image: postgres:latest
+    image: {{ tpl .Values.image.init.postgres . | default "postgres:latest" | quote }}
     volumeMounts:
 {{- include "agenticbuilder.commonssl.volumeMounts.postgres" . | nindent 4 }}
     env:
@@ -609,7 +617,7 @@ initContainers:
         # Always grant membership so the admin can act on behalf of the user in the next step
         PGPORT=$POSTGRES_PORT PGPASSWORD=$POSTGRES_ADMIN_PASSWORD psql -h "$POSTGRES_HOST" -U "$POSTGRES_ADMIN_USER" -d "$POSTGRES_ADMIN_SESSION_DB" -c "GRANT \"$POSTGRES_USER\" TO \"$POSTGRES_ADMIN_USER\";"
   - name: init-create-postgres-db
-    image: postgres:latest
+    image: {{ tpl .Values.image.init.postgres . | default "postgres:latest" | quote }}
     volumeMounts:
 {{- include "agenticbuilder.commonssl.volumeMounts.postgres" . | nindent 4 }}
     env:

@@ -18,11 +18,11 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/uno
   # pluginImageName is the name of the image with tags for Automation Hub integrations.
-  pluginImageName: hcl-uno-automation-plugins:2.1.5.0
+  pluginImageName: hcl-uno-automation-plugins:2.1.6.0
   # extraImages is the list of images with tags containing OCLI and agent for download from engine.
   extraImages:
     - registry: hclcr.io/uno
-      name: hcl-uno-external-pod:2.1.5.0
+      name: hcl-uno-external-pod:2.1.6.0
   customLabels:
     - name: "environment"
       value: "prod"
@@ -46,6 +46,8 @@ global:
   # This is only used in case internal genai service
   cloudCredentials:
     gcp:
+      # Location for Vertex AI models (e.g., global, us, eu, us-central1, europe-west1, ...)
+      location:
       # gcp is the GCP service account key in JSON format. Replace the value with your GCP service account file content encoded in base64.
       serviceFile:
       # gcpProjectId is the GCP project ID. Replace the value with your GCP project ID.
@@ -112,6 +114,8 @@ database:
   databaseMaxPoolSize: 20
 
 kafka:
+  # if true kafka topics will be created /updated on start of UnO
+  configureTopicOnStart: true
   # url is the URL of the event streaming platform. Mandatory parameter.
   url: hcl-uno-kafka-0.kafka-headless.kafka.svc.cluster.local:9092
   # prefix of topic name
@@ -139,6 +143,9 @@ kafka:
   # topicReplicas is the number of replicas for the topic.
   topicReplicas: 1
 config:
+  aiChat:
+    # Specifies the connection timeout for the connection to the AI Chat service. The value is in seconds. The default value is 300 seconds.
+    timeout: 300
   serviceAccount:
     # use the serviceAccount.annotations to add annotations to serviceAccount.
     annotations:
@@ -328,7 +335,7 @@ config:
     # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
     pullPolicy: Always
     # tag is the tag of the image. The default value is latest.
-    tag: 2.1.5.0
+    tag: 2.1.6.0
   orchestrator:
     # Specifies for how long the Task Run History is retained (in ISO 8601 format, e.g., P400D).
     jobRunHistoryRetentionDuration: P400DT0H
@@ -360,6 +367,9 @@ config:
     # how long tasks executed from the CLOUD executor (and related job logs) are retained in DB. This applies to tasks in final status.
     # minimum value is 7 days (lower value will be ignored)
     taskRetentionDays: P15D
+    # cloudExecutorBlockedPlugin is a comma-separated list of plugin types that are blocked from execution on the cloud agent.
+    # This maps to the quarkus property uno.cloud.task.launcher.not.supported.job.types.
+    cloudExecutorBlockedPlugin:
   endpoints:
     monitor:
       frequency:
@@ -403,23 +413,68 @@ config:
     internal: false
 
     # Below information are only used if the genai service is internal deployment.
-    # Gemini model used for AI Pilot. This is also the default model used for AI Agents. It must be a Gemini model.
-    defaultVertexAiModel: gemini-2.5-flash-lite
     # timeout is the timeout for the GenAI service requests.
     timeout:
-    # These models may take up to 5 minutes to reflect in the other services.
 
-    agentModels:
-      # Model names that work with GenAI service for AI Agents from vertex-ai
-      vertexAiModels:
-      # Model names that work with GenAI service for AI Agents from open ai
-      openAiModels:
-      # Model names that work with GenAI service for AI Agents from bedrock
-      bedrockModels:
-      # Model names that work with GenAI service for AI Agents from ollama
-      ollamaModels:
-    # The model used for internal agents (e.g. to create workflow). It must be one of the models specified in agentModels. If not specified, the defaultVertexAiModel is used.
-    internalAgentsModel:
+    # Unified GenAI configuration structure for engine with internal GenAI
+    # Configuration must be provided via values override
+    
+    # Validation configuration
+    validation:
+      # For engine deployments with internal GenAI, validation can be enabled
+      failOnMissingCosts: false
+    
+    # Provider configuration (must be provided)
+    providers:
+      vertexai:
+        models: []
+        activeModels: []
+      
+      openai:
+        models: []
+        activeModels: []
+      
+      azure:
+        models: []
+        activeModels: []
+      
+      bedrock:
+        models: []
+        activeModels: []
+      
+      ollama:
+        models: []
+        activeModels: []
+    
+    # Default model for AI Agents (must be provided)
+    defaultModel:
+    
+    # Service configuration with estimated tokens (must be provided)
+    serviceConfig:
+      ai_agent:
+        model:
+        estimatedInputTokens:
+        estimatedOutputTokens:
+      
+      create_workflow:
+        model:
+        estimatedInputTokens:
+        estimatedOutputTokens:
+      
+      rag:
+        model:
+        estimatedInputTokens:
+        estimatedOutputTokens:
+      
+      generate_jsonata:
+        model:
+        estimatedInputTokens:
+        estimatedOutputTokens:
+      
+      generate_dashboard_oql_query:
+        model:
+        estimatedInputTokens:
+        estimatedOutputTokens:
 
   engine:
     # allowed_referer specifies the allowed referer for the engine and console in case of Invalid Referer.
@@ -782,6 +837,21 @@ agenticAIBuilder:
     telemetryExporterHeaders: ""
     # Timeout in milliseconds for the telemetry exporter
     telemetryExporterTimeoutMillis: "10000"
+    # If your trace exporter requires different headers than metrics, provide them here in the format "key1=value1,key2=value2"
+    telemetryExporterTraceHeaders: ""
+    # Optional Langfuse credentials for OTLP trace export. Prefer the SecretName/SecretKey form for production.
+    # Langfuse Public Key (used for trace export)
+    langfusePublicKey: ""
+    # Optional Secret reference for Langfuse Public Key (used if langfusePublicKey is not set)
+    langfusePublicKeySecretName: ""
+    # Optional Secret key for Langfuse Public Key (default: "public-key")
+    langfusePublicKeySecretKey: "public-key"
+    # Langfuse Secret Key (used for trace export)
+    langfuseSecretKey: ""
+    # Optional Secret reference for Langfuse Secret Key (used if langfuseSecretKey is not set)
+    langfuseSecretKeySecretName: ""
+    # Optional Secret key for Langfuse Secret Key (default: "secret-key")
+    langfuseSecretKeySecretKey: "secret-key"
   
   common:
     autoscaler:
@@ -1080,16 +1150,19 @@ agenticAIBuilder:
     # The registry where the image is hosted
     repository: hclcr.io/uno
     # The tag of the images
-    tag: 2.1.5.0
+    tag: 2.1.6.0
     # The Pull Policy for the images
     imagePullPolicy: Always
+    init:
+      busybox: busybox:latest
+      postgres: postgres:latest
 
   additionalPullSecret : ""
 
 hclaipilot:  
   image:
     repository: hclcr.io/uno
-    tag: 2.1.5.0
+    tag: 2.1.6.0
   
   channels:
     slackToken: ""
@@ -1251,7 +1324,7 @@ hclaipilot:
 
     container:
       registry: hclcr.io/uno # Image name
-      tag: 2.1.5.0  # Image tag
+      tag: 2.1.6.0  # Image tag
     authorization:
       # The URL of the OpenID Connect (OIDC) server for the RAG service to authenticate the jwt token
       oidcServerURL: "https://uno-keycloak-ssl:8843"

@@ -110,11 +110,11 @@ UnO Agentic AI Builder:
 Before you begin the deployment process, ensure your environment meets the following prerequisites:
 
 **Mandatory**
- - Kubectl v 1.32 or later
+ - Kubectl v 1.34 or later
  - Kubernetes cluster v 1.32 or later
- - Helm v 4.0.0 or later
- - Messaging system: Apache Kafka v 3.9.1 or later OR Redpanda v 25.1.12 or later 
- - Database: MongoDB v 8 or later OR Azure Cosmos DB for MongoDB (vCore) OR AWS DocumentDB v 5 (Note: Support for the DocumentDB platform is strictly limited to Instance-based clusters only)
+ - Helm v 3.19 or later
+ - Messaging system: Apache Kafka v 3.9 or later OR Redpanda v 25.3 or later 
+ - Database: MongoDB v 8 OR Azure Cosmos DB for MongoDB (vCore) OR AWS DocumentDB v 5 (Note: Support for the DocumentDB platform is strictly limited to Instance-based clusters only)
  - Enablement of an OIDC provider.
 
 **For Agentic AI Builder**
@@ -244,6 +244,15 @@ To deploy HCL Universal Orchestrator, perform the following steps:
 The license parameter determines whether the license agreement is accepted or not. Supported values are `accept` and `not accepted`. To accept the license agreement, set the value as:
 
     global.license: accept
+
+
+If you plan to use GenAI features, you must also configure your MHS (My HCL Software) license details in the `values.yaml` file:
+
+	license:
+      # Url of MHS license server
+      licenseServerUrl: https://api.hcltechsw.com
+      # Key of Deployment on MHS license server
+      licenseServerKey: <your_mhs_license_server_key>
 
 
 - Configuring the database section in the values.yaml file
@@ -405,6 +414,36 @@ You can create an AI agent using three different agent types: External MCP, Basi
 You can enable the generative features of the AI Agent and the UnO AI Pilot for both workflow generation and generative knowledge base by setting the following parameter in the **values.yaml** file of the Helm chart to true:
 
     uno.config.genai.enabled: true
+
+⚠️ **Prerequisite Note:** To use the GenAI model, you **must** specify your MHS (My HCL Software) license parameters in the `values.yaml` file. If these parameters are omitted, the GenAI model does not function.
+
+Add your MHS details to your `values.yaml` configuration:
+
+	license:
+  	  # Url of MHS license server
+      licenseServerUrl: [https://api.hcltechsw.com](https://api.hcltechsw.com)                            
+	  # Key of Deployment on MHS license server
+      licenseServerKey: "<your_mhs_license_server_key>"
+ 
+
+
+**Webhook payload limits**
+
+To prevent oversized payloads from disrupting API gateway availability, a maximum request body limit is enforced at the gateway entry point. 
+
+By default, the maximum webhook payload size is capped at **700 KB** (716,800 bytes). If an incoming request exceeds this limit, the gateway rejects it immediately with an **HTTP 413 Payload Too Large** status code and a clean, sanitized JSON error.
+
+Although this parameter is not explicitly defined in the default `values.yaml` file, you can customize this limit by appending the following configuration to your custom override deployment file:
+
+	uno:
+     config:
+       webhook:
+         # Specifies the maximum size of a webhook request body in bytes.
+         # Default: 716800 (700 KB)
+         max-size.bytes: 716800
+
+⚠️**Important**: This limit is strictly dependent on your Kafka configuration. Ensure that the value of webhook.max-size.bytes does not exceed the maximum message size (max.request.size) permitted by your Kafka broker.
+
 
 **UnoAIPilot**
 

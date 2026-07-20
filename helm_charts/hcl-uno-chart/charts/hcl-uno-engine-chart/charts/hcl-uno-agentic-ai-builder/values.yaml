@@ -50,7 +50,7 @@ common:
     valkeyPasswordSecret : "valkey-password-secret"
     valkeyPasswordSecretKey: "password"
     valkeyPassword : ""
-    valkeyHost: "valkey-primary"
+    valkeyHost: "valkey"
     valkeyPort: "6379"
     valkeyDb: "0"
     valkeyUser:
@@ -91,10 +91,10 @@ common:
     postgresDB: "agenticbuilder"
     #The postgres service name
     postgresService: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-primary'
-    #The postgres user password
-    postgresPassword: "" 
-    #postgresPasswordSecretName: "{{ .Release.Name }}-postgres-password"
-    #postgresPasswordSecretKey: "password"
+    # The postgres user password, if not set it will be generated and stored in a secret called {{ .Release.Name }}-postgres-password
+    #postgresPassword: "" 
+    #postgresPasswordSecretName: "{{ include \"agenticbuilder.fullname\" . }}-postgres-password"
+    #postgresPasswordSecretKey: "postgres-password"
     # Only to let the init container create the database "$postgresDB" if it does not exist
     # Postgres Client connection timeout in seconds
     connectTimeout: "60"
@@ -345,6 +345,21 @@ telemetry:
     telemetryExporterHeaders: ""
     # Timeout in milliseconds for the telemetry exporter
     telemetryExporterTimeoutMillis: "10000"
+    # If your trace exporter requires different headers than metrics, provide them here in the format "key1=value1,key2=value2"
+    telemetryExporterTraceHeaders: ""
+    # Optional Langfuse credentials for OTLP trace export. Prefer the SecretName/SecretKey form for production.
+    # Langfuse Public Key (used for trace export)
+    langfusePublicKey: ""
+    # Optional Secret reference for Langfuse Public Key (used if langfusePublicKey is not set)
+    langfusePublicKeySecretName: ""
+    # Optional Secret key for Langfuse Public Key (default: "public-key")
+    langfusePublicKeySecretKey: "public-key"
+    # Langfuse Secret Key (used for trace export)
+    langfuseSecretKey: ""
+    # Optional Secret reference for Langfuse Secret Key (used if langfuseSecretKey is not set)
+    langfuseSecretKeySecretName: ""
+    # Optional Secret key for Langfuse Secret Key (default: "secret-key")
+    langfuseSecretKeySecretKey: "secret-key"
 
 certificates:
   # No enable if you want to use customized certificates
@@ -381,9 +396,16 @@ image:
   # The registry where the image is hosted
   repository: hclcr.io/uno
   # The tag/version of the images
-  tag: 2.1.5.0
+  tag: 2.1.6.0
   # The Pull Policy for the images
   imagePullPolicy: Always
+
+  #Init containers images
+  init:
+    # Busybox image used in init containers for database initialization and other tasks, you can override it with any other image that has the required tools for your init containers, such as psql for Postgres initialization. The default value is "busybox:latest", but you can change it to fit your needs.
+    busybox: busybox:latest
+    # Postgres image used in the init container for Postgres database initialization, you can override it with any other image that has the required tools for your init container, such as psql for Postgres initialization. The default value is "postgres:latest", but you can change it to fit your needs.
+    postgres: postgres:latest
 
 # to configure if you want a custom service account
 serviceAccount:

@@ -325,7 +325,15 @@ imagePullSecrets:
 {{- end -}}
 
 {{- define "sltCommon.postgres.env.password" -}}
+{{- if or ( .Values.postgres.postgresPassword) (and ( .Values.postgres.postgresPasswordSecretName) ( .Values.postgres.postgresPasswordSecretKey)) }}
 {{ include "sltCommon.env.valueOrSecret" (list . "POSTGRES_PASSWORD" "postgres.postgresPassword") }}
+{{- else }}
+- name: POSTGRES_PASSWORD
+  valueFrom: 
+    secretKeyRef:
+      name: {{ printf "%s-postgres-password" .Release.Name | trunc 63 | trimSuffix "-" }}
+      key: postgres-password
+{{- end -}}
 {{- end -}}
 
 {{- define "sltCommon.init.postgres.certificate.env" -}}
