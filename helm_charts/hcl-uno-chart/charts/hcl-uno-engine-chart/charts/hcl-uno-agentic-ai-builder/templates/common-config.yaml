@@ -108,6 +108,7 @@ data:
     OTEL_EXPORTER_OTLP_CERTIFICATE: {{ printf "/ca/otel/%s.crt" (tpl .Values.telemetry.telemetryExporterCertificate . ) }}
     {{- end }}
     OTEL_EXPORTER_OTLP_HEADERS: {{ tpl .Values.telemetry.telemetryExporterHeaders . | quote }}
+    OTEL_EXPORTER_OTLP_TRACES_HEADERS: {{ tpl .Values.telemetry.telemetryExporterTraceHeaders . | quote }}
     OTEL_EXPORTER_OTLP_TIMEOUT: {{ tpl .Values.telemetry.telemetryExporterTimeoutMillis . | quote }}
     LOG_LEVEL: {{ tpl (default "INFO" .Values.common.config.logLevel) . | quote }}
     # Authorization Configuration

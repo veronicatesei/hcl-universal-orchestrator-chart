@@ -31,11 +31,11 @@ global:
   # pluginImageRepository is the name of the repository that contains the image with tags for Automation Hub integrations.
   pluginImageRepository: hclcr.io/uno
   # pluginImageName is the name of the image with tags for Automation Hub integrations. 
-  pluginImageName: hcl-uno-automation-plugins:2.1.5.0
+  pluginImageName: hcl-uno-automation-plugins:2.1.6.0
   # extraImages is the list of images with tags containing OCLI and agent for download from engine.
   extraImages:
     - registry: hclcr.io/uno
-      name: hcl-uno-external-pod:2.1.5.0
+      name: hcl-uno-external-pod:2.1.6.0
     - registry: hclcr.io/wa
       name: hcl-workload-automation-packages:10.2.7.00.20260424.amd64
   # customPluginImageName is the custom name of the image with tags for Automation Hub integrations.
@@ -66,6 +66,8 @@ global:
   # This is only used in case internal genai service
   cloudCredentials:
     gcp:
+      # Location for Vertex AI models (e.g., global, us, eu, us-central1, europe-west1, ...)
+      location:
       # gcp is the GCP service account key in JSON format. Replace the value with your GCP service account file content encoded in base64.
       serviceFile:
       # gcpProjectId is the GCP project ID. Replace the value with your GCP project ID.
@@ -102,6 +104,7 @@ global:
       basicAuthPassword:
       # bearerToken is the bearer token for authentication (used when authType=bearer).
       bearerToken:
+
 uno:
   database:
     # url is the URL of the database. Mandatory parameter.
@@ -125,6 +128,8 @@ uno:
     # Specifies the maximum number of connections in the pool.
     databaseMaxPoolSize: 20
   kafka:
+    # if true kafka topics will be created /updated on start of UnO
+    configureTopicOnStart: true
     # url is the URL of the event streaming platform. Mandatory parameter.
     url: hcl-uno-kafka-0.kafka-headless.kafka.svc.cluster.local:9092
     # prefix of topic name
@@ -152,6 +157,9 @@ uno:
     # topicReplicas is the number of replicas for the topic.
     topicReplicas: 1
   config:
+    aiChat:
+      # Specifies the connection timeout for the connection to the AI Chat service. The value is in seconds. The default value is 300 seconds.
+      timeout: 300
     serviceAccount:
       # use the serviceAccount.annotations to add annotations to serviceAccount.
       annotations:
@@ -290,7 +298,7 @@ uno:
       # pullPolicy defines when data is pulled from your event streaming platform. Supported values are Always, Never, IfNotPresent.
       pullPolicy: Always
       # tag is the tag of the image. The default value is latest.
-      tag: 2.1.5.0
+      tag: 2.1.6.0
     orchestrator:
       # Specifies for how long the Task Run History is retained (in ISO 8601 format, e.g., P400D).
       jobRunHistoryRetentionDuration: P400DT0H
@@ -320,6 +328,8 @@ uno:
       # how long tasks executed from the CLOUD executor (and related job logs) are retained in DB. This applies to tasks in final status.
       # minimum value is 7 days (lower value will be ignored)
       taskRetentionDays: P15D
+      # cloudExecutorBlockedPlugin is a comma-separated list of plugin types that are blocked from execution on the cloud agent.
+      cloudExecutorBlockedPlugin:
     endpoints:
       monitor:
         frequency:
@@ -363,22 +373,82 @@ uno:
       internal: false
       # Below information are only used if the genai service is internal deployment.
 
-      # Gemini model used for AI Pilot. This is also the default model used for AI Agents. It must be a Gemini model.
-      defaultVertexAiModel: gemini-2.5-flash-lite
       # timeout is the timeout for the GenAI service requests.
       timeout:
-      # These models may take up to 5 minutes to reflect in the other services.
-      agentModels:
-        # Model names that work with GenAI service for AI Agents from vertex-ai
-        vertexAiModels:
-        # Model names that work with GenAI service for AI Agents from OpenAI
-        openAiModels:
-        # Model names that work with GenAI service for AI Agents from bedrock
-        bedrockModels:
-        # Model names that work with GenAI service for AI Agents from ollama
-        ollamaModels:
-      # The model used for internal agents (e.g. to create workflow). It must be one of the models specified in agentModels. If not specified, the defaultVertexAiModel is used.
-      internalAgentsModel:
+
+      # Unified GenAI configuration structure
+      
+      # Validation configuration
+      validation:
+        # failOnMissingCosts controls whether the service fails to start if cost configuration is incomplete.
+        # If cost reports are not relevant, keep this as false.
+        failOnMissingCosts: false
+      
+      # Provider configuration
+      providers:
+        vertexai:
+          # Model cost configuration (optional)
+          # Each model requires inputCost, outputCost, and divider
+          models: []
+          # Example:
+          # - name: gemini-3.1-flash-lite
+          #   inputCost: 0.10
+          #   outputCost: 0.40
+          #   divider: 1000000
+          
+          # Models available for AI Agent selection (optional)
+          # If not specified or empty, defaults to ALL models configured in the 'models' section above
+          # Use this to restrict which models users can select (e.g., hide expensive models)
+          activeModels: []
+          # Example: ["gemini-3.1-flash-lite", "gemini-3.5-flash"]
+        
+        openai:
+          # Model cost configuration (optional)
+          models: []
+          # Models available for AI Agent selection (optional, defaults to all configured models)
+          activeModels: []
+        
+        azure:
+          # Model cost configuration (optional)
+          # Note: Azure OpenAI uses the same models as OpenAI (gpt-*)
+          models: []
+          # Models available for AI Agent selection (optional, defaults to all configured models)
+          activeModels: []
+        
+        bedrock:
+          # Model cost configuration (optional)
+          models: []
+          # Models available for AI Agent selection (optional, defaults to all configured models)
+          activeModels: []
+        
+        ollama:
+          # Model cost configuration (optional)
+          models: []
+          # Models available for AI Agent selection (optional, defaults to all configured models)
+          activeModels: []
+      
+      # Default model for AI Agents (provider-agnostic, can be any configured model)
+      defaultModel:
+      
+      # Service configuration
+      # Defines model and estimated token consumption per service for cost calculation
+      serviceConfig:
+        
+        # Per-service configuration (model only, no estimated tokens for BYOL)
+        ai_agent:
+          model:  # Optional, uses defaultModel if not specified
+        
+        create_workflow:
+          model:
+        
+        rag:
+          model:
+        
+        generate_jsonata:
+          model:
+        
+        generate_dashboard_oql_query:
+          model:
 
     engine:
       # allowed_referer specifies the allowed referer for the engine and console in case of Invalid Referer.
@@ -695,7 +765,7 @@ uno:
   hclaipilot:
     image:
       repository: hclcr.io/uno
-      tag: 2.1.5.0
+      tag: 2.1.6.0
 
     # Channels Configuration
     # The following configuration is used to enable the AIPilot for the channels. For each channel, you need to provide the required configuration.
@@ -747,8 +817,8 @@ uno:
       options: ""
       # Client Required Authentication for Postgres connection ( scram-sha-256, md5, password, gss, sspi, ident, peer, ldap, none)
       requiredAuthentication : "scram-sha-256"
-      #The postgres user password
-      postgresPassword: "Kt3oDP8KWBs3Hg5L11kR9hLhPekw8tIC" 
+      # The password for the postgres user. If no value is defined, the chart automatically generates a password and stores it in a secret named {{ .Release.Name }}-postgres-password.
+      #postgresPassword: "" 
       #postgresPasswordSecretName: '{{ .Release.Name }}-postgres-password'
       #postgresPasswordSecretKey: "password"
       # Only to let the init container create the database "$postgresDB" if it does not exist
@@ -868,7 +938,7 @@ uno:
 
       container:
         registry: hclcr.io/uno # Image name
-        tag: 2.1.5.0  # Image tag
+        tag: 2.1.6.0  # Image tag
 
       authorization:
         # Is the URL of the OpenID Connect (OIDC) server.
@@ -889,8 +959,8 @@ uno:
         options: ""
         # Client Required Authentication for Postgres connection ( scram-sha-256, md5, password, gss, sspi, ident, peer, ldap, none)
         requiredAuthentication : "scram-sha-256"
-        #The postgres user password
-        postgresPassword: "Kt3oDP8KWBs3Hg5L11kR9hLhPekw8tIC" 
+        # The password for the postgres user. If no value is defined, the chart automatically generates a password and stores it in a secret named {{ .Release.Name }}-postgres-password.
+        #postgresPassword: "" 
         #postgresPasswordSecretName: '{{ .Release.Name }}-postgres-password'
         #postgresPasswordSecretKey: "password"
         # Only to let the init container create the database "$postgresDB" if it does not exist
@@ -953,6 +1023,21 @@ uno:
       telemetryExporterHeaders: ""
       # Timeout in milliseconds for the telemetry exporter
       telemetryExporterTimeoutMillis: "10000"
+      # If your trace exporter requires different headers than metrics, provide them here in the format "key1=value1,key2=value2"
+      telemetryExporterTraceHeaders: ""
+      # Optional Langfuse credentials for OTLP trace export. Prefer the SecretName/SecretKey form for production.
+      # Langfuse Public Key (used for trace export)
+      langfusePublicKey: ""
+      # Optional Secret reference for Langfuse Public Key (used if langfusePublicKey is not set)
+      langfusePublicKeySecretName: ""
+      # Optional Secret key for Langfuse Public Key (default: "public-key")
+      langfusePublicKeySecretKey: "public-key"
+      # Langfuse Secret Key (used for trace export)
+      langfuseSecretKey: ""
+      # Optional Secret reference for Langfuse Secret Key (used if langfuseSecretKey is not set)
+      langfuseSecretKeySecretName: ""
+      # Optional Secret key for Langfuse Secret Key (default: "secret-key")
+      langfuseSecretKeySecretKey: "secret-key"
 
     common:
       autoscaler:
@@ -1014,7 +1099,7 @@ uno:
           caSecretKey: "" 
           # Whether to validate the hostname in the server certificate
           hostnameValidation : "true"
-      # By default the values are configured to work with the default Valkey deployed by the bitnami/valkey chart.
+      # By default the values are configured to work with the default Valkey deployed by the valkey/valkey chart.
       valkey:
         # valkeyPasswordSecret is the name of the Kubernetes secret that contains the Valkey password.
         valkeyPasswordSecret : "valkey-password-secret"
@@ -1023,7 +1108,7 @@ uno:
         # valkeyPassword is the Valkey password. If you set valkeyPasswordSecret, this parameter is ignored.
         valkeyPassword : ""
         # valkeyHost is the hostname of the Valkey service.
-        valkeyHost: "valkey-primary"
+        valkeyHost: "valkey"
         # valkeyPort is the port of the Valkey service.
         valkeyPort: "6379"
         # valkeyDb is the database number of the Valkey service.
@@ -1076,10 +1161,10 @@ uno:
         postgresDB: "agenticbuilder"
         #The postgres service name
         postgresService: '{{ printf "%s-%s" .Release.Name "pg-db" | trunc 21 | trimSuffix "-"  }}-primary'
-        #The postgres user password
-        postgresPassword: "Kt3oDP8KWBs3Hg5L11kR9hLhPekw8tIC" 
-        #postgresPasswordSecretName: "{{ .Release.Name }}-postgres-password"
-        #postgresPasswordSecretKey: "password"
+        # The password for the postgres user. If no value is defined, the chart automatically generates a password and stores it in a secret named {{ .Release.Name }}-postgres-password.
+        #postgresPassword: "" 
+        #postgresPasswordSecretName: "{{ include \"agenticbuilder.fullname\" . }}-postgres-password"
+        #postgresPasswordSecretKey: "postgres-password"
         # Only to let the init container create the database "$postgresDB" if it does not exist
         # Postgres Client connection timeout in seconds
         connectTimeout: "60"
@@ -1262,41 +1347,47 @@ uno:
       # The registry where the image is hosted
       repository: hclcr.io/uno
       # The tag of the images
-      tag: 2.1.5.0
+      tag: 2.1.6.0
       # The Pull Policy for the images
       imagePullPolicy: Always
+      #Init containers images
+      init:
+        # Busybox image used in init containers for database initialization and other tasks, you can override it with any other image that has the required tools for your init containers, such as psql for Postgres initialization. The default value is "busybox:latest", but you can change it to fit your needs.
+        busybox: busybox:latest
+        # Postgres image used in the init container for Postgres database initialization, you can override it with any other image that has the required tools for your init container, such as psql for Postgres initialization. The default value is "postgres:latest", but you can change it to fit your needs.
+        postgres: postgres:latest
 
     additionalPullSecret : ""
+    # Autoinstalled postgres configuration, used by default if global.postgres.usePercona = true, you can override it to use a different configuration for the autoinstalled Postgres instance.
+    pgdb:
+      crVersion: "v1"
+      image: "docker.io/percona/percona-postgresql-operator:2.7.0-ppg17.5.2-postgres"
+      port: 5432
+      postgresVersion: 17
+      pause: false
+      unmanaged: false
+      instanceName: "agentic-postgres"
+      replicas: 1
+      affinityLabel: "postgres"
+      topologyKey: "kubernetes.io/hostname"
+      storageSize: "5Gi"
 
-pgdb:
-  crVersion: "v1"
-  image: "docker.io/percona/percona-postgresql-operator:2.7.0-ppg17.5.2-postgres"
-  port: 5432
-  postgresVersion: 17
-  pause: false
-  unmanaged: false
-  instanceName: "agentic-postgres"
-  replicas: 1
-  affinityLabel: "postgres"
-  topologyKey: "kubernetes.io/hostname"
-  storageSize: "5Gi"
+      users:
+        - name: postgres
+          options: "SUPERUSER"
 
-  users:
-    - name: postgres
-      options: "SUPERUSER"
+      resources:
+        requests:
+          memory: "850Mi"
+          cpu: "500m"
+        limits:
+          memory: "1024Mi"
+          cpu: "1000m"
 
-  resources:
-    requests:
-      memory: "850Mi"
-      cpu: "500m"
-    limits:
-      memory: "1024Mi"
-      cpu: "1000m"
-
-  patroni:
-    dynamicConfiguration:
-      postgresql:
-        pg_hba:
-        - hostssl all all all md5
-        - hostssl all all all scram-sha-256
-        - hostssl all all all cert
+      patroni:
+        dynamicConfiguration:
+          postgresql:
+            pg_hba:
+            - hostssl all all all md5
+            - hostssl all all all scram-sha-256
+            - hostssl all all all cert

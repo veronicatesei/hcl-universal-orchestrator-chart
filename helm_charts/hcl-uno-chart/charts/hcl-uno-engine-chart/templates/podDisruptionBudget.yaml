@@ -31,7 +31,7 @@ spec:
     matchLabels:
       app: {{ $fullName }}-{{ $k }}
       app.kubernetes.io/name: {{ $root.Release.Name | quote }}
-      uno.microservice.version: 2.1.5.0
+      uno.microservice.version: 2.1.6.0
 
 
 {{ end }}

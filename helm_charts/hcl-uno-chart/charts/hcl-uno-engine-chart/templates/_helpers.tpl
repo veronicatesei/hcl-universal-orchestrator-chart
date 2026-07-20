@@ -261,7 +261,7 @@ prometheus.io/path: "/q/metrics"
 {{- end -}}
 
 {{- define "uno.common.label" -}}
-uno.microservice.version: 2.1.5.0
+uno.microservice.version: 2.1.6.0
 app.kubernetes.io/name: {{ .Release.Name | quote}}
 app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -517,6 +517,8 @@ release: {{ .Release.Name | quote }}
 - name: UNO_AUTHENTICATION_CONSOLE_PORT
   value: {{ .Values.config.console.port | default $consolePublicPort | quote}}
 {{- end }}
+- name: UNO_AICHAT_SERVER_CONNECTION_TIMEOUT
+  value: {{ .Values.config.aiChat.timeout | default 300 | quote }}
 {{- end -}}
 
 {{- define "uno.multitenant.lastLoginForMailNotificationsDuration" -}}
@@ -720,6 +722,14 @@ release: {{ .Release.Name | quote }}
 #uno.multi-tenant.tenant.metrics.enabled
 - name: UNO_MULTI_TENANT_TENANT_METRICS_ENABLED
   value: {{ .Values.config.multitenant.tenantMetricsEnabled | quote }}
+#uno.multi-tenant.enabled
+- name: UNO_MULTI_TENANT_ENABLED
+  value: "true"
+{{- if .Values.config.multitenant.marketplace.HCLSoftware.enabled }}
+# uno.tenantmanager.marketplace.enabled
+- name: UNO_TENANTMANAGER_MARKETPLACE_ENABLED
+  value: "true"
+{{- end }}
 {{- end }}
 - name: UNO_LICENSE_SERVER_MHS_URL
   value: {{ $mhsUrl | quote }}
@@ -774,6 +784,11 @@ release: {{ .Release.Name | quote }}
  #uno.cloudtask.cleanup.max-age
 - name: UNO_CLOUDTASK_CLEANUP_MAX_AGE
   value: {{ .Values.config.executor.taskRetentionDays | quote}}
+{{- end }}
+{{- if .Values.config.executor.cloudExecutorBlockedPlugin }}
+ #uno.cloud.task.launcher.not.supported.job.types
+- name: UNO_CLOUD_TASK_LAUNCHER_NOT_SUPPORTED_JOB_TYPES
+  value: {{ .Values.config.executor.cloudExecutorBlockedPlugin | quote }}
 {{- end }}
 #uno.endpoint.monitor.timer.frequency
 - name: UNO_ENDPOINT_MONITOR_TIMER_FREQUENCY
@@ -938,6 +953,10 @@ release: {{ .Release.Name | quote }}
 - name: KAFKA_BOOTSTRAP_SERVERS
   # if additional bootstrap servers are required, add a comma separated list
   value: {{ (tpl ( .Values.kafka.url) .) | quote}}
+{{- if .Values.kafka.configureTopicOnStart }}
+- name: UNO_CREATE_TOPICS_ENABLE
+  value: {{ .Values.kafka.configureTopicOnStart | quote}}
+{{- end }}
 {{- if .Values.kafka.kerberosServiceName }}
 - name: KAFKA_SASL_KERBEROS_SERVICE_NAME
   value: {{ .Values.kafka.kerberosServiceName | quote}}
@@ -1013,8 +1032,6 @@ release: {{ .Release.Name | quote }}
 {{- end }}
 - name: UNO_TRACING_ENABLE_ALL
   value: {{ .Values.config.tracing.traceAll | quote }}
-- name:  UNO_CREATE_TOPICS_ENABLE
-  value: "true"
 - name: UNO_CREATE_TOPICS_PARTITION
   value: {{ mul .Values.deployment.global.maxTargetReplicas 2 | quote }}
 - name: UNO_CREATE_TOPICS_REPLICA
@@ -1337,30 +1354,90 @@ gcr.io/blackjack-209019/services/uno
 {{- end -}}
 
 {{- define "uno.genai.env.configuration" -}}
-{{- if .Values.config.defaultVertexAiModel }}
-- name: UNO_GENAI_AGENT_PLATFORM_VERTEX_AI_MODEL
+{{- /* Default model configuration (provider-agnostic) - new values take precedence */ -}}
+{{- if .Values.config.genai.defaultModel }}
+- name: UNO_GENAI_DEFAULT_MODEL
+  value: {{ .Values.config.genai.defaultModel | quote }}
+{{- else if and .Values.config.genai .Values.config.genai.defaultVertexAiModel }}
+- name: UNO_GENAI_DEFAULT_MODEL
   value: {{ .Values.config.genai.defaultVertexAiModel | quote }}
 {{- end }}
-{{- if .Values.config.genai.internalAgentsModel }}
-#uno.genai.agent.internal.model
-- name: UNO_GENAI_AGENT_INTERNAL_MODEL
-  value: {{ .Values.config.genai.internalAgentsModel | quote }}
+{{- /* Active models per provider for AI Agent selection */ -}}
+{{- range $provider, $providerConfig := .Values.config.genai.providers }}
+{{- if $providerConfig.activeModels }}
+- name: UNO_GENAI_PLATFORM_{{ upper $provider | replace "." "_" }}_MODELS_ACTIVE
+  value: {{ join "," $providerConfig.activeModels | quote }}
 {{- end }}
-{{- if .Values.config.genai.agentModels.vertexAiModels }}
-- name: UNO_AIAGENT_MODELS_VERTEXAI
+{{- end }}
+{{- /* Backward compatibility for old agentModels structure */ -}}
+{{- if and .Values.config.genai .Values.config.genai.agentModels .Values.config.genai.agentModels.vertexAiModels (not .Values.config.genai.providers.vertexai.activeModels) (not .Values.config.genai.providers.vertexai.models) }}
+- name: UNO_GENAI_PLATFORM_VERTEXAI_MODELS_ACTIVE
   value: {{ .Values.config.genai.agentModels.vertexAiModels | quote }}
 {{- end }}
-{{- if .Values.config.genai.agentModels.openAiModels }}
-- name: UNO_AIAGENT_MODELS_OPENAI
+{{- if and .Values.config.genai .Values.config.genai.agentModels .Values.config.genai.agentModels.openAiModels (not .Values.config.genai.providers.openai.activeModels) (not .Values.config.genai.providers.openai.models) }}
+- name: UNO_GENAI_PLATFORM_OPENAI_MODELS_ACTIVE
   value: {{ .Values.config.genai.agentModels.openAiModels | quote }}
 {{- end }}
-{{- if .Values.config.genai.agentModels.bedrockModels }}
-- name: UNO_AIAGENT_MODELS_BEDROCK
+{{- if and .Values.config.genai .Values.config.genai.agentModels .Values.config.genai.agentModels.bedrockModels (not .Values.config.genai.providers.bedrock.activeModels) (not .Values.config.genai.providers.bedrock.models) }}
+- name: UNO_GENAI_PLATFORM_BEDROCK_MODELS_ACTIVE
   value: {{ .Values.config.genai.agentModels.bedrockModels | quote }}
 {{- end }}
-{{- if .Values.config.genai.agentModels.ollamaModels }}
-- name: UNO_AIAGENT_MODELS_OLLAMA
+{{- if and .Values.config.genai .Values.config.genai.agentModels .Values.config.genai.agentModels.ollamaModels (not .Values.config.genai.providers.ollama.activeModels) (not .Values.config.genai.providers.ollama.models) }}
+- name: UNO_GENAI_PLATFORM_OLLAMA_MODELS_ACTIVE
   value: {{ .Values.config.genai.agentModels.ollamaModels | quote }}
+{{- end }}
+{{- /* Validation configuration */ -}}
+{{- if hasKey .Values.config.genai.validation "failOnMissingCosts" }}
+- name: UNO_GENAI_VALIDATION_FAIL_ON_MISSING_COSTS
+  value: {{ .Values.config.genai.validation.failOnMissingCosts | quote }}
+{{- end }}
+{{- /* Service configuration with estimated tokens */ -}}
+{{- if .Values.config.genai.serviceConfig }}
+{{- /* Backward compatibility: support old internalAgentsModel */ -}}
+{{- $defaultBackwardModel := .Values.config.genai.internalAgentsModel | default .Values.config.genai.defaultVertexAiModel }}
+{{- range $service, $config := .Values.config.genai.serviceConfig }}
+{{- if ne $service "defaultModel" }}
+{{- if $config.model }}
+- name: UNO_GENAI_SERVICE_CONFIG_{{ upper $service }}_MODEL
+  value: {{ $config.model | quote }}
+{{- else if $defaultBackwardModel }}
+- name: UNO_GENAI_SERVICE_CONFIG_{{ upper $service }}_MODEL
+  value: {{ $defaultBackwardModel | quote }}
+{{- end }}
+{{- if $config.estimatedInputTokens }}
+- name: UNO_GENAI_SERVICE_CONFIG_{{ upper $service }}_ESTIMATED_INPUT_TOKENS
+  value: {{ $config.estimatedInputTokens | quote }}
+{{- end }}
+{{- if $config.estimatedOutputTokens }}
+- name: UNO_GENAI_SERVICE_CONFIG_{{ upper $service }}_ESTIMATED_OUTPUT_TOKENS
+  value: {{ $config.estimatedOutputTokens | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- /* Model list and cost configuration */ -}}
+{{- range $provider, $providerConfig := .Values.config.genai.providers }}
+{{- if $providerConfig.models }}
+{{- $modelNames := list }}
+{{- range $model := $providerConfig.models }}
+{{- $modelNames = append $modelNames $model.name }}
+{{- if $model.inputCost }}
+- name: UNO_GENAI_PLATFORM_{{ upper $provider | replace "." "_" }}_COST_{{ $model.name | upper | replace "." "_" | replace "-" "_" }}_INPUT
+  value: {{ printf "%.10g" $model.inputCost | quote }}
+{{- end }}
+{{- if $model.outputCost }}
+- name: UNO_GENAI_PLATFORM_{{ upper $provider | replace "." "_" }}_COST_{{ $model.name | upper | replace "." "_" | replace "-" "_" }}_OUTPUT
+  value: {{ printf "%.10g" $model.outputCost | quote }}
+{{- end }}
+{{- if $model.divider }}
+- name: UNO_GENAI_PLATFORM_{{ upper $provider | replace "." "_" }}_COST_{{ $model.name | upper | replace "." "_" | replace "-" "_" }}_DIVIDER
+  value: {{ printf "%.0f" $model.divider | quote }}
+{{- end }}
+{{ end }}
+{{- /* Generate comma-separated list of model names for this provider */ -}}
+- name: UNO_GENAI_PLATFORM_{{ upper $provider | replace "." "_" }}_MODELS
+  value: {{ join "," $modelNames | quote }}
+{{- end }}
 {{- end }}
 {{- if .Values.config.genai.maxUserPrompts }}
 - name: UNO_GENAI_AGENT_MAX_USER_PROMPT_FOR_CONTEXT
@@ -1378,12 +1455,23 @@ gcr.io/blackjack-209019/services/uno
 - name: GOOGLE_APPLICATION_CREDENTIALS
   value: /security/credentials/gcp-vertexai-svc.json
 {{- end }}
+{{- /* Backward compatibility: new values take precedence */ -}}
+{{- if .Values.global.cloudCredentials.gcp.location }}
+- name: UNO_GENAI_PLATFORM_VERTEXAI_LOCATION
+  value: {{ .Values.global.cloudCredentials.gcp.location | quote }}
+{{- else if and .Values.config.genai .Values.config.genai.vertexAiModelsLocation }}
+- name: UNO_GENAI_PLATFORM_VERTEXAI_LOCATION
+  value: {{ .Values.config.genai.vertexAiModelsLocation | quote }}
+{{- else }}
+- name: UNO_GENAI_PLATFORM_VERTEXAI_LOCATION
+  value: "global"
+{{- end }}
 {{- if .Values.config.genai.timeout }}
 - name: UNO_GENAI_ENDPOINT_TIMEOUT
   value: {{ .Values.config.genai.timeout | quote }}
 {{- end }}
 {{- if .Values.global.cloudCredentials.gcp.projectId }}
-- name: UNO_GENAI_PLATFORM_VERTEX_AI_PROJECT_ID
+- name: UNO_GENAI_PLATFORM_VERTEXAI_PROJECT_ID
   value: {{ .Values.global.cloudCredentials.gcp.projectId | quote }}
 {{- end }}
 {{- if .Values.global.cloudCredentials.aws.accessKeyId }}

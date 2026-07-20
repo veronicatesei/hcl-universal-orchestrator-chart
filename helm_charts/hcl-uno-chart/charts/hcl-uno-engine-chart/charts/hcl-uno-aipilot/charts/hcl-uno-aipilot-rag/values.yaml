@@ -122,8 +122,8 @@ postgres:
   options: ""
   # Client Required Authentication for Postgres connection ( scram-sha-256, md5, password, gss, sspi, ident, peer, ldap, none)
   requiredAuthentication : "scram-sha-256"
-  #The postgres user password
-  postgresPassword: "" 
+  # The postgres user password, if not set it will be generated and stored in a secret called {{ .Release.Name }}-postgres-password
+  #postgresPassword: "" 
   #postgresPasswordSecretName: '{{ .Release.Name }}-postgres-password'
   #postgresPasswordSecretKey: "password"
   # Only to let the init container create the database "$postgresDB" if it does not exist

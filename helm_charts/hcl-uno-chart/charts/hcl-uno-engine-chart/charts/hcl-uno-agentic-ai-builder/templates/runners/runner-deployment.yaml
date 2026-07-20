@@ -73,7 +73,7 @@ spec:
 {{- include "agenticbuilder.image" (list $root $root.Values.runner) | nindent 10 }}
 {{- include "agenticbuilder.imagePullPolicy" (list $root $root.Values.runner) | nindent 10 }}          
 {{- include "agenticbuilder.resources" (list $root "runner" $root.Values.runner) | nindent 10 }}
-          args: ["--ssl-keyfile" ,"/https/tls.key" ,"--ssl-certfile" ,"/https/tls.crt"]
+          args: ["--ssl-keyfile" ,"/https/tls.key" ,"--ssl-certfile" ,"/https/tls.crt","--ws-ping-interval","300","--ws-ping-timeout","300"]
           ports:
             - containerPort: {{ default 8000 $root.Values.runner.port }}
               name: port-{{ default 8000 $root.Values.runner.port }}
@@ -103,6 +103,8 @@ spec:
               value: "/$(EXECUTOR_NAME)"
             - name: EXECUTOR_ADDRESS
               value: "$(EXECUTOR_NAME).{{ $fullname }}-{{ $root.Values.runner.name }}-{{ $currentDeploymentType }}-headless.{{ $root.Release.Namespace }}.svc.cluster.local:{{ default 8000 $root.Values.runner.port }}"
+{{- include "agenticbuilder.env.valueOrSecret" (list $root "LANGFUSE_PUBLIC_KEY" "telemetry.langfusePublicKey") | nindent 12 }}
+{{- include "agenticbuilder.env.valueOrSecret" (list $root "LANGFUSE_SECRET_KEY" "telemetry.langfuseSecretKey") | nindent 12 }}
 {{- include "agenticbuilder.commonssl.env.definition" $root | nindent 12 }}
 {{- include "agenticbuilder.env.valkey.password" $root | nindent 12 }}
 {{- include "agenticbuilder.env.postgres.password" $root | nindent 12 }}
